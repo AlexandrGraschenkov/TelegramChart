@@ -18,6 +18,8 @@
 		FAC45E722235435D00A165CC /* DebugFpsLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC45E712235435D00A165CC /* DebugFpsLabel.swift */; };
 		FAC45E7422355A5700A165CC /* ChartData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC45E7322355A5700A165CC /* ChartData.swift */; };
 		FAC45E762235753500A165CC /* chart_data.json in Resources */ = {isa = PBXBuildFile; fileRef = FAC45E752235753500A165CC /* chart_data.json */; };
+		FAC45E782236FAEE00A165CC /* LabelsPool.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC45E772236FAEE00A165CC /* LabelsPool.swift */; };
+		FAC45E7A2236FEB300A165CC /* AttachedLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC45E792236FEB300A165CC /* AttachedLabel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +36,8 @@
 		FAC45E712235435D00A165CC /* DebugFpsLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugFpsLabel.swift; sourceTree = "<group>"; };
 		FAC45E7322355A5700A165CC /* ChartData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartData.swift; sourceTree = "<group>"; };
 		FAC45E752235753500A165CC /* chart_data.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = chart_data.json; sourceTree = "<group>"; };
+		FAC45E772236FAEE00A165CC /* LabelsPool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelsPool.swift; sourceTree = "<group>"; };
+		FAC45E792236FEB300A165CC /* AttachedLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachedLabel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +89,8 @@
 				FAC45E6B2235243900A165CC /* DisplayLinkAnimator.swift */,
 				FAC45E682235224C00A165CC /* ChartView.swift */,
 				FAC45E6F2235279600A165CC /* AxesDrawer.swift */,
+				FAC45E792236FEB300A165CC /* AttachedLabel.swift */,
+				FAC45E772236FAEE00A165CC /* LabelsPool.swift */,
 				FAC45E7322355A5700A165CC /* ChartData.swift */,
 			);
 			path = Chart;
@@ -162,9 +168,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAC45E782236FAEE00A165CC /* LabelsPool.swift in Sources */,
 				FAC45E592235222400A165CC /* ViewController.swift in Sources */,
 				FAC45E7422355A5700A165CC /* ChartData.swift in Sources */,
 				FAC45E572235222400A165CC /* AppDelegate.swift in Sources */,
+				FAC45E7A2236FEB300A165CC /* AttachedLabel.swift in Sources */,
 				FAC45E692235224C00A165CC /* ChartView.swift in Sources */,
 				FAC45E6C2235243900A165CC /* DisplayLinkAnimator.swift in Sources */,
 				FAC45E702235279600A165CC /* AxesDrawer.swift in Sources */,

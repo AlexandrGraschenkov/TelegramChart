@@ -22,7 +22,7 @@ class ChartView: UIView {
     var drawGrid: Bool = true
     var showZeroYValue: Bool = true
     var lineWidth: CGFloat = 2.0
-    var axesDrawer: AxesDrawer = AxesDrawer()
+    lazy var axesDrawer: AxesDrawer = AxesDrawer(view: self)
     
     var data: [ChartData] = [] {
         didSet {
@@ -55,6 +55,8 @@ class ChartView: UIView {
         }
         
         onDrawDebug?()
+        axesDrawer.drawGrid(ctx: ctx)
+        
         ctx.setLineWidth(lineWidth)
         ctx.setLineJoin(.round)
         let chartRect = bounds.inset(by: axesDrawer.getAxesInsets())
