@@ -17,12 +17,50 @@ class AxesDrawer: NSObject {
     let horisontalHeight: CGFloat = 20
     var levelsCount = 5
     
-    var lastMaxVal: Float?
+    fileprivate(set) var maxVal: Float!
     var vertical: [AttachedLabel] = []
     
     init(view: ChartView) {
         self.view = view
         super.init()
+    }
+    
+    func setMaxVal(_ maxVal: Float, animationDuration duration: Double = 0) {
+        if self.maxVal == maxVal { return }
+        if duration == 0 {
+            _ = resizeVerticalIfNeeded()
+            self.maxVal = maxVal
+            updateVerticalAttachedValues(force: true)
+            vertical.forEach({ $0.alpha = 1 })
+            return
+        }
+        
+        let oldLabels = vertical
+        let startAlpha = vertical.first?.alpha ?? 1
+        vertical.removeAll()
+        
+        _ = resizeVerticalIfNeeded()
+        self.maxVal = maxVal
+        updateVerticalAttachedValues(force: true)
+        
+        let minAlpha: CGFloat = 0.01
+        let startAppear: CGFloat = 0.0
+        let appearDur: CGFloat = 0.8
+        let startDismiss: CGFloat = 0.0
+        let dismissDur: CGFloat = 0.5
+        
+        vertical.forEach({ $0.alpha = minAlpha })
+        _ = DisplayLinkAnimator.animate(duration: duration) { (progress) in
+            if maxVal == self.maxVal {
+                let val = (progress - startAppear) / appearDur
+                let alpha: CGFloat = min(1, max(minAlpha, val))
+                self.vertical.forEach({$0.alpha = alpha})
+            }
+            
+            let val = (progress - startDismiss) / dismissDur
+            let alpha: CGFloat = max(0, min(1, startAlpha-val))
+            oldLabels.forEach({$0.alpha = alpha})
+        }
     }
     
     func getAxesInsets() -> UIEdgeInsets {
@@ -33,8 +71,7 @@ class AxesDrawer: NSObject {
     }
     
     func drawGrid(ctx: CGContext) {
-        let resized = resizeVerticalIfNeeded()
-        updateVerticalAttachedValues(force: resized)
+        let drawMaxVal = view.displayVerticalRange.to
         
         var attachedLabels: [AttachedLabel] = view.subviews.compactMap({$0 as? AttachedLabel})
         attachedLabels.sort(by: {$0.alpha < $1.alpha})
@@ -43,15 +80,16 @@ class AxesDrawer: NSObject {
                                                        left: 0,
                                                        bottom: showHorisontal ? horisontalHeight : 0,
                                                        right: 0))
-        let maxVal = view.displayVerticalRange.to
         for lab in attachedLabels {
             guard let val = lab.attachedValue else { continue }
-            if !lab.isUsed { continue }
+            if lab.unused {
+                continue
+            }
             if prevAlpha != lab.alpha && prevAlpha != 0 {
                 ctx.setStrokeColor(UIColor(white: 0.9, alpha: prevAlpha).cgColor)
                 ctx.strokePath()
             }
-            var y = frame.height * CGFloat(1 - val / maxVal) + frame.origin.y
+            var y = frame.height * CGFloat(1 - val / drawMaxVal) + frame.origin.y
             y = round(y)
             ctx.move(to: CGPoint(x: frame.minX, y: y))
             ctx.addLine(to: CGPoint(x: frame.maxX, y: y))
@@ -67,7 +105,7 @@ class AxesDrawer: NSObject {
         }
     }
     
-    func resizeVerticalIfNeeded() -> Bool {
+    private func resizeVerticalIfNeeded() -> Bool {
         var changed = false
         while vertical.count < levelsCount {
             let lab = labelsPool.getUnused()
@@ -83,16 +121,19 @@ class AxesDrawer: NSObject {
         return changed
     }
     
-    func updateVerticalAttachedValues(force: Bool = false) {
-        let update = force || lastMaxVal == view.displayVerticalRange.to
+    private func updateVerticalAttachedValues(force: Bool = false) {
+        let update = force
         if !update {
             return
         }
         
-        lastMaxVal = view.displayVerticalRange.to
-        for (idx, l) in vertical.enumerated() {
-            let val = view.displayVerticalRange.to * Float(idx) / Float(vertical.count)
-            l.attachedValue = val
+        let levels = generateValueLevels(maxVal: maxVal, levelsCount: vertical.count)
+        zip(vertical, levels).forEach { (lab, val) in
+            lab.attachedValue = val
         }
+    }
+    
+    private func generateValueLevels(maxVal: Float, levelsCount count: Int) -> [Float] {
+        return (0..<count).map({maxVal * Float($0) / Float(count)})
     }
 }

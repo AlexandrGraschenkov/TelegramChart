@@ -46,6 +46,18 @@ class ChartView: UIView {
     var displayRange: RangeI = RangeI(from: 0, to: 0)
     var displayVerticalRange: Range = Range(from: 0, to: 200)
     var onDrawDebug: (()->())?
+    var maxValAnimatorCancel: Cancelable?
+    
+    func animateMaxVal(val: Float) {
+        let duration: Double = 0.5
+        let fromVal = displayVerticalRange.to
+        maxValAnimatorCancel?()
+        maxValAnimatorCancel = DisplayLinkAnimator.animate(duration: duration) { (percent) in
+            self.displayVerticalRange.to = (val - fromVal) * Float(percent) + fromVal
+            self.setNeedsDisplay()
+        }
+        axesDrawer.setMaxVal(val, animationDuration: duration)
+    }
     
     override func draw(_ rect: CGRect) {
         super.draw(rect)
@@ -55,6 +67,9 @@ class ChartView: UIView {
         }
         
         onDrawDebug?()
+        if axesDrawer.maxVal == nil {
+            axesDrawer.setMaxVal(displayVerticalRange.to)
+        }
         axesDrawer.drawGrid(ctx: ctx)
         
         ctx.setLineWidth(lineWidth)

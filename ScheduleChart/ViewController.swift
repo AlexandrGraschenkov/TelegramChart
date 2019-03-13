@@ -47,13 +47,16 @@ class ViewController: UITableViewController {
         return result
     }
     
+    var animIdx: Int = 0
     @IBAction func nightModePressed() {
-        
-        _ = DisplayLinkAnimator.animate(duration: 2.0) { (percent) in
-            let dTime = self.chartView.dataMaxTime - self.chartView.dataMinTime
-            self.chartView.displayRange.to = Int64((1-(0.8 * percent)) * CGFloat(dTime)) + self.chartView.dataMinTime
-            self.chartView.setNeedsDisplay()
-        }
+        animIdx = (animIdx + 1) % 3
+        let maxVal: Float = 200 + Float(animIdx) * 100
+        chartView.animateMaxVal(val: maxVal)
+//        _ = DisplayLinkAnimator.animate(duration: 2.0) { (percent) in
+//            let dTime = self.chartView.dataMaxTime - self.chartView.dataMinTime
+//            self.chartView.displayRange.to = Int64((1-(0.8 * percent)) * CGFloat(dTime)) + self.chartView.dataMinTime
+//            self.chartView.setNeedsDisplay()
+//        }
     }
 
 

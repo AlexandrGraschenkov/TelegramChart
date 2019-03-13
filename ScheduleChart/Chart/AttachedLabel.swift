@@ -12,16 +12,30 @@ class AttachedLabel: UILabel {
 
     var attachedValue: Float? {
         didSet {
-            if attachedValue == nil || oldValue == attachedValue {
+            guard let val = attachedValue, val != oldValue else {
                 return
             }
-            text = "\(Int(attachedValue!))"
+            text = valueFormatter?(val) ?? "\(Int(val))"
             sizeToFit()
         }
     }
-    var attachedTime: Int64?
+    var attachedTime: Int64? {
+        didSet {
+            guard let val = attachedTime, val != oldValue else {
+                return
+            }
+            text = timeFormatter?(val) ?? "\(val)"
+            sizeToFit()
+        }
+    }
 
-    var isUsed: Bool {
-        return superview != nil && alpha != 0 && !isHidden
+    var valueFormatter: ((Float)->(String))?
+    var timeFormatter: ((Int64)->(String))?
+    
+    var unused: Bool {
+        guard let parent = superview else {
+            return true
+        }
+        return alpha == 0 || isHidden || (!parent.bounds.intersects(frame) && alpha == 1)
     }
 }
