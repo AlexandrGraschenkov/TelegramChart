@@ -58,6 +58,19 @@ class ViewController: UITableViewController {
 //            self.chartView.setNeedsDisplay()
 //        }
     }
+    
+    var animIdx2: Int = 0
+    @IBAction func test2Pressed() {
+        let data = data1.first!.items
+        let minTime = data.first!.time
+        let maxTime = data.last!.time
+        let testTime1 = data[data.count / 2].time
+        let testTime2 = data[data.count / 3].time
+        
+        let toTimes = [maxTime, testTime1, testTime2]
+        animIdx2 = (animIdx2 + 1) % toTimes.count
+        chartView.setRange(minTime: minTime, maxTime: toTimes[animIdx2], animated: true)
+    }
 
 
 }

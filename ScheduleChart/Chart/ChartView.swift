@@ -22,7 +22,8 @@ class ChartView: UIView {
     var drawGrid: Bool = true
     var showZeroYValue: Bool = true
     var lineWidth: CGFloat = 2.0
-    lazy var axesDrawer: AxesDrawer = AxesDrawer(view: self)
+    lazy var verticalAxe: VerticalAxe = VerticalAxe(view: self)
+    lazy var horisontalAxe: HorisontalAxe = HorisontalAxe(view: self)
     
     var data: [ChartData] = [] {
         didSet {
@@ -47,6 +48,8 @@ class ChartView: UIView {
     var displayVerticalRange: Range = Range(from: 0, to: 200)
     var onDrawDebug: (()->())?
     var maxValAnimatorCancel: Cancelable?
+    var rangeAnimatorCancel: Cancelable?
+    var chartInset = UIEdgeInsets(top: 0, left: 40, bottom: 30, right: 30)
     
     func animateMaxVal(val: Float) {
         let duration: Double = 0.5
@@ -56,7 +59,31 @@ class ChartView: UIView {
             self.displayVerticalRange.to = (val - fromVal) * Float(percent) + fromVal
             self.setNeedsDisplay()
         }
-        axesDrawer.setMaxVal(val, animationDuration: duration)
+        verticalAxe.setMaxVal(val, animationDuration: duration)
+    }
+    
+    func setRange(minTime: Int64, maxTime: Int64, animated: Bool) {
+        rangeAnimatorCancel?()
+        if !animated {
+            displayRange.from = minTime
+            displayRange.to = maxTime
+            setNeedsDisplay()
+            horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to, animationDuration: 0)
+            // TODO
+            return
+        }
+        
+        let fromRange = displayRange
+        rangeAnimatorCancel = DisplayLinkAnimator.animate(duration: 0.5, closure: { (percent) in
+            self.displayRange.from = Int64(CGFloat(minTime - fromRange.from) * percent) + fromRange.from
+            self.displayRange.to = Int64(CGFloat(maxTime - fromRange.to) * percent) + fromRange.to
+            self.setNeedsDisplay()
+            if percent == 1 {
+                self.rangeAnimatorCancel = nil
+            }
+        })
+        
+        horisontalAxe.setRange(minTime: minTime, maxTime: maxTime, animationDuration: 0.5)
     }
     
     override func draw(_ rect: CGRect) {
@@ -67,18 +94,29 @@ class ChartView: UIView {
         }
         
         onDrawDebug?()
-        if axesDrawer.maxVal == nil {
-            axesDrawer.setMaxVal(displayVerticalRange.to)
+        if verticalAxe.maxVal == nil {
+            verticalAxe.setMaxVal(displayVerticalRange.to)
         }
-        axesDrawer.drawGrid(ctx: ctx)
+        verticalAxe.drawGrid(ctx: ctx, inset: chartInset)
+        if horisontalAxe.maxTime == 0 && data.count > 0 {
+            horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to)
+        }
+        if rangeAnimatorCancel != nil {
+            horisontalAxe.layoutLabels()
+        }
+//        if horisontalAxe.minTime != displayRange.from || horisontalAxe.maxTime != displayRange.to {
+//            horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to, animationDuration: 0.5)
+//        }
         
         ctx.setLineWidth(lineWidth)
         ctx.setLineJoin(.round)
-        let chartRect = bounds.inset(by: axesDrawer.getAxesInsets())
+        let chartRect = bounds.inset(by: chartInset)
+//        ctx.clip(to: chartRect)
         for (_, d) in data.enumerated() {
 //            if d.alpha == 0 { continue }
             drawData(d, alpha: 1.0, ctx: ctx, from: displayRange.from, to: displayRange.to, inRect: chartRect)
         }
+//        ctx.resetClip()
     }
  
     func drawData(_ data: ChartData, alpha: CGFloat, ctx: CGContext, from: Int64, to: Int64, inRect rect: CGRect) {

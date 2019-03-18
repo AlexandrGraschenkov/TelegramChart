@@ -24,7 +24,7 @@ class LabelsPool: NSObject {
     
     func getUnused() -> AttachedLabel {
         var label: AttachedLabel! = labels.first(where: { (l) -> Bool in
-            return l.unused
+            return !l.used
         })
         label = label ?? generate()
         label.alpha = 1
@@ -37,17 +37,25 @@ class LabelsPool: NSObject {
     func removeUnused() {
         for i in (0..<labels.count).reversed() {
             let label = labels[i]
-            if label.unused {
+            if !label.used {
                 label.removeFromSuperview()
                 labels.remove(at: i)
             }
         }
     }
     
+    func removeAll() {
+        for l in labels {
+            l.removeFromSuperview()
+        }
+        labels.removeAll()
+    }
+    
     private func generate() -> AttachedLabel {
         let label = AttachedLabel(frame: CGRect(x: 0, y: 0, width: 30, height: 15))
         label.font = font
         label.textColor = color
+        label.textAlignment = .center
         labels.append(label)
         print("Labels Pool:", labels.count)
 //        label.backgroundColor = UIColor.yellow

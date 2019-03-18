@@ -32,10 +32,52 @@ class AttachedLabel: UILabel {
     var valueFormatter: ((Float)->(String))?
     var timeFormatter: ((Int64)->(String))?
     
-    var unused: Bool {
-        guard let parent = superview else {
-            return true
-        }
-        return alpha == 0 || isHidden || (!parent.bounds.intersects(frame) && alpha == 1)
+    var used: Bool {
+        return superview != nil
     }
+    
+    func unuse() {
+        attachedValue = nil
+        attachedTime = nil
+        removeFromSuperview()
+    }
+}
+
+class AttachedLabelAnimator {
+    @discardableResult class func animateAppearDismiss(appear: [AttachedLabel], dismiss: [AttachedLabel], duration: Double) -> Cancelable {
+        let startAppear: CGFloat = 0.0
+        let appearDur: CGFloat = 0.8
+        let startDismiss: CGFloat = 0.0
+        let dismissDur: CGFloat = 0.5
+        
+        allAppearLabels.removeAll { dismiss.contains($0) }
+        allAppearLabels.append(contentsOf: appear)
+        
+        let startAlphaDismiss = dismiss.first?.alpha ?? 1
+        appear.forEach({$0.alpha = 0})
+        let cancel = DisplayLinkAnimator.animate(duration: duration) { (progress) in
+            
+            let val = (progress - startAppear) / appearDur
+            let alpha: CGFloat = min(1, max(0, val))
+            for l in appear {
+                if allAppearLabels.contains(l) { l.alpha = alpha }
+            }
+            
+            if progress < 1 {
+                let val = (progress - startDismiss) / dismissDur
+                let alpha: CGFloat = max(0, min(1, startAlphaDismiss-val))
+                print(alpha)
+                dismiss.forEach({$0.alpha = alpha})
+            } else {
+                dismiss.forEach({$0.unuse()})
+            }
+        }
+        
+        return {
+            allAppearLabels.removeAll(where: {appear.contains($0)})
+            cancel()
+        }
+    }
+    
+    private static var allAppearLabels: [AttachedLabel] = []
 }

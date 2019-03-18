@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FA4BB7982239B55A00723FA1 /* HorisontalAxe.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */; };
 		FAC45E572235222400A165CC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC45E562235222400A165CC /* AppDelegate.swift */; };
 		FAC45E592235222400A165CC /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC45E582235222400A165CC /* ViewController.swift */; };
 		FAC45E5C2235222400A165CC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FAC45E5A2235222400A165CC /* Main.storyboard */; };
@@ -14,7 +15,7 @@
 		FAC45E612235222600A165CC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FAC45E5F2235222600A165CC /* LaunchScreen.storyboard */; };
 		FAC45E692235224C00A165CC /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC45E682235224C00A165CC /* ChartView.swift */; };
 		FAC45E6C2235243900A165CC /* DisplayLinkAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC45E6B2235243900A165CC /* DisplayLinkAnimator.swift */; };
-		FAC45E702235279600A165CC /* AxesDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC45E6F2235279600A165CC /* AxesDrawer.swift */; };
+		FAC45E702235279600A165CC /* VerticalAxe.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC45E6F2235279600A165CC /* VerticalAxe.swift */; };
 		FAC45E722235435D00A165CC /* DebugFpsLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC45E712235435D00A165CC /* DebugFpsLabel.swift */; };
 		FAC45E7422355A5700A165CC /* ChartData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC45E7322355A5700A165CC /* ChartData.swift */; };
 		FAC45E762235753500A165CC /* chart_data.json in Resources */ = {isa = PBXBuildFile; fileRef = FAC45E752235753500A165CC /* chart_data.json */; };
@@ -23,6 +24,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorisontalAxe.swift; sourceTree = "<group>"; };
 		FAC45E532235222400A165CC /* ScheduleChart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScheduleChart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAC45E562235222400A165CC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FAC45E582235222400A165CC /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -32,7 +34,7 @@
 		FAC45E622235222600A165CC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FAC45E682235224C00A165CC /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
 		FAC45E6B2235243900A165CC /* DisplayLinkAnimator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DisplayLinkAnimator.swift; sourceTree = "<group>"; };
-		FAC45E6F2235279600A165CC /* AxesDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxesDrawer.swift; sourceTree = "<group>"; };
+		FAC45E6F2235279600A165CC /* VerticalAxe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalAxe.swift; sourceTree = "<group>"; };
 		FAC45E712235435D00A165CC /* DebugFpsLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugFpsLabel.swift; sourceTree = "<group>"; };
 		FAC45E7322355A5700A165CC /* ChartData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartData.swift; sourceTree = "<group>"; };
 		FAC45E752235753500A165CC /* chart_data.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = chart_data.json; sourceTree = "<group>"; };
@@ -88,7 +90,8 @@
 			children = (
 				FAC45E6B2235243900A165CC /* DisplayLinkAnimator.swift */,
 				FAC45E682235224C00A165CC /* ChartView.swift */,
-				FAC45E6F2235279600A165CC /* AxesDrawer.swift */,
+				FAC45E6F2235279600A165CC /* VerticalAxe.swift */,
+				FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */,
 				FAC45E792236FEB300A165CC /* AttachedLabel.swift */,
 				FAC45E772236FAEE00A165CC /* LabelsPool.swift */,
 				FAC45E7322355A5700A165CC /* ChartData.swift */,
@@ -173,9 +176,10 @@
 				FAC45E7422355A5700A165CC /* ChartData.swift in Sources */,
 				FAC45E572235222400A165CC /* AppDelegate.swift in Sources */,
 				FAC45E7A2236FEB300A165CC /* AttachedLabel.swift in Sources */,
+				FA4BB7982239B55A00723FA1 /* HorisontalAxe.swift in Sources */,
 				FAC45E692235224C00A165CC /* ChartView.swift in Sources */,
 				FAC45E6C2235243900A165CC /* DisplayLinkAnimator.swift in Sources */,
-				FAC45E702235279600A165CC /* AxesDrawer.swift in Sources */,
+				FAC45E702235279600A165CC /* VerticalAxe.swift in Sources */,
 				FAC45E722235435D00A165CC /* DebugFpsLabel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

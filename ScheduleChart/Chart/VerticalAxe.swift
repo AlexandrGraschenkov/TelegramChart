@@ -8,14 +8,25 @@
 
 import UIKit
 
-class AxesDrawer: NSObject {
-    var showHorisontal: Bool = true
-    var showVertical: Bool = true
+class VerticalAxe: NSObject {
+    var show: Bool = true {
+        didSet {
+            if show {
+                let val = maxVal
+                maxVal = nil
+                if val != nil {
+                    setMaxVal(val!, animationDuration: 0)
+                }
+            } else {
+                labelsPool.removeAll()
+            }
+        }
+    }
     let view: ChartView
     let labelsPool: LabelsPool = LabelsPool()
-    let verticalWidth: CGFloat = 30
-    let horisontalHeight: CGFloat = 20
     var levelsCount = 5
+    var gridColor: UIColor = UIColor(white: 0.9, alpha: 1.0)
+    
     
     fileprivate(set) var maxVal: Float!
     var vertical: [AttachedLabel] = []
@@ -27,66 +38,36 @@ class AxesDrawer: NSObject {
     
     func setMaxVal(_ maxVal: Float, animationDuration duration: Double = 0) {
         if self.maxVal == maxVal { return }
+        self.maxVal = maxVal
         if duration == 0 {
             _ = resizeVerticalIfNeeded()
-            self.maxVal = maxVal
             updateVerticalAttachedValues(force: true)
             vertical.forEach({ $0.alpha = 1 })
             return
         }
         
         let oldLabels = vertical
-        let startAlpha = vertical.first?.alpha ?? 1
         vertical.removeAll()
         
         _ = resizeVerticalIfNeeded()
-        self.maxVal = maxVal
         updateVerticalAttachedValues(force: true)
         
-        let minAlpha: CGFloat = 0.01
-        let startAppear: CGFloat = 0.0
-        let appearDur: CGFloat = 0.8
-        let startDismiss: CGFloat = 0.0
-        let dismissDur: CGFloat = 0.5
-        
-        vertical.forEach({ $0.alpha = minAlpha })
-        _ = DisplayLinkAnimator.animate(duration: duration) { (progress) in
-            if maxVal == self.maxVal {
-                let val = (progress - startAppear) / appearDur
-                let alpha: CGFloat = min(1, max(minAlpha, val))
-                self.vertical.forEach({$0.alpha = alpha})
-            }
-            
-            let val = (progress - startDismiss) / dismissDur
-            let alpha: CGFloat = max(0, min(1, startAlpha-val))
-            oldLabels.forEach({$0.alpha = alpha})
-        }
+        _ = AttachedLabelAnimator.animateAppearDismiss(appear: vertical, dismiss: oldLabels, duration: duration)
     }
     
-    func getAxesInsets() -> UIEdgeInsets {
-        return UIEdgeInsets(top: 0,
-                            left: showVertical ? verticalWidth : 0,
-                            bottom: showHorisontal ? horisontalHeight : 0,
-                            right: 0)
-    }
-    
-    func drawGrid(ctx: CGContext) {
+    func drawGrid(ctx: CGContext, inset: UIEdgeInsets) {
         let drawMaxVal = view.displayVerticalRange.to
         
         var attachedLabels: [AttachedLabel] = view.subviews.compactMap({$0 as? AttachedLabel})
         attachedLabels.sort(by: {$0.alpha < $1.alpha})
         var prevAlpha: CGFloat = 0
-        let frame = view.bounds.inset(by: UIEdgeInsets(top: 0,
-                                                       left: 0,
-                                                       bottom: showHorisontal ? horisontalHeight : 0,
-                                                       right: 0))
+        let frame = view.bounds.inset(by: UIEdgeInsets(top: inset.top, left: 0, bottom: inset.bottom, right: 0))
         for lab in attachedLabels {
             guard let val = lab.attachedValue else { continue }
-            if lab.unused {
-                continue
-            }
+            if lab.alpha == 0 { continue }
+            
             if prevAlpha != lab.alpha && prevAlpha != 0 {
-                ctx.setStrokeColor(UIColor(white: 0.9, alpha: prevAlpha).cgColor)
+                ctx.setStrokeColor(gridColor.withAlphaComponent(prevAlpha).cgColor)
                 ctx.strokePath()
             }
             var y = frame.height * CGFloat(1 - val / drawMaxVal) + frame.origin.y
@@ -95,12 +76,12 @@ class AxesDrawer: NSObject {
             ctx.addLine(to: CGPoint(x: frame.maxX, y: y))
             prevAlpha = lab.alpha
             
-            lab.frame.origin = CGPoint(x: frame.minX + verticalWidth - lab.frame.width,
+            lab.frame.origin = CGPoint(x: frame.minX + inset.left - lab.frame.width,
                                        y: y - lab.frame.height)
         }
         
         if prevAlpha > 0 {
-            ctx.setStrokeColor(UIColor(white: 0.9, alpha: prevAlpha).cgColor)
+            ctx.setStrokeColor(gridColor.withAlphaComponent(prevAlpha).cgColor)
             ctx.strokePath()
         }
     }
