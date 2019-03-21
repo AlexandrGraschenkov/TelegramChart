@@ -11,7 +11,7 @@ import UIKit
 class HorisontalAxe: NSObject {
     var show: Bool = true
     let view: ChartView
-    let labelsPool: LabelsPool = LabelsPool()
+    var labelsPool: LabelsPool { return view.labelsPool }
     
     var timeFormater: DateFormatter = {
         let df = DateFormatter()
@@ -56,14 +56,13 @@ class HorisontalAxe: NSObject {
         let times = getDisplayTimes(minTime: displayMinTime, maxTime: displayMaxTime, width: width)
         let animated = duration>0
         let (addLabels, dismissLabels) = updateHorisontal(times: times, reuse: !animated)
-        if addLabels.count == 0 && dismissLabels.count == 0 {
-            return
-        }
-        if animated {
-            _ = AttachedLabelAnimator.animateAppearDismiss(appear: addLabels, dismiss: dismissLabels, duration: duration)
-        } else {
-            dismissLabels.forEach({$0.unuse()})
-            addLabels.forEach({$0.alpha = 1})
+        if addLabels.count > 0 || dismissLabels.count > 0 {
+            if animated {
+                _ = AttachedLabelAnimator.animateAppearDismiss(appear: addLabels, dismiss: dismissLabels, duration: duration)
+            } else {
+                dismissLabels.forEach({$0.unuse()})
+                addLabels.forEach({$0.alpha = 1})
+            }
         }
         layoutLabels()
     }
@@ -91,7 +90,7 @@ class HorisontalAxe: NSObject {
         var displayValues: [Int64] = []
         for i in start...to {
             if Int(i) % Int(skipCount) != 0 { continue }
-            if maxDaysCount - i < Int64(skipCount) {
+            if maxDaysCount - i < Int64(skipCount/2) {
                 // we want to display last day not depend on spacing
                 displayValues.append(lastDate)
                 break
@@ -146,6 +145,7 @@ class HorisontalAxe: NSObject {
         
         let minTime = view.displayRange.from
         let maxTime = view.displayRange.to
+//        let bgColor = UIColor.random
         for lab in attachedLabels {
             guard let time = lab.attachedTime else { continue }
             if lab.bounds.size != labSize {
@@ -155,5 +155,14 @@ class HorisontalAxe: NSObject {
             let labX: CGFloat = percent * chartFrame.width + chartFrame.origin.x
             lab.center = CGPoint(x: labX, y: labY)
         }
+    }
+}
+
+extension UIColor {
+    static var random: UIColor {
+        return UIColor(red: .random(in: 0...1),
+                       green: .random(in: 0...1),
+                       blue: .random(in: 0...1),
+                       alpha: 1.0)
     }
 }

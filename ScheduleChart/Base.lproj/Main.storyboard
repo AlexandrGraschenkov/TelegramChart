@@ -27,7 +27,7 @@
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="299.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <view contentMode="scaleToFill" id="wbr-8D-x4g" customClass="ChartView" customModule="ScheduleChart" customModuleProvider="target">
+                                                <view contentMode="scaleToFill" id="wbr-8D-x4g" customClass="ChartCopmosedView" customModule="ScheduleChart" customModuleProvider="target">
                                                     <rect key="frame" x="0.0" y="0.0" width="375" height="300"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

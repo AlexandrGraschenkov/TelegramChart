@@ -42,7 +42,7 @@ class DebugFpsLabel: UILabel {
             return
         }
         
-        let fps = Double(callTimes.count) / (callTimes.last! - callTimes.first!)
+        let fps = Double(callTimes.count-1) / (callTimes.last! - callTimes.first!)
         text = NSString(format: "%.2lf", fps) as String
     }
 }

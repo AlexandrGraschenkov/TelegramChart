@@ -21,9 +21,11 @@ class ChartView: UIView {
     
     var drawGrid: Bool = true
     var showZeroYValue: Bool = true
+    var drawOutsideChart: Bool = true
     var lineWidth: CGFloat = 2.0
     lazy var verticalAxe: VerticalAxe = VerticalAxe(view: self)
     lazy var horisontalAxe: HorisontalAxe = HorisontalAxe(view: self)
+    let labelsPool: LabelsPool = LabelsPool()
     
     var data: [ChartData] = [] {
         didSet {
@@ -68,7 +70,7 @@ class ChartView: UIView {
             displayRange.from = minTime
             displayRange.to = maxTime
             setNeedsDisplay()
-            horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to, animationDuration: 0)
+            horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to, animationDuration: 0.2)
             // TODO
             return
         }
@@ -94,15 +96,17 @@ class ChartView: UIView {
         }
         
         onDrawDebug?()
-        if verticalAxe.maxVal == nil {
-            verticalAxe.setMaxVal(displayVerticalRange.to)
-        }
-        verticalAxe.drawGrid(ctx: ctx, inset: chartInset)
-        if horisontalAxe.maxTime == 0 && data.count > 0 {
-            horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to)
-        }
-        if rangeAnimatorCancel != nil {
-            horisontalAxe.layoutLabels()
+        if drawGrid {
+            if verticalAxe.maxVal == nil {
+                verticalAxe.setMaxVal(displayVerticalRange.to)
+            }
+            verticalAxe.drawGrid(ctx: ctx, inset: chartInset)
+            if horisontalAxe.maxTime == 0 && data.count > 0 {
+                horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to)
+            }
+            if rangeAnimatorCancel != nil {
+                horisontalAxe.layoutLabels()
+            }
         }
 //        if horisontalAxe.minTime != displayRange.from || horisontalAxe.maxTime != displayRange.to {
 //            horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to, animationDuration: 0.5)
@@ -110,14 +114,23 @@ class ChartView: UIView {
         
         ctx.setLineWidth(lineWidth)
         ctx.setLineJoin(.round)
-        let chartRect = bounds.inset(by: chartInset)
+        var chartRect = bounds.inset(by: chartInset)
 //        ctx.clip(to: chartRect)
+        var fromTime = displayRange.from
+        var toTime = displayRange.to
+        if drawOutsideChart {
+            (chartRect, fromTime, toTime) = expandDrawRange(rect: chartRect,
+                                                            inset: chartInset,
+                                                            from: displayRange.from,
+                                                            to: displayRange.to)
+        }
         for (_, d) in data.enumerated() {
 //            if d.alpha == 0 { continue }
-            drawData(d, alpha: 1.0, ctx: ctx, from: displayRange.from, to: displayRange.to, inRect: chartRect)
+            drawData(d, alpha: 1.0, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
         }
 //        ctx.resetClip()
     }
+    
  
     func drawData(_ data: ChartData, alpha: CGFloat, ctx: CGContext, from: Int64, to: Int64, inRect rect: CGRect) {
         guard let drawFrom = data.floorIndex(time: from),
@@ -156,5 +169,36 @@ class ChartView: UIView {
         let y = rect.maxY - rect.height * CGFloat(yPercent)
         return CGPoint(x: x, y: y)
     }
+}
 
+private extension ChartView { // Data draw helpers
+    func expandDrawRange(rect: CGRect, inset: UIEdgeInsets, from: Int64, to: Int64) -> (CGRect, Int64, Int64) {
+        let dt = CGFloat(to - from)
+        var newInset = inset
+        
+        var fromTime = from - Int64(dt * inset.left / rect.width)
+        if fromTime != from {
+            newInset.left *= CGFloat(dataMinTime - from) / CGFloat(fromTime - from)
+            newInset.left = min(newInset.left, inset.left)
+        }
+        if newInset.left != inset.left {
+            fromTime = dataMinTime
+        }
+        
+        
+        var toTime = to + Int64(dt * inset.right / rect.width)
+        if toTime != to {
+            newInset.right *= CGFloat(dataMaxTime - to) / CGFloat(toTime - to)
+            newInset.right = min(newInset.right, inset.right)
+        }
+        if newInset.right != inset.right {
+            toTime = dataMaxTime
+        }
+        
+        let resultRect = rect.inset(by: UIEdgeInsets(top: 0,
+                                                     left: -newInset.left,
+                                                     bottom: 0,
+                                                     right: -newInset.right))
+        return (resultRect, fromTime, toTime)
+    }
 }

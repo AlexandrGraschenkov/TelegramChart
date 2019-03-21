@@ -10,7 +10,7 @@ import UIKit
 
 class ViewController: UITableViewController {
 
-    @IBOutlet weak var chartView: ChartView!
+    @IBOutlet weak var chartView: ChartCopmosedView!
     @IBOutlet weak var fpsLabel: DebugFpsLabel!
     var data1: [ChartData] = []
     var data2: [ChartData] = []
@@ -31,7 +31,7 @@ class ViewController: UITableViewController {
         }
         
         chartView.data = data1
-        chartView.onDrawDebug = fpsLabel.drawCalled
+        chartView.displayChart.onDrawDebug = fpsLabel.drawCalled
         fpsLabel.startCapture()
     }
     
@@ -51,7 +51,7 @@ class ViewController: UITableViewController {
     @IBAction func nightModePressed() {
         animIdx = (animIdx + 1) % 3
         let maxVal: Float = 200 + Float(animIdx) * 100
-        chartView.animateMaxVal(val: maxVal)
+//        chartView.animateMaxVal(val: maxVal)
 //        _ = DisplayLinkAnimator.animate(duration: 2.0) { (percent) in
 //            let dTime = self.chartView.dataMaxTime - self.chartView.dataMinTime
 //            self.chartView.displayRange.to = Int64((1-(0.8 * percent)) * CGFloat(dTime)) + self.chartView.dataMinTime
@@ -66,12 +66,14 @@ class ViewController: UITableViewController {
         let maxTime = data.last!.time
         let testTime1 = data[data.count / 2].time
         let testTime2 = data[data.count / 3].time
+        let testTime3 = data[data.count / 5].time
         
-        let toTimes = [maxTime, testTime1, testTime2]
+        let toTimes = [maxTime, testTime1, testTime2, testTime3]
         animIdx2 = (animIdx2 + 1) % toTimes.count
-        chartView.setRange(minTime: minTime, maxTime: toTimes[animIdx2], animated: true)
+//        chartView.setRange(minTime: minTime, maxTime: toTimes[animIdx2], animated: true)
     }
 
 
+    
 }
 

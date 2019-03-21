@@ -23,7 +23,7 @@ class VerticalAxe: NSObject {
         }
     }
     let view: ChartView
-    let labelsPool: LabelsPool = LabelsPool()
+    var labelsPool: LabelsPool { return view.labelsPool }
     var levelsCount = 5
     var gridColor: UIColor = UIColor(white: 0.9, alpha: 1.0)
     
