@@ -74,6 +74,10 @@ class ViewController: UITableViewController {
     }
 
 
+    @IBAction func switchChanged(control: UISwitch) {
+        chartView.displayChart.drawOutsideChart = control.isOn
+        chartView.displayChart.setNeedsDisplay()
+    }
     
 }
 
