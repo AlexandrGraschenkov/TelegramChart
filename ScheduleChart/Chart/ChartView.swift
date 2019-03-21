@@ -41,6 +41,17 @@ class ChartView: UIView {
                 dataMaxTime = max(dataMaxTime, d.items.last!.time)
             }
             displayRange = RangeI(from: dataMinTime, to: dataMaxTime)
+            
+            
+            var maxVal: Float = 0
+            for d in data {
+                for item in d.items {
+                    maxVal = max(item.value, maxVal)
+                }
+            }
+            maxVal = ceil(maxVal / 100) * 100
+            setMaxVal(val: maxVal, animationDuration: 0)
+            setNeedsDisplay()
         }
     }
     var dataAlpha: [Float] = []
@@ -53,15 +64,22 @@ class ChartView: UIView {
     var rangeAnimatorCancel: Cancelable?
     var chartInset = UIEdgeInsets(top: 0, left: 40, bottom: 30, right: 30)
     
-    func animateMaxVal(val: Float) {
-        let duration: Double = 0.5
-        let fromVal = displayVerticalRange.to
+    func setMaxVal(val: Float, animationDuration: Double) {
         maxValAnimatorCancel?()
-        maxValAnimatorCancel = DisplayLinkAnimator.animate(duration: duration) { (percent) in
-            self.displayVerticalRange.to = (val - fromVal) * Float(percent) + fromVal
+        if animationDuration > 0 {
+            let fromVal = displayVerticalRange.to
+            maxValAnimatorCancel = DisplayLinkAnimator.animate(duration: animationDuration) { (percent) in
+                self.displayVerticalRange.to = (val - fromVal) * Float(percent) + fromVal
+                self.setNeedsDisplay()
+            }
+        } else {
+            displayVerticalRange.to = val
             self.setNeedsDisplay()
         }
-        verticalAxe.setMaxVal(val, animationDuration: duration)
+        
+        if drawGrid {
+            verticalAxe.setMaxVal(val, animationDuration: animationDuration)
+        }
     }
     
     func setRange(minTime: Int64, maxTime: Int64, animated: Bool) {

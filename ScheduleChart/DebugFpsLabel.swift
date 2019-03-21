@@ -36,11 +36,14 @@ class DebugFpsLabel: UILabel {
     }
 
     @objc func updateLabel() {
-        guard let last = callTimes.last, CFAbsoluteTimeGetCurrent() - last < 1.0 else {
+        guard let last = callTimes.last,
+            CFAbsoluteTimeGetCurrent() - last < 1.0 else {
             text = "-"
             callTimes.removeAll()
             return
         }
+        
+        if callTimes.count < 2 { return }
         
         let fps = Double(callTimes.count-1) / (callTimes.last! - callTimes.first!)
         text = NSString(format: "%.2lf", fps) as String

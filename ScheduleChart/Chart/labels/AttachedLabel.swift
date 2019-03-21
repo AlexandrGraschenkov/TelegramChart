@@ -66,7 +66,6 @@ class AttachedLabelAnimator {
             if progress < 1 {
                 let val = (progress - startDismiss) / dismissDur
                 let alpha: CGFloat = max(0, min(1, startAlphaDismiss-val))
-                print(alpha)
                 dismiss.forEach({$0.alpha = alpha})
             } else {
                 dismiss.forEach({$0.unuse()})

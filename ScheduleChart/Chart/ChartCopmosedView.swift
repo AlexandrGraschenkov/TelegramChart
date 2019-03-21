@@ -10,6 +10,11 @@ import UIKit
 
 class ChartCopmosedView: UIView {
 
+    enum Mode {
+        case night
+        case day
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
@@ -27,10 +32,21 @@ class ChartCopmosedView: UIView {
         didSet { setNeedsLayout(); layoutIfNeeded() }
     }
     
+    var mode: Mode = .day {
+        didSet { updateMode() }
+    }
+    
     var data: [ChartData] = [] {
         didSet {
             selectionChart.data = data
             displayChart.data = data
+        }
+    }
+    
+    override var backgroundColor: UIColor? {
+        didSet {
+            displayChart?.backgroundColor = backgroundColor
+            selectionChart?.backgroundColor = backgroundColor
         }
     }
     
@@ -65,6 +81,17 @@ class ChartCopmosedView: UIView {
         displayChart.backgroundColor = backgroundColor
         displayChart.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height - selectionHeight)
         addSubview(displayChart)
+    }
+        
+    func updateMode() {
+        switch mode {
+        case .day:
+            backgroundColor = .white
+            displayChart.verticalAxe.gridColor = UIColor(white: 0.9, alpha: 1.0)
+        case .night:
+            backgroundColor = UIColor(red:0.14, green:0.18, blue:0.24, alpha:1.00)
+            displayChart.verticalAxe.gridColor = UIColor(red:0.11, green:0.15, blue:0.20, alpha:1.00)
+        }
     }
 }
 

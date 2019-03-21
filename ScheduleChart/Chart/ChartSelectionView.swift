@@ -21,6 +21,7 @@ class ChartSelectionView: UIView {
             return lhs.from == rhs.from && lhs.to == rhs.to
         }
     }
+    typealias Mode = ChartCopmosedView.Mode
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -40,6 +41,7 @@ class ChartSelectionView: UIView {
         }
     }
     var minRangeDist: CGFloat = 0.1
+    var mode: Mode = .day
     weak var delegate: ChartSelectionViewDelegate?
     
     // mark: private
@@ -56,20 +58,30 @@ class ChartSelectionView: UIView {
     
     private func setupViews() {
         let autoresize: UIView.AutoresizingMask = [.flexibleWidth, .flexibleHeight, .flexibleLeftMargin, .flexibleRightMargin]
-        let overlayColor = UIColor(red:0.95, green:0.96, blue:0.98, alpha:0.80)
         
         leftOverlay = UIView(frame: bounds)
-        leftOverlay.backgroundColor = overlayColor
         addSubview(leftOverlay)
         
         rightOverlay = UIView(frame: bounds)
-        rightOverlay.backgroundColor = overlayColor
         addSubview(rightOverlay)
         
         selectionImgView = UIImageView(image: UIImage(named: "selection_area")?.resizableImage(withCapInsets: UIEdgeInsets(top: 3, left: 6, bottom: 3, right: 6)))
         selectionImgView.autoresizingMask = autoresize
 //        selectionImgView.backgroundColor = UIColor.red
         addSubview(selectionImgView)
+        updateMode()
+    }
+    
+    private func updateMode() {
+        let overlayColor: UIColor
+        switch mode {
+        case .day:
+            overlayColor = UIColor(red:0.95, green:0.96, blue:0.98, alpha:0.80)
+        case .night:
+            overlayColor = UIColor(red:0.10, green:0.13, blue:0.17, alpha:0.80)
+        }
+        rightOverlay.backgroundColor = overlayColor
+        leftOverlay.backgroundColor = overlayColor
     }
     
     private func setupGestures() {
@@ -94,7 +106,6 @@ class ChartSelectionView: UIView {
         leftOverlay.frame = CGRect(x: 0, y: 0, width: leftX, height: bounds.height)
         rightOverlay.frame = CGRect(x: righX, y: 0, width: bounds.width-righX, height: bounds.height)
         selectionImgView.frame = CGRect(x: leftX, y: 0, width: righX-leftX, height: bounds.height)
-        print(selectionImgView.frame)
     }
 
     
