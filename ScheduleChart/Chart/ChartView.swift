@@ -90,7 +90,10 @@ class ChartView: UIView {
         if !animated {
             displayRange.from = minTime
             displayRange.to = maxTime
-            setNeedsDisplay()
+            if maxValueAnimation == nil {
+                // little hack: if we ave animation with redraws, do not need to call redraw here
+                setNeedsDisplay()
+            }
             horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to, animationDuration: 0.2)
             // TODO
             return

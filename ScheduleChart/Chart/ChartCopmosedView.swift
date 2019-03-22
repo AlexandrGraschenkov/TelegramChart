@@ -108,6 +108,6 @@ extension ChartCopmosedView: ChartSelectionViewDelegate {
         let toTime = Int64(CGFloat(maxTime - minTime) * range.to) + minTime
         displayChart.setRange(minTime: fromTime, maxTime: toTime, animated: false)
         let maxVal = DataMaxValCalculator.getMaxValue(data, fromTime: fromTime, toTime: toTime, dividableBy: 5)
-        displayChart.setMaxVal(val: maxVal, animationDuration: 0.3)
+        displayChart.setMaxVal(val: maxVal, animationDuration: 0.2)
     }
 }
