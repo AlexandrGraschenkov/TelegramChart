@@ -15,6 +15,7 @@ class ViewController: UITableViewController {
     @IBOutlet weak var clipSwitch: UISwitch!
     @IBOutlet weak var dayNightModeButt: UIButton!
     @IBOutlet var labels: [UILabel] = []
+    @IBOutlet weak var debugFpsSwitch: UISwitch!
     var dataArr: [[ChartData]] = []
     var selectedData: Int = 0
     var cellBg: UIColor = .white
@@ -32,6 +33,7 @@ class ViewController: UITableViewController {
             }
         }
         
+        fpsLabel.isEnabled = debugFpsSwitch.isOn
         chartView.data = dataArr[selectedData]
         chartView.displayChart.onDrawDebug = fpsLabel.drawCalled
         fpsLabel.startCapture()
@@ -79,6 +81,10 @@ class ViewController: UITableViewController {
     @IBAction func switchChanged(control: UISwitch) {
         chartView.displayChart.drawOutsideChart = !control.isOn
         chartView.displayChart.setNeedsDisplay()
+    }
+    
+    @IBAction func debugFpsSwitchChanged(sender: UISwitch) {
+        fpsLabel.isEnabled = sender.isOn
     }
     
     @IBAction func switchNightDayMode(sender: UIButton) {

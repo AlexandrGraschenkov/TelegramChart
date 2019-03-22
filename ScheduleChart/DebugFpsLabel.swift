@@ -14,6 +14,14 @@ class DebugFpsLabel: UILabel {
     var timer: Timer?
     var onPrevDrawCalled = false
     
+    override var isEnabled: Bool {
+        didSet {
+            if !isEnabled {
+                text = "Redraw per/sec"
+            }
+        }
+    }
+    
     func startCapture() {
         if timer != nil { return }
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateLabel), userInfo: nil, repeats: true)
@@ -38,14 +46,18 @@ class DebugFpsLabel: UILabel {
     @objc func updateLabel() {
         guard let last = callTimes.last,
             CFAbsoluteTimeGetCurrent() - last < 1.0 else {
-            text = "-"
+            if isEnabled {
+                text = "-"
+            }
             callTimes.removeAll()
             return
         }
         
         if callTimes.count < 2 { return }
         
-        let fps = Double(callTimes.count-1) / (callTimes.last! - callTimes.first!)
-        text = NSString(format: "%.2lf", fps) as String
+        if isEnabled {
+            let fps = Double(callTimes.count-1) / (callTimes.last! - callTimes.first!)
+            text = NSString(format: "%.2lf", fps) as String
+        }
     }
 }

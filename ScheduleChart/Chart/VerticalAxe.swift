@@ -109,7 +109,17 @@ class VerticalAxe: NSObject {
         }
         
         let levels = generateValueLevels(maxVal: maxVal, levelsCount: vertical.count)
+        
+        let val = Int64(levels[1])
+        var formatter: ((Float)->(String))? = nil
+        if val % 1000000 == 0 {
+            formatter = {"\(Int64($0/1000000))M"}
+        } else if val % 1000 == 0 {
+            formatter = {"\(Int64($0/1000))K"}
+        }
+        
         zip(vertical, levels).forEach { (lab, val) in
+            lab.valueFormatter = formatter
             lab.attachedValue = val
         }
     }
