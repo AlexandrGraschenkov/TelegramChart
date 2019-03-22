@@ -26,7 +26,7 @@ class ViewController: UITableViewController {
             let data = try? Data(contentsOf: url),
             let obj = try? JSONSerialization.jsonObject(with: data, options: []),
             let json = obj as? [[String: Any]] {
-            for i in 0..<4 {
+            for i in 0..<5 {
                 let data = ChartData.generateData(dic: json[i])
                 dataArr.append(data)
             }

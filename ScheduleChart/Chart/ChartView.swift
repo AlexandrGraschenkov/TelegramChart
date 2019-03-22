@@ -41,16 +41,6 @@ class ChartView: UIView {
                 dataMaxTime = max(dataMaxTime, d.items.last!.time)
             }
             displayRange = RangeI(from: dataMinTime, to: dataMaxTime)
-            
-            
-            var maxVal: Float = 0
-            for d in data {
-                for item in d.items {
-                    maxVal = max(item.value, maxVal)
-                }
-            }
-            maxVal = ceil(maxVal / 100) * 100
-            setMaxVal(val: maxVal, animationDuration: 0)
             setNeedsDisplay()
         }
     }
@@ -58,22 +48,35 @@ class ChartView: UIView {
     private(set) var dataMinTime: Int64 = -1
     private(set) var dataMaxTime: Int64 = -1
     var displayRange: RangeI = RangeI(from: 0, to: 0)
-    var displayVerticalRange: Range = Range(from: 0, to: 200)
+//    var displayVerticalRange: Range = Range(from: 0, to: 200)
+    var maxValue: Float = 200
+    var maxValueAnimation: Float? = nil
     var onDrawDebug: (()->())?
     var maxValAnimatorCancel: Cancelable?
     var rangeAnimatorCancel: Cancelable?
     var chartInset = UIEdgeInsets(top: 0, left: 40, bottom: 30, right: 30)
     
     func setMaxVal(val: Float, animationDuration: Double) {
+        if let maxValueAnimation = maxValueAnimation {
+            if animationDuration > 0 && maxValueAnimation == val { return }
+        } else if maxValue == val, maxValueAnimation == nil {
+            return
+        }
+        
         maxValAnimatorCancel?()
         if animationDuration > 0 {
-            let fromVal = displayVerticalRange.to
+            maxValueAnimation = val
+            let fromMaxVal = maxValue
             maxValAnimatorCancel = DisplayLinkAnimator.animate(duration: animationDuration) { (percent) in
-                self.displayVerticalRange.to = (val - fromVal) * Float(percent) + fromVal
+                self.maxValue = (val - fromMaxVal) * Float(percent) + fromMaxVal
                 self.setNeedsDisplay()
+                if percent == 1 {
+                    self.maxValueAnimation = nil
+                }
             }
         } else {
-            displayVerticalRange.to = val
+            maxValue = val
+            maxValueAnimation = nil
             self.setNeedsDisplay()
         }
         
@@ -116,7 +119,7 @@ class ChartView: UIView {
         onDrawDebug?()
         if drawGrid {
             if verticalAxe.maxVal == nil {
-                verticalAxe.setMaxVal(displayVerticalRange.to)
+                verticalAxe.setMaxVal(maxValue)
             }
             verticalAxe.drawGrid(ctx: ctx, inset: chartInset)
             if horisontalAxe.maxTime == 0 && data.count > 0 {
@@ -186,7 +189,7 @@ class ChartView: UIView {
     private func convertPos(time: Int64, val: Float, inRect rect: CGRect, fromTime: Int64, toTime: Int64) -> CGPoint {
         let xPercent = Float(time - fromTime) / Float(toTime - fromTime)
         let x = rect.origin.x + rect.width * CGFloat(xPercent)
-        let yPercent = (val - displayVerticalRange.from) / (displayVerticalRange.to - displayVerticalRange.from)
+        let yPercent = val / maxValue
         let y = rect.maxY - rect.height * CGFloat(yPercent)
         return CGPoint(x: x, y: y)
     }

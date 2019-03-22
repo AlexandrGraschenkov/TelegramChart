@@ -41,7 +41,9 @@ class ChartSelectionView: UIView {
         }
     }
     var minRangeDist: CGFloat = 0.1
-    var mode: Mode = .day
+    var mode: Mode = .day {
+        didSet { updateMode() }
+    }
     weak var delegate: ChartSelectionViewDelegate?
     
     // mark: private

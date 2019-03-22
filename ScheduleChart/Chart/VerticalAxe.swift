@@ -56,7 +56,7 @@ class VerticalAxe: NSObject {
     }
     
     func drawGrid(ctx: CGContext, inset: UIEdgeInsets) {
-        let drawMaxVal = view.displayVerticalRange.to
+        let drawMaxVal = view.maxValue
         
         var attachedLabels: [AttachedLabel] = view.subviews.compactMap({$0 as? AttachedLabel})
         attachedLabels.sort(by: {$0.alpha < $1.alpha})

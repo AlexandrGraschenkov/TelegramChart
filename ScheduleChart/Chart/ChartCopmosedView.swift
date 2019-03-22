@@ -40,6 +40,10 @@ class ChartCopmosedView: UIView {
         didSet {
             selectionChart.data = data
             displayChart.data = data
+            
+            let maxVal = DataMaxValCalculator.getMaxValue(data, dividableBy: 5)
+            selectionChart.setMaxVal(val: maxVal, animationDuration: 0)
+            displayChart.setMaxVal(val: maxVal, animationDuration: 0)
         }
     }
     
@@ -84,6 +88,7 @@ class ChartCopmosedView: UIView {
     }
         
     func updateMode() {
+        selectionView.mode = mode
         switch mode {
         case .day:
             backgroundColor = .white
@@ -102,5 +107,7 @@ extension ChartCopmosedView: ChartSelectionViewDelegate {
         let fromTime = Int64(CGFloat(maxTime - minTime) * range.from) + minTime
         let toTime = Int64(CGFloat(maxTime - minTime) * range.to) + minTime
         displayChart.setRange(minTime: fromTime, maxTime: toTime, animated: false)
+        let maxVal = DataMaxValCalculator.getMaxValue(data, fromTime: fromTime, toTime: toTime, dividableBy: 5)
+        displayChart.setMaxVal(val: maxVal, animationDuration: 0.3)
     }
 }
