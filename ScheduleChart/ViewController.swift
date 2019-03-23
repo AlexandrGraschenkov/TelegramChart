@@ -16,6 +16,7 @@ class ViewController: UITableViewController {
     @IBOutlet weak var dayNightModeButt: UIButton!
     @IBOutlet var labels: [UILabel] = []
     @IBOutlet weak var debugFpsSwitch: UISwitch!
+    @IBOutlet weak var selectChartDisplay: SelectChartDisplayedView!
     var dataArr: [[ChartData]] = []
     var selectedData: Int = 0
     var cellBg: UIColor = .white
@@ -33,8 +34,10 @@ class ViewController: UITableViewController {
             }
         }
         
+        selectChartDisplay.displayDelegate = self
         fpsLabel.isEnabled = debugFpsSwitch.isOn
         chartView.data = dataArr[selectedData]
+        selectChartDisplay.items = ChartDataInfo.mapInfoFrom(data: chartView.data)
         chartView.displayChart.onDrawDebug = fpsLabel.drawCalled
         fpsLabel.startCapture()
     }
@@ -50,33 +53,6 @@ class ViewController: UITableViewController {
         }
         return result
     }
-    
-    var animIdx: Int = 0
-    @IBAction func nightModePressed() {
-        animIdx = (animIdx + 1) % 3
-        let maxVal: Float = 200 + Float(animIdx) * 100
-//        chartView.animateMaxVal(val: maxVal)
-//        _ = DisplayLinkAnimator.animate(duration: 2.0) { (percent) in
-//            let dTime = self.chartView.dataMaxTime - self.chartView.dataMinTime
-//            self.chartView.displayRange.to = Int64((1-(0.8 * percent)) * CGFloat(dTime)) + self.chartView.dataMinTime
-//            self.chartView.setNeedsDisplay()
-//        }
-    }
-    
-    var animIdx2: Int = 0
-    @IBAction func test2Pressed() {
-        let data = dataArr[selectedData].first!.items
-        let minTime = data.first!.time
-        let maxTime = data.last!.time
-        let testTime1 = data[data.count / 2].time
-        let testTime2 = data[data.count / 3].time
-        let testTime3 = data[data.count / 5].time
-        
-        let toTimes = [maxTime, testTime1, testTime2, testTime3]
-        animIdx2 = (animIdx2 + 1) % toTimes.count
-//        chartView.setRange(minTime: minTime, maxTime: toTimes[animIdx2], animated: true)
-    }
-
 
     @IBAction func switchChanged(control: UISwitch) {
         chartView.displayChart.drawOutsideChart = !control.isOn
@@ -127,6 +103,8 @@ class ViewController: UITableViewController {
         tableView.separatorColor = separatorColor
         tableView.backgroundColor = bgColor
         tableView.visibleCells.forEach({$0.backgroundColor = self.cellBg})
+        selectChartDisplay.backgroundColor = cellBg
+        selectChartDisplay.titleColor = textColor
         labels.forEach({$0.textColor = textColor})
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: textColor]
     }
@@ -156,8 +134,15 @@ extension ViewController { // table
                 tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
                 selectedData = indexPath.row
                 chartView.data = dataArr[selectedData]
+                selectChartDisplay.items = ChartDataInfo.mapInfoFrom(data: chartView.data)
             }
         }
+    }
+}
+
+extension ViewController: SelectChartDisplayedViewDelegate {
+    func chartDataDisplayChanged(index: Int, display: Bool) {
+        chartView.setShowData(index: index, show: display, animated: true)
     }
 }
 

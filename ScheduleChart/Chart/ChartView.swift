@@ -41,10 +41,11 @@ class ChartView: UIView {
                 dataMaxTime = max(dataMaxTime, d.items.last!.time)
             }
             displayRange = RangeI(from: dataMinTime, to: dataMaxTime)
+            dataAlpha = Array(repeating: 1.0, count: data.count)
             setNeedsDisplay()
         }
     }
-    var dataAlpha: [Float] = []
+    var dataAlpha: [CGFloat] = []
     private(set) var dataMinTime: Int64 = -1
     private(set) var dataMaxTime: Int64 = -1
     var displayRange: RangeI = RangeI(from: 0, to: 0)
@@ -55,6 +56,10 @@ class ChartView: UIView {
     var maxValAnimatorCancel: Cancelable?
     var rangeAnimatorCancel: Cancelable?
     var chartInset = UIEdgeInsets(top: 0, left: 40, bottom: 30, right: 30)
+    
+    var isMaxValAnimating: Bool {
+        return maxValueAnimation != nil
+    }
     
     func setMaxVal(val: Float, animationDuration: Double) {
         if let maxValueAnimation = maxValueAnimation {
@@ -148,9 +153,10 @@ class ChartView: UIView {
             ctx.clip(to: chartRect)
         }
         
-        for (_, d) in data.enumerated() {
-//            if d.alpha == 0 { continue }
-            drawData(d, alpha: 1.0, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
+        for (idx, d) in data.enumerated() {
+            let alpha = dataAlpha[idx]
+            if alpha == 0 { continue }
+            drawData(d, alpha: alpha, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
         }
         
         if !drawOutsideChart {

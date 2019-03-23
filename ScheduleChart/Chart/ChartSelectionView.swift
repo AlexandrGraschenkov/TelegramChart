@@ -37,7 +37,6 @@ class ChartSelectionView: UIView {
         didSet {
             if oldValue == range { return }
             setNeedsLayout(); layoutIfNeeded()
-            delegate?.selectionRangeChanged(self, range: range)
         }
     }
     var minRangeDist: CGFloat = 0.1
@@ -160,7 +159,7 @@ class ChartSelectionView: UIView {
         
         let minDist = panSide == .center ? (panStartRange.to - panStartRange.from) : minRangeDist
         newRange = fixMinRange(newRange, side: panSide, minDist: minDist)
-        range = newRange
+        updateRange(newRange: newRange)
     }
     
     private func fixMinRange(_ range: Range, side: PanSide, minDist: CGFloat) -> Range {
@@ -175,6 +174,12 @@ class ChartSelectionView: UIView {
             }
         }
         return range
+    }
+    
+    private func updateRange(newRange: Range) {
+        if newRange == range { return }
+        range = newRange
+        delegate?.selectionRangeChanged(self, range: range)
     }
 }
 

@@ -25,6 +25,7 @@ class ChartCopmosedView: UIView {
         setup()
     }
     
+    var levelsCount: Int = 5
     var selectionChart: ChartView!
     var displayChart: ChartView!
     var selectionView: ChartSelectionView!
@@ -38,13 +39,30 @@ class ChartCopmosedView: UIView {
     
     var data: [ChartData] = [] {
         didSet {
+            cancelShowHideAnimation.values.forEach({$0()})
+            cancelShowHideAnimation.removeAll()
             selectionChart.data = data
             displayChart.data = data
             
-            let maxVal = DataMaxValCalculator.getMaxValue(data, dividableBy: 5)
+            dataIsVisible = Array(repeating: true, count: data.count)
+            let maxVal = DataMaxValCalculator.getMaxValue(data, dividableBy: levelsCount)
             selectionChart.setMaxVal(val: maxVal, animationDuration: 0)
             displayChart.setMaxVal(val: maxVal, animationDuration: 0)
+            selectionView.range = ChartSelectionView.Range(from: 0, to: 1)
         }
+    }
+    
+    func setShowData(index: Int, show: Bool, animated: Bool) {
+        if index < 0 || index >= dataIsVisible.count { return }
+        if dataIsVisible[index] == show { return }
+        
+        dataIsVisible[index] = show
+        let animDuration: Double = 0.2
+        
+        if visibleData.count > 0 {
+            runMaxValueChangeAnimation(data: visibleData, animDuration: animDuration)
+        }
+        runShowHideAnimation(dataIndex: index, show: show, animDuration: animDuration)
     }
     
     override var backgroundColor: UIColor? {
@@ -65,6 +83,14 @@ class ChartCopmosedView: UIView {
         chartFrame.size.height = selectionHeight
         selectionChart.frame = chartFrame.insetBy(dx: 15, dy: 0)
     }
+    
+    
+    // mark: private
+    private var dataIsVisible: [Bool] = []
+    private var visibleData: [ChartData] {
+        return zip(data, dataIsVisible).compactMap({$0.1 ? $0.0 : nil})
+    }
+    private var cancelShowHideAnimation: [Int: Cancelable] = [:]
     
     private func setup() {
         selectionChart = ChartView()
@@ -87,7 +113,7 @@ class ChartCopmosedView: UIView {
         addSubview(displayChart)
     }
         
-    func updateMode() {
+    private func updateMode() {
         selectionView.mode = mode
         switch mode {
         case .day:
@@ -98,6 +124,39 @@ class ChartCopmosedView: UIView {
             displayChart.verticalAxe.gridColor = UIColor(red:0.11, green:0.15, blue:0.20, alpha:1.00)
         }
     }
+    
+    // mark: show\hide animation
+    private func runMaxValueChangeAnimation(data: [ChartData], animDuration: Double) {
+        let totalMaxVal = DataMaxValCalculator.getMaxValue(data, dividableBy: levelsCount)
+        selectionChart.setMaxVal(val: totalMaxVal, animationDuration: animDuration)
+        
+        
+        let fromTime = displayChart.displayRange.from
+        let toTime = displayChart.displayRange.to
+        let displayMaxVal = DataMaxValCalculator.getMaxValue(data, fromTime: fromTime, toTime: toTime, dividableBy: levelsCount)
+        displayChart.setMaxVal(val: displayMaxVal, animationDuration: animDuration)
+    }
+    
+    private func runShowHideAnimation(dataIndex index: Int, show: Bool, animDuration: Double) {
+        cancelShowHideAnimation[index]?()
+        let startAlpha = displayChart.dataAlpha[index]
+        let endAlpha: CGFloat = show ? 1 : 0
+        let cancel = DisplayLinkAnimator.animate(duration: animDuration) { (progress) in
+            let alpha = (endAlpha - startAlpha) * progress + startAlpha
+            self.displayChart.dataAlpha[index] = alpha
+            self.selectionChart.dataAlpha[index] = alpha
+            if !self.displayChart.isMaxValAnimating {
+                self.displayChart.setNeedsDisplay()
+            }
+            if !self.selectionChart.isMaxValAnimating {
+                self.selectionChart.setNeedsDisplay()
+            }
+            if progress == 1 {
+                self.cancelShowHideAnimation[index] = nil
+            }
+        }
+        cancelShowHideAnimation[index] = cancel
+    }
 }
 
 extension ChartCopmosedView: ChartSelectionViewDelegate {
@@ -107,7 +166,7 @@ extension ChartCopmosedView: ChartSelectionViewDelegate {
         let fromTime = Int64(CGFloat(maxTime - minTime) * range.from) + minTime
         let toTime = Int64(CGFloat(maxTime - minTime) * range.to) + minTime
         displayChart.setRange(minTime: fromTime, maxTime: toTime, animated: false)
-        let maxVal = DataMaxValCalculator.getMaxValue(data, fromTime: fromTime, toTime: toTime, dividableBy: 5)
+        let maxVal = DataMaxValCalculator.getMaxValue(visibleData, fromTime: fromTime, toTime: toTime, dividableBy: levelsCount)
         displayChart.setMaxVal(val: maxVal, animationDuration: 0.2)
     }
 }

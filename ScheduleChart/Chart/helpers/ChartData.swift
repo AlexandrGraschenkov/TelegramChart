@@ -50,11 +50,10 @@ struct ChartData {
         return result
     }
     
-    init(color: UIColor, items: [Item], name: String? = nil, hidden: Bool = false) {
+    init(color: UIColor, items: [Item], name: String? = nil) {
         self.color = color
         self.items = items
         self.name = name
-        self.hidden = hidden
     }
     
     struct Item {
@@ -65,7 +64,6 @@ struct ChartData {
     let items: [Item]
     var color: UIColor
     var name: String?
-    var hidden: Bool
     
     func ceilIndex(time: Int64) -> Int? {
         if items.count < 2 { return nil }
