@@ -111,6 +111,12 @@ class ChartCopmosedView: UIView {
         displayChart.backgroundColor = backgroundColor
         displayChart.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height - selectionHeight)
         addSubview(displayChart)
+        
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(userSelectDate(gesture:)))
+        displayChart.addGestureRecognizer(pan)
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(userSelectDate(gesture:)))
+        displayChart.addGestureRecognizer(tap)
     }
         
     private func updateMode() {
@@ -118,10 +124,10 @@ class ChartCopmosedView: UIView {
         switch mode {
         case .day:
             backgroundColor = .white
-            displayChart.verticalAxe.gridColor = UIColor(white: 0.9, alpha: 1.0)
+            displayChart.gridColor = UIColor(white: 0.9, alpha: 1.0)
         case .night:
             backgroundColor = UIColor(red:0.14, green:0.18, blue:0.24, alpha:1.00)
-            displayChart.verticalAxe.gridColor = UIColor(red:0.11, green:0.15, blue:0.20, alpha:1.00)
+            displayChart.gridColor = UIColor(red:0.11, green:0.15, blue:0.20, alpha:1.00)
         }
     }
     
@@ -156,6 +162,30 @@ class ChartCopmosedView: UIView {
             }
         }
         cancelShowHideAnimation[index] = cancel
+    }
+    
+    @objc func userSelectDate(gesture: UIGestureRecognizer) {
+        if gesture.state == .cancelled { return }
+        if data.count == 0 { return }
+        let pos = gesture.location(in: displayChart)
+        guard let date = displayChart.getDate(forPos: pos) else {
+            displayChart.selectedDate = nil
+            return
+        }
+        
+        // can be boosted
+        var closestDate: Int64?
+        for item in data[0].items {
+            guard let cDate = closestDate else {
+                closestDate = item.time
+                continue
+            }
+            
+            if abs(cDate - date) > abs(date - item.time) {
+                closestDate = item.time
+            }
+        }
+        displayChart.selectedDate = closestDate
     }
 }
 

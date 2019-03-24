@@ -20,9 +20,18 @@ class ChartView: UIView {
     }
     
     var drawGrid: Bool = true
+    var gridColor: UIColor = UIColor(white: 0.9, alpha: 1.0) {
+        didSet { verticalAxe.gridColor = gridColor }
+    }
     var showZeroYValue: Bool = true
     var drawOutsideChart: Bool = false
     var lineWidth: CGFloat = 2.0
+    var selectedDate: Int64? {
+        didSet {
+            if selectedDate == oldValue { return }
+            setNeedsDisplay()
+        }
+    }
     lazy var verticalAxe: VerticalAxe = VerticalAxe(view: self)
     lazy var horisontalAxe: HorisontalAxe = HorisontalAxe(view: self)
     let labelsPool: LabelsPool = LabelsPool()
@@ -117,6 +126,19 @@ class ChartView: UIView {
         horisontalAxe.setRange(minTime: minTime, maxTime: maxTime, animationDuration: 0.5)
     }
     
+    func getDate(forPos pos: CGPoint) -> Int64? {
+        if displayRange.from == 0 && displayRange.to == 0 {
+            return nil
+        }
+        
+        let from = displayRange.from
+        let to = displayRange.to
+        let rect = bounds.inset(by: chartInset)
+        let percent = (pos.x - rect.minX) / rect.width
+        let time = Int64(CGFloat(to - from) * percent) + from
+        return time
+    }
+    
     override func draw(_ rect: CGRect) {
         super.draw(rect)
        
@@ -138,8 +160,6 @@ class ChartView: UIView {
             }
         }
         
-        ctx.setLineWidth(lineWidth)
-        ctx.setLineJoin(.round)
         var chartRect = bounds.inset(by: chartInset)
         
         var fromTime = displayRange.from
@@ -152,11 +172,25 @@ class ChartView: UIView {
         } else {
             ctx.clip(to: chartRect)
         }
+        if let selected = selectedDate {
+            ctx.setStrokeColor(gridColor.cgColor)
+            let x = convertPos(time: selected, val: 0, inRect: chartRect, fromTime: fromTime, toTime: toTime).x
+            ctx.move(to: CGPoint(x: x, y: chartRect.minY))
+            ctx.addLine(to: CGPoint(x: x, y: chartRect.maxY))
+            ctx.strokePath()
+        }
+        
+        
+        ctx.setLineWidth(lineWidth)
+        ctx.setLineJoin(.round)
         
         for (idx, d) in data.enumerated() {
             let alpha = dataAlpha[idx]
             if alpha == 0 { continue }
             drawData(d, alpha: alpha, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
+            if let date = selectedDate {
+                drawSelection(d, selectedDate: date, alpha: alpha, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
+            }
         }
         
         if !drawOutsideChart {
@@ -165,7 +199,7 @@ class ChartView: UIView {
     }
     
  
-    func drawData(_ data: ChartData, alpha: CGFloat, ctx: CGContext, from: Int64, to: Int64, inRect rect: CGRect) {
+    private func drawData(_ data: ChartData, alpha: CGFloat, ctx: CGContext, from: Int64, to: Int64, inRect rect: CGRect) {
         guard let drawFrom = data.floorIndex(time: from),
             let drawTo = data.ceilIndex(time: to) else {
             return
@@ -193,6 +227,23 @@ class ChartView: UIView {
         }
         ctx.setStrokeColor(color)
         ctx.strokePath()
+    }
+    
+    private func drawSelection(_ data: ChartData, selectedDate: Int64, alpha: CGFloat, ctx: CGContext, from: Int64, to: Int64, inRect rect: CGRect) {
+        guard let val = data.items.first(where: {$0.time == selectedDate})?.value else {
+            return
+        }
+        let pos = convertPos(time: selectedDate, val: val, inRect: rect, fromTime: from, toTime: to)
+        let or = lineWidth*2
+        ctx.setFillColor(data.color.cgColor)
+        let outCircle = CGRect(x: pos.x - or, y: pos.y - or, width: 2*or, height: 2*or)
+        ctx.fillEllipse(in: outCircle)
+        
+        let bgColor = backgroundColor ?? UIColor.white
+        ctx.setFillColor(bgColor.cgColor)
+        let ir = or - lineWidth
+        let innerCircle = CGRect(x: pos.x - ir, y: pos.y - ir, width: 2*ir, height: 2*ir)
+        ctx.fillEllipse(in: innerCircle)
     }
     
     private func convertPos(time: Int64, val: Float, inRect rect: CGRect, fromTime: Int64, toTime: Int64) -> CGPoint {
