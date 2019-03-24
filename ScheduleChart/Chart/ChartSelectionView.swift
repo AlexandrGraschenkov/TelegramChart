@@ -45,7 +45,7 @@ class ChartSelectionView: UIView {
     }
     weak var delegate: ChartSelectionViewDelegate?
     
-    // mark: private
+    // MARK: private
     private var leftOverlay: UIView!
     private var rightOverlay: UIView!
     private var selectionImgView: UIImageView!

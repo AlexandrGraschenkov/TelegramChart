@@ -48,7 +48,7 @@ class ChartCopmosedView: UIView {
             let maxVal = DataMaxValCalculator.getMaxValue(data, dividableBy: levelsCount)
             selectionChart.setMaxVal(val: maxVal, animationDuration: 0)
             displayChart.setMaxVal(val: maxVal, animationDuration: 0)
-            selectionView.range = ChartSelectionView.Range(from: 0, to: 1)
+            resetState()
         }
     }
     
@@ -63,6 +63,9 @@ class ChartCopmosedView: UIView {
             runMaxValueChangeAnimation(data: visibleData, animDuration: animDuration)
         }
         runShowHideAnimation(dataIndex: index, show: show, animDuration: animDuration)
+        if let date = displayChart.selectedDate, selectInfoView != nil {
+            updateInfoSlectedDate(date: date)
+        }
     }
     
     override var backgroundColor: UIColor? {
@@ -85,12 +88,19 @@ class ChartCopmosedView: UIView {
     }
     
     
-    // mark: private
+    // MARK: private
+    private var selectInfoBgColor: UIColor = UIColor(red:0.94, green:0.94, blue:0.96, alpha:1.00) {
+        didSet {
+            selectInfoView?.bgColor = selectInfoBgColor
+        }
+    }
+    private var selectInfoView: SelctionInfoView?
     private var dataIsVisible: [Bool] = []
     private var visibleData: [ChartData] {
         return zip(data, dataIsVisible).compactMap({$0.1 ? $0.0 : nil})
     }
     private var cancelShowHideAnimation: [Int: Cancelable] = [:]
+    private var panGesture: UIPanGestureRecognizer!
     
     private func setup() {
         selectionChart = ChartView()
@@ -113,10 +123,19 @@ class ChartCopmosedView: UIView {
         addSubview(displayChart)
         
         let pan = UIPanGestureRecognizer(target: self, action: #selector(userSelectDate(gesture:)))
+        pan.delegate = self
         displayChart.addGestureRecognizer(pan)
+        panGesture = pan
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(userSelectDate(gesture:)))
         displayChart.addGestureRecognizer(tap)
+    }
+    
+    private func resetState() {
+        selectionView.range = ChartSelectionView.Range(from: 0, to: 1)
+        displayChart.selectedDate = nil
+        selectInfoView?.removeFromSuperview()
+        selectInfoView = nil
     }
         
     private func updateMode() {
@@ -125,13 +144,15 @@ class ChartCopmosedView: UIView {
         case .day:
             backgroundColor = .white
             displayChart.gridColor = UIColor(white: 0.9, alpha: 1.0)
+            selectInfoBgColor = UIColor(red:0.94, green:0.94, blue:0.96, alpha:1.00)
         case .night:
             backgroundColor = UIColor(red:0.14, green:0.18, blue:0.24, alpha:1.00)
             displayChart.gridColor = UIColor(red:0.11, green:0.15, blue:0.20, alpha:1.00)
+            selectInfoBgColor = UIColor(red:0.11, green:0.16, blue:0.21, alpha:1.00)
         }
     }
     
-    // mark: show\hide animation
+    // MARK: show\hide animation
     private func runMaxValueChangeAnimation(data: [ChartData], animDuration: Double) {
         let totalMaxVal = DataMaxValCalculator.getMaxValue(data, dividableBy: levelsCount)
         selectionChart.setMaxVal(val: totalMaxVal, animationDuration: animDuration)
@@ -186,6 +207,28 @@ class ChartCopmosedView: UIView {
             }
         }
         displayChart.selectedDate = closestDate
+        
+        if let date = closestDate {
+            updateInfoSlectedDate(date: date)
+        }
+    }
+    
+    private func updateInfoSlectedDate(date: Int64) {
+        if selectInfoView == nil {
+            selectInfoView = SelctionInfoView(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
+            selectInfoView?.bgColor = selectInfoBgColor
+            addSubview(selectInfoView!)
+        }
+        if let view = selectInfoView {
+            view.update(data: visibleData, time: date)
+            let centerX = displayChart.getXPos(date: date)
+            let frame = CGRect(x: round(centerX - view.bounds.width / 2.0),
+                               y: 5,
+                               width: view.bounds.width,
+                               height: view.bounds.height)
+            view.frame = convert(frame, from: displayChart)
+            //            selectInfoView?.center =
+        }
     }
 }
 
@@ -198,5 +241,32 @@ extension ChartCopmosedView: ChartSelectionViewDelegate {
         displayChart.setRange(minTime: fromTime, maxTime: toTime, animated: false)
         let maxVal = DataMaxValCalculator.getMaxValue(visibleData, fromTime: fromTime, toTime: toTime, dividableBy: levelsCount)
         displayChart.setMaxVal(val: maxVal, animationDuration: 0.2)
+    }
+}
+
+extension ChartCopmosedView: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if gestureRecognizer == panGesture {
+            let t = panGesture!.translation(in: self)
+            if abs(t.y) < abs(t.x) {
+                otherGestureRecognizer.isEnabled = false
+                otherGestureRecognizer.isEnabled = true
+            }
+        }
+        return true
+    }
+    
+    override func gestureRecognizerShouldBegin(_ g: UIGestureRecognizer) -> Bool {
+        if self.panGesture != g {
+            return super.gestureRecognizerShouldBegin(g)
+        }
+        
+        if let pan = g as? UIPanGestureRecognizer {
+            let t = pan.translation(in: self)
+            if abs(t.y) > abs(t.x) {
+                return false
+            }
+        }
+        return true
     }
 }

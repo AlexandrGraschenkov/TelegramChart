@@ -43,7 +43,7 @@ class SelectChartDisplayedView: UIScrollView {
     }
     
     
-    // mark: private
+    // MARK: private
     private lazy var selectedIcon = UIImage(named: "selected_icon")?.withRenderingMode(.alwaysTemplate)
     private lazy var deselectedIcon = UIImage(named: "unselected_icon")?.withRenderingMode(.alwaysTemplate)
     private lazy var bgImage = UIImage(named: "borders")?.resizableImage(withCapInsets: UIEdgeInsets(top: 15, left: 15, bottom: 15, right: 15))

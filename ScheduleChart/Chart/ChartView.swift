@@ -139,6 +139,16 @@ class ChartView: UIView {
         return time
     }
     
+    func getXPos(date: Int64) -> CGFloat {
+        let chartRect = bounds.inset(by: chartInset)
+        let x = convertPos(time: date,
+                           val: 0,
+                           inRect: chartRect,
+                           fromTime: displayRange.from,
+                           toTime: displayRange.to).x
+        return x
+    }
+    
     override func draw(_ rect: CGRect) {
         super.draw(rect)
        

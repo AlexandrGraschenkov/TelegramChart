@@ -125,7 +125,7 @@ class HorisontalAxe: NSObject {
             if lab.attachedTime == nil {
                 added.append(lab)
                 let tf = timeFormater
-                lab.timeFormatter = {tf.string(from: Date(timeIntervalSince1970: Double($0)))}
+                lab.timeFormatter = {tf.string(from: Date(timeIntervalSince1970: Double($0) / 1000.0))}
             }
             lab.attachedTime = time
             if lab.superview != view {
