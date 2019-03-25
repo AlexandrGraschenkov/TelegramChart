@@ -145,7 +145,6 @@ class HorisontalAxe: NSObject {
         
         let minTime = view.displayRange.from
         let maxTime = view.displayRange.to
-//        let bgColor = UIColor.random
         for lab in attachedLabels {
             guard let time = lab.attachedTime else { continue }
             if lab.bounds.size != labSize {
@@ -158,11 +157,3 @@ class HorisontalAxe: NSObject {
     }
 }
 
-extension UIColor {
-    static var random: UIColor {
-        return UIColor(red: .random(in: 0...1),
-                       green: .random(in: 0...1),
-                       blue: .random(in: 0...1),
-                       alpha: 1.0)
-    }
-}

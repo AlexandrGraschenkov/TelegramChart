@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FA2B41C72247CA4600C3E6BA /* Icon.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA2B41C62247CA4600C3E6BA /* Icon.xcassets */; };
 		FA4BB7982239B55A00723FA1 /* HorisontalAxe.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */; };
 		FA4BB7DA2242D7FD00723FA1 /* ChartCopmosedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4BB7D92242D7FD00723FA1 /* ChartCopmosedView.swift */; };
 		FA4BB7DC2242D8C100723FA1 /* ChartSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4BB7DB2242D8C100723FA1 /* ChartSelectionView.swift */; };
@@ -29,6 +30,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		FA2B41C62247CA4600C3E6BA /* Icon.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Icon.xcassets; sourceTree = "<group>"; };
 		FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorisontalAxe.swift; sourceTree = "<group>"; };
 		FA4BB7D92242D7FD00723FA1 /* ChartCopmosedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartCopmosedView.swift; sourceTree = "<group>"; };
 		FA4BB7DB2242D8C100723FA1 /* ChartSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartSelectionView.swift; sourceTree = "<group>"; };
@@ -107,6 +109,7 @@
 				FAC45E712235435D00A165CC /* DebugFpsLabel.swift */,
 				FAC45E6A2235225100A165CC /* Chart */,
 				FAC45E5A2235222400A165CC /* Main.storyboard */,
+				FA2B41C62247CA4600C3E6BA /* Icon.xcassets */,
 				FAC45E5D2235222600A165CC /* Assets.xcassets */,
 				FAC45E5F2235222600A165CC /* LaunchScreen.storyboard */,
 				FAC45E752235753500A165CC /* chart_data.json */,
@@ -192,6 +195,7 @@
 				FAC45E5E2235222600A165CC /* Assets.xcassets in Resources */,
 				FAC45E762235753500A165CC /* chart_data.json in Resources */,
 				FAC45E5C2235222400A165CC /* Main.storyboard in Resources */,
+				FA2B41C72247CA4600C3E6BA /* Icon.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -362,6 +366,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = RE82W8HD52;
 				INFOPLIST_FILE = ScheduleChart/Info.plist;
@@ -372,6 +377,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = ru.alexgra.tchat;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -381,6 +387,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = RE82W8HD52;
 				INFOPLIST_FILE = ScheduleChart/Info.plist;
@@ -391,6 +398,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = ru.alexgra.tchat;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
