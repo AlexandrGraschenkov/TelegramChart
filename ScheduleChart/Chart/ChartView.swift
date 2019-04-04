@@ -70,6 +70,13 @@ class ChartView: UIView {
         return maxValueAnimation != nil
     }
     
+    override var frame: CGRect {
+        didSet {
+            if oldValue.size == frame.size { return }
+            setNeedsDisplay()
+        }
+    }
+    
     func setMaxVal(val: Float, animationDuration: Double) {
         if let maxValueAnimation = maxValueAnimation {
             if animationDuration > 0 && maxValueAnimation == val { return }

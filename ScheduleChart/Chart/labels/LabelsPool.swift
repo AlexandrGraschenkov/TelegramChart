@@ -28,7 +28,6 @@ class LabelsPool: NSObject {
         })
         label = label ?? generate()
         label.alpha = 1
-        label.isHidden = false
         label.attachedTime = nil
         label.attachedValue = nil
         return label
@@ -56,6 +55,7 @@ class LabelsPool: NSObject {
         label.font = font
         label.textColor = color
         label.textAlignment = .center
+//        label.isHidden = true
         labels.append(label)
         print("Labels Pool:", labels.count)
 //        label.backgroundColor = UIColor.yellow
