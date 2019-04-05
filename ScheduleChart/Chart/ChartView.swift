@@ -54,6 +54,7 @@ class ChartView: UIView {
             setNeedsDisplay()
         }
     }
+    var shapeLayers: [CAShapeLayer] = []
     var dataAlpha: [CGFloat] = []
     private(set) var dataMinTime: Int64 = -1
     private(set) var dataMaxTime: Int64 = -1
@@ -198,24 +199,79 @@ class ChartView: UIView {
         }
         
         
-        ctx.setLineWidth(lineWidth)
-        ctx.setLineJoin(.round)
-        
+//        ctx.setLineWidth(lineWidth)
+//        ctx.setLineJoin(.round)
+        resizeShapes()
+        CATransaction.begin()
+        CATransaction.setValue(true, forKey: kCATransactionDisableActions)
         for (idx, d) in data.enumerated() {
             let alpha = dataAlpha[idx]
+            shapeLayers[idx].isHidden = (alpha == 0)
             if alpha == 0 { continue }
-            drawData(d, alpha: alpha, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
-            if let date = selectedDate {
-                drawSelection(d, selectedDate: date, alpha: alpha, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
-            }
+            drawData2(d, alpha: alpha, shape: shapeLayers[idx], from: fromTime, to: toTime, inRect: chartRect)
+//            drawData(d, alpha: alpha, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
+//            if let date = selectedDate {
+//                drawSelection(d, selectedDate: date, alpha: alpha, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
+//            }
         }
+        CATransaction.commit()
         
         if !drawOutsideChart {
             ctx.resetClip()
         }
     }
     
- 
+    private func drawData2(_ data: ChartData, alpha: CGFloat, shape: CAShapeLayer, from: Int64, to: Int64, inRect rect: CGRect) {
+        guard let drawFrom = data.floorIndex(time: from),
+            let drawTo = data.ceilIndex(time: to) else {
+                return
+        }
+        let color = data.color.withAlphaComponent(alpha).cgColor
+        shape.strokeColor = color
+        let firstItem = data.items[drawFrom]
+        let firstPoint = convertPos(time: firstItem.time, val: firstItem.value, inRect: rect, fromTime: from, toTime: to)
+        
+        let path = CGMutablePath()
+        if drawFrom == drawTo {
+            let circle = CGRect(x: firstPoint.x-lineWidth/2.0,
+                                y: firstPoint.y-lineWidth/2.0,
+                                width: lineWidth,
+                                height: lineWidth)
+            path.addEllipse(in: circle)
+            return
+        }
+        
+        path.move(to: firstPoint)
+        for i in (drawFrom+1)...drawTo {
+            let item = data.items[i]
+            
+            let p = convertPos(time: item.time, val: item.value, inRect: rect, fromTime: from, toTime: to)
+            path.addLine(to: p)
+        }
+        shape.path = path
+    }
+    
+    private func resizeShapes() {
+        while shapeLayers.count < data.count {
+            let l = generateLayer()
+            shapeLayers.append(l)
+            layer.addSublayer(l)
+        }
+        while shapeLayers.count > data.count {
+            let l = shapeLayers.removeLast()
+            l.removeFromSuperlayer()
+        }
+    }
+    
+    private func generateLayer() -> CAShapeLayer {
+        let l = CAShapeLayer()
+        l.lineCap = .round
+        l.lineJoin = .round
+        l.fillColor = nil
+        l.lineWidth = lineWidth
+        return l
+    }
+    
     private func drawData(_ data: ChartData, alpha: CGFloat, ctx: CGContext, from: Int64, to: Int64, inRect rect: CGRect) {
         guard let drawFrom = data.floorIndex(time: from),
             let drawTo = data.ceilIndex(time: to) else {
@@ -235,14 +291,18 @@ class ChartView: UIView {
             return
         }
         
+        ctx.setStrokeColor(color)
         ctx.move(to: firstPoint)
         for i in (drawFrom+1)...drawTo {
             let item = data.items[i]
             
             let p = convertPos(time: item.time, val: item.value, inRect: rect, fromTime: from, toTime: to)
             ctx.addLine(to: p)
+            if i % 25 == 0 {
+                ctx.strokePath()
+                ctx.move(to: p)
+            }
         }
-        ctx.setStrokeColor(color)
         ctx.strokePath()
     }
     
