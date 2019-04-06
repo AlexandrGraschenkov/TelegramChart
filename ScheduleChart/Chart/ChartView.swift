@@ -9,11 +9,6 @@
 import UIKit
 
 class ChartView: UIView {
-    struct Range {
-        var from: Float
-        var to: Float
-    }
-    
     struct RangeI {
         var from: Int64
         var to: Int64
@@ -35,6 +30,7 @@ class ChartView: UIView {
     lazy var verticalAxe: VerticalAxe = VerticalAxe(view: self)
     lazy var horisontalAxe: HorisontalAxe = HorisontalAxe(view: self)
     let labelsPool: LabelsPool = LabelsPool()
+    var metal: MetalChartView!
     
     var data: [ChartData] = [] {
         didSet {
@@ -51,7 +47,11 @@ class ChartView: UIView {
             }
             displayRange = RangeI(from: dataMinTime, to: dataMaxTime)
             dataAlpha = Array(repeating: 1.0, count: data.count)
+//            updateShapesData()
             setNeedsDisplay()
+            
+            setupMetal()
+            metal.setupWithData(data: data)
         }
     }
     var shapeLayers: [CAShapeLayer] = []
@@ -59,7 +59,6 @@ class ChartView: UIView {
     private(set) var dataMinTime: Int64 = -1
     private(set) var dataMaxTime: Int64 = -1
     var displayRange: RangeI = RangeI(from: 0, to: 0)
-//    var displayVerticalRange: Range = Range(from: 0, to: 200)
     var maxValue: Float = 200
     var maxValueAnimation: Float? = nil
     var onDrawDebug: (()->())?
@@ -69,6 +68,14 @@ class ChartView: UIView {
     
     var isMaxValAnimating: Bool {
         return maxValueAnimation != nil
+    }
+    
+    func setupMetal() {
+        if metal != nil { return }
+        metal = MetalChartView(frame: bounds.insetBy(dx: 100, dy: 50))
+        metal.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        metal.setupBuffers(maxChartDataCount: 4, maxChartItemsCount: 400)
+        addSubview(metal)
     }
     
     override var frame: CGRect {
@@ -157,6 +164,27 @@ class ChartView: UIView {
         return x
     }
     
+    private let divider: CGFloat = 100000000
+    private func updateShapesData() {
+        resizeShapes()
+        for (l, d) in zip(shapeLayers, data) {
+            let path = CGMutablePath()
+            let bezier = UIBezierPath()
+            
+            for (idx, item) in d.items.enumerated() {
+                let p = CGPoint(x: CGFloat(item.time) / divider, y: CGFloat(item.value))
+                if idx == 0 {
+                    path.move(to: p)
+                    bezier.move(to: p)
+                } else {
+                    path.addLine(to: p)
+                    bezier.addLine(to: p)
+                }
+            }
+            l.path = path
+        }
+    }
+    
     override func draw(_ rect: CGRect) {
         super.draw(rect)
        
@@ -199,22 +227,29 @@ class ChartView: UIView {
         }
         
         
-//        ctx.setLineWidth(lineWidth)
-//        ctx.setLineJoin(.round)
-        resizeShapes()
-        CATransaction.begin()
-        CATransaction.setValue(true, forKey: kCATransactionDisableActions)
+        ctx.setLineWidth(lineWidth)
+        ctx.setLineJoin(.round)
+//        let t = caclulateTransform(fromTime: fromTime, toTime: toTime, maxValue: maxValue, inRect: chartRect)
+//        CATransaction.begin()
+//        CATransaction.setValue(true, forKey: kCATransactionDisableActions)
         for (idx, d) in data.enumerated() {
             let alpha = dataAlpha[idx]
-            shapeLayers[idx].isHidden = (alpha == 0)
+//            let shape = shapeLayers[idx]
+//            shape.isHidden = (alpha == 0)
             if alpha == 0 { continue }
-            drawData2(d, alpha: alpha, shape: shapeLayers[idx], from: fromTime, to: toTime, inRect: chartRect)
-//            drawData(d, alpha: alpha, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
+//            shape.transform = t
+//            shape.strokeColor = d.color.withAlphaComponent(alpha).cgColor
+//            let bezier = UIBezierPath(cgPath: shape.path!)
+//            bezier.apply(CATransform3DGetAffineTransform(t))
+//            bezier.apply(CGAffineTransform(scaleX: 1/100, y: 1))
+//            print(bezier)
+//            drawData2(d, alpha: alpha, shape: shapeLayers[idx], from: fromTime, to: toTime, inRect: chartRect)
+            drawData(d, alpha: alpha, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
 //            if let date = selectedDate {
 //                drawSelection(d, selectedDate: date, alpha: alpha, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
 //            }
         }
-        CATransaction.commit()
+//        CATransaction.commit()
         
         if !drawOutsideChart {
             ctx.resetClip()
@@ -298,10 +333,10 @@ class ChartView: UIView {
             
             let p = convertPos(time: item.time, val: item.value, inRect: rect, fromTime: from, toTime: to)
             ctx.addLine(to: p)
-            if i % 25 == 0 {
-                ctx.strokePath()
-                ctx.move(to: p)
-            }
+//            if i % 25 == 0 {
+//                ctx.strokePath()
+//                ctx.move(to: p)
+//            }
         }
         ctx.strokePath()
     }
@@ -329,6 +364,18 @@ class ChartView: UIView {
         let yPercent = val / maxValue
         let y = rect.maxY - rect.height * CGFloat(yPercent)
         return CGPoint(x: x, y: y)
+    }
+    
+    private func caclulateTransform(fromTime: Int64, toTime: Int64, maxValue: Float, inRect rect: CGRect) -> CATransform3D {
+        let fromTime = CGFloat(fromTime)/divider
+        let toTime = CGFloat(toTime)/divider
+        let maxValue = CGFloat(maxValue)
+        
+        var t = CATransform3DIdentity
+        let scaleX = rect.width / (toTime - fromTime)
+        t = CATransform3DScale(t, scaleX, rect.height / maxValue, 1)
+        t = CATransform3DTranslate(t, rect.minX - fromTime, 0, 0)
+        return t
     }
 }
 

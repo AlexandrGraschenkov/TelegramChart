@@ -18,7 +18,7 @@ class ViewController: UITableViewController {
     @IBOutlet weak var debugFpsSwitch: UISwitch!
     @IBOutlet weak var selectChartDisplay: SelectChartDisplayedView!
     var dataArr: [[ChartData]] = []
-    var selectedData: Int = 0
+    var selectedData: Int = 4
     var cellBg: UIColor = .white
     
     override func viewDidLoad() {
