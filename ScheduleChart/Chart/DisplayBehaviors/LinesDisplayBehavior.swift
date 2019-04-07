@@ -54,9 +54,10 @@ class LinesDisplayBehavior: BaseDisplayBehavior {
     override func generateLayer() -> CAShapeLayer {
         let l = ShapeLayer()
         l.lineCap = .round
-        l.lineJoin = .round
+        l.lineJoin = .bevel
         l.fillColor = nil
         l.lineWidth = view.lineWidth
+//        l.drawsAsynchronously = true
         return l
     }
     

@@ -39,7 +39,7 @@ class ChartView: UIView {
     var data: [ChartData] = [] {
         didSet {
             if display == nil {
-                display = StackedBarDisplayBehavior(view: self)
+                display = LinesDisplayBehavior(view: self)
             }
             dataMinTime = -1
             dataMaxTime = -1

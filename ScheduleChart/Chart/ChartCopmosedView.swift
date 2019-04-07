@@ -42,7 +42,7 @@ class ChartCopmosedView: UIView {
     var mode: Mode = .day {
         didSet { updateMode() }
     }
-    var chartType: ChartType = .stackedBar
+    var chartType: ChartType = .line
     
     var data: [ChartData] = [] {
         didSet {
