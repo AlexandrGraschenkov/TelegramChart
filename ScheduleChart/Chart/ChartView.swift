@@ -74,6 +74,7 @@ class ChartView: UIView {
     var maxValAnimatorCancel: Cancelable?
     var rangeAnimatorCancel: Cancelable?
     var chartInset = UIEdgeInsets(top: 0, left: 40, bottom: 30, right: 30)
+    var endAnimationFlag = false
     
     var isMaxValAnimating: Bool {
         return maxValueAnimation != nil
@@ -102,6 +103,7 @@ class ChartView: UIView {
                 self.setNeedsDisplay()
                 if percent == 1 {
                     self.maxValueAnimation = nil
+                    self.endAnimationFlag = true
                 }
             }
         } else {
@@ -205,7 +207,9 @@ class ChartView: UIView {
             ctx.addLine(to: CGPoint(x: x, y: chartRect.maxY))
             ctx.strokePath()
         }
-        lineDisplay.update(maxValue: maxValue, displayRange: RangeI(from: fromTime, to: toTime), rect: chartRect, force: false)
+        let force = endAnimationFlag
+        endAnimationFlag = false
+        lineDisplay.update(maxValue: maxValue, displayRange: RangeI(from: fromTime, to: toTime), rect: chartRect, force: force)
     }
     
     
