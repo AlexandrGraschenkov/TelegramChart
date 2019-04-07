@@ -180,6 +180,7 @@ class ChartCopmosedView: UIView {
             }
             if progress == 1 {
                 self.cancelShowHideAnimation[index] = nil
+                self.setShowData(index: index, show: !show, animated: true)
             }
         }
         cancelShowHideAnimation[index] = cancel

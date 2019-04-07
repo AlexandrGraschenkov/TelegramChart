@@ -27,6 +27,9 @@
 		FAC45E762235753500A165CC /* chart_data.json in Resources */ = {isa = PBXBuildFile; fileRef = FAC45E752235753500A165CC /* chart_data.json */; };
 		FAC45E782236FAEE00A165CC /* LabelsPool.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC45E772236FAEE00A165CC /* LabelsPool.swift */; };
 		FAC45E7A2236FEB300A165CC /* AttachedLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC45E792236FEB300A165CC /* AttachedLabel.swift */; };
+		FAFD31942259511E00FDF551 /* LinesDisplayBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31932259511E00FDF551 /* LinesDisplayBehavior.swift */; };
+		FAFD31992259F26300FDF551 /* ShapeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31982259F26300FDF551 /* ShapeLayer.swift */; };
+		FAFD319B2259F70E00FDF551 /* HandleDrawView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD319A2259F70E00FDF551 /* HandleDrawView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +55,9 @@
 		FAC45E752235753500A165CC /* chart_data.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = chart_data.json; sourceTree = "<group>"; };
 		FAC45E772236FAEE00A165CC /* LabelsPool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelsPool.swift; sourceTree = "<group>"; };
 		FAC45E792236FEB300A165CC /* AttachedLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachedLabel.swift; sourceTree = "<group>"; };
+		FAFD31932259511E00FDF551 /* LinesDisplayBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinesDisplayBehavior.swift; sourceTree = "<group>"; };
+		FAFD31982259F26300FDF551 /* ShapeLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeLayer.swift; sourceTree = "<group>"; };
+		FAFD319A2259F70E00FDF551 /* HandleDrawView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandleDrawView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,9 +74,11 @@
 		FA4BB7D72242D63900723FA1 /* helpers */ = {
 			isa = PBXGroup;
 			children = (
+				FAFD31982259F26300FDF551 /* ShapeLayer.swift */,
 				FAC45E6B2235243900A165CC /* DisplayLinkAnimator.swift */,
 				FAC45E7322355A5700A165CC /* ChartData.swift */,
 				FA4BB7E022442A2800723FA1 /* DataMaxValCalculator.swift */,
+				FAFD319A2259F70E00FDF551 /* HandleDrawView.swift */,
 			);
 			path = helpers;
 			sourceTree = "<group>";
@@ -123,6 +131,7 @@
 			children = (
 				FA4BB7D72242D63900723FA1 /* helpers */,
 				FA4BB7D82242D65300723FA1 /* labels */,
+				FAFD31952259512200FDF551 /* DisplayBehaviors */,
 				FAC45E682235224C00A165CC /* ChartView.swift */,
 				FA4BB7D92242D7FD00723FA1 /* ChartCopmosedView.swift */,
 				FA4BB7EC2247A6BD00723FA1 /* SelctionInfoView.swift */,
@@ -131,6 +140,14 @@
 				FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */,
 			);
 			path = Chart;
+			sourceTree = "<group>";
+		};
+		FAFD31952259512200FDF551 /* DisplayBehaviors */ = {
+			isa = PBXGroup;
+			children = (
+				FAFD31932259511E00FDF551 /* LinesDisplayBehavior.swift */,
+			);
+			path = DisplayBehaviors;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -210,8 +227,11 @@
 				FA4BB7ED2247A6BD00723FA1 /* SelctionInfoView.swift in Sources */,
 				FAC45E782236FAEE00A165CC /* LabelsPool.swift in Sources */,
 				FAC45E592235222400A165CC /* ViewController.swift in Sources */,
+				FAFD319B2259F70E00FDF551 /* HandleDrawView.swift in Sources */,
 				FA4BB7E322466A1C00723FA1 /* SelectChartDisplayedView.swift in Sources */,
 				FAC45E7422355A5700A165CC /* ChartData.swift in Sources */,
+				FAFD31992259F26300FDF551 /* ShapeLayer.swift in Sources */,
+				FAFD31942259511E00FDF551 /* LinesDisplayBehavior.swift in Sources */,
 				FAC45E572235222400A165CC /* AppDelegate.swift in Sources */,
 				FA4BB7E122442A2800723FA1 /* DataMaxValCalculator.swift in Sources */,
 				FAC45E7A2236FEB300A165CC /* AttachedLabel.swift in Sources */,

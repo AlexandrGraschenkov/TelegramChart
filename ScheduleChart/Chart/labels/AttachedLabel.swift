@@ -28,6 +28,12 @@ class AttachedLabel: UILabel {
             sizeToFit()
         }
     }
+    
+    override var alpha: CGFloat {
+        didSet {
+            shapeLayer?.opacity = Float(alpha)
+        }
+    }
 
     var valueFormatter: ((Float)->(String))?
     var timeFormatter: ((Int64)->(String))?
@@ -36,10 +42,13 @@ class AttachedLabel: UILabel {
         return superview != nil
     }
     
+    var shapeLayer: CAShapeLayer?
+    
     func unuse() {
         attachedValue = nil
         attachedTime = nil
         removeFromSuperview()
+        shapeLayer?.removeFromSuperlayer()
     }
 }
 
