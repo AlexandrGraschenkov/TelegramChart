@@ -29,7 +29,7 @@ class ChartView: UIView {
     var selectedDate: Int64? {
         didSet {
             if selectedDate == oldValue { return }
-            handleDrawView.setNeedsDisplay()
+            setNeedsDisplay()
         }
     }
     lazy var verticalAxe: VerticalAxe = VerticalAxe(view: self)
@@ -38,7 +38,9 @@ class ChartView: UIView {
     
     var data: [ChartData] = [] {
         didSet {
-            setupOnce()
+            if lineDisplay == nil {
+                lineDisplay = LinesDisplayBehavior(view: self)
+            }
             dataMinTime = -1
             dataMaxTime = -1
             for d in data {
@@ -53,10 +55,9 @@ class ChartView: UIView {
             displayRange = RangeI(from: dataMinTime, to: dataMaxTime)
             dataAlpha = Array(repeating: 1.0, count: data.count)
             lineDisplay.data = data
-            handleDrawView.setNeedsDisplay()
+            setNeedsDisplay()
         }
     }
-    var handleDrawView: HandleDrawView!
     var shapeLayers: [CAShapeLayer] = []
     var dataAlpha: [CGFloat] {
         get { return lineDisplay.dataAlpha }
@@ -81,7 +82,7 @@ class ChartView: UIView {
     override var frame: CGRect {
         didSet {
             if oldValue.size == frame.size { return }
-            handleDrawView?.setNeedsDisplay()
+            setNeedsDisplay()
         }
     }
     
@@ -98,7 +99,7 @@ class ChartView: UIView {
             let fromMaxVal = maxValue
             maxValAnimatorCancel = DisplayLinkAnimator.animate(duration: animationDuration) { (percent) in
                 self.maxValue = (val - fromMaxVal) * Float(percent) + fromMaxVal
-                self.handleDrawView.setNeedsDisplay()
+                self.setNeedsDisplay()
                 if percent == 1 {
                     self.maxValueAnimation = nil
                 }
@@ -106,7 +107,7 @@ class ChartView: UIView {
         } else {
             maxValue = val
             maxValueAnimation = nil
-            self.handleDrawView.setNeedsDisplay()
+            self.setNeedsDisplay()
         }
         
         if drawGrid {
@@ -121,7 +122,7 @@ class ChartView: UIView {
             displayRange.to = maxTime
             if maxValueAnimation == nil {
                 // little hack: if we ave animation with redraws, do not need to call redraw here
-                handleDrawView.setNeedsDisplay()
+                setNeedsDisplay()
             }
             horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to, animationDuration: 0.2)
             // TODO
@@ -132,7 +133,7 @@ class ChartView: UIView {
         rangeAnimatorCancel = DisplayLinkAnimator.animate(duration: 0.5, closure: { (percent) in
             self.displayRange.from = Int64(CGFloat(minTime - fromRange.from) * percent) + fromRange.from
             self.displayRange.to = Int64(CGFloat(maxTime - fromRange.to) * percent) + fromRange.to
-            self.handleDrawView.setNeedsDisplay()
+            self.setNeedsDisplay()
             if percent == 1 {
                 self.rangeAnimatorCancel = nil
             }
@@ -164,24 +165,19 @@ class ChartView: UIView {
         return x
     }
     
-    private func setupOnce() {
-        if lineDisplay != nil { return }
-        
-        lineDisplay = LinesDisplayBehavior(view: self)
-        handleDrawView = HandleDrawView(frame: CGRect(x: 0, y: 0, width: 1, height: 1))
-        addSubview(handleDrawView)
-        handleDrawView.onDraw = { [weak self] in
-            self?.redraw()
+    override func draw(_ rect: CGRect) {
+        super.draw(rect)
+       
+        guard let ctx = UIGraphicsGetCurrentContext() else {
+            return
         }
-    }
-    
-    private func redraw() {
+        
         onDrawDebug?()
         if drawGrid {
             if verticalAxe.maxVal == nil {
                 verticalAxe.setMaxVal(maxValue)
             }
-            verticalAxe.redraw(inset: chartInset)
+            verticalAxe.drawGrid(ctx: ctx, inset: chartInset)
             if horisontalAxe.maxTime == 0 && data.count > 0 {
                 horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to)
             }
@@ -199,9 +195,19 @@ class ChartView: UIView {
                                                             inset: chartInset,
                                                             from: fromTime,
                                                             to: toTime)
+        } else {
+            ctx.clip(to: chartRect)
+        }
+        if let selected = selectedDate {
+            ctx.setStrokeColor(gridColor.cgColor)
+            let x = convertPos(time: selected, val: 0, inRect: chartRect, fromTime: fromTime, toTime: toTime).x
+            ctx.move(to: CGPoint(x: x, y: chartRect.minY))
+            ctx.addLine(to: CGPoint(x: x, y: chartRect.maxY))
+            ctx.strokePath()
         }
         lineDisplay.update(maxValue: maxValue, displayRange: RangeI(from: fromTime, to: toTime), rect: chartRect, force: false)
     }
+    
     
     private func drawSelection(_ data: ChartData, selectedDate: Int64, alpha: CGFloat, ctx: CGContext, from: Int64, to: Int64, inRect rect: CGRect) {
         guard let val = data.items.first(where: {$0.time == selectedDate})?.value else {

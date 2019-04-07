@@ -55,23 +55,34 @@ class VerticalAxe: NSObject {
         _ = AttachedLabelAnimator.animateAppearDismiss(appear: vertical, dismiss: oldLabels, duration: duration)
     }
     
-    
-    func redraw(inset: UIEdgeInsets) {
+    func drawGrid(ctx: CGContext, inset: UIEdgeInsets) {
         let drawMaxVal = view.maxValue
         
         var attachedLabels: [AttachedLabel] = view.subviews.compactMap({$0 as? AttachedLabel})
         attachedLabels.sort(by: {$0.alpha < $1.alpha})
+        var prevAlpha: CGFloat = 0
         let frame = view.bounds.inset(by: UIEdgeInsets(top: inset.top, left: 0, bottom: inset.bottom, right: 0))
         for lab in attachedLabels {
             guard let val = lab.attachedValue else { continue }
             if lab.alpha == 0 { continue }
             
+            if prevAlpha != lab.alpha && prevAlpha != 0 {
+                ctx.setStrokeColor(gridColor.withAlphaComponent(prevAlpha).cgColor)
+                ctx.strokePath()
+            }
             var y = frame.height * CGFloat(1 - val / drawMaxVal) + frame.origin.y
             y = round(y)
+            ctx.move(to: CGPoint(x: frame.minX, y: y))
+            ctx.addLine(to: CGPoint(x: frame.maxX, y: y))
+            prevAlpha = lab.alpha
             
             lab.frame.origin = CGPoint(x: frame.minX + inset.left - lab.frame.width,
                                        y: y - lab.frame.height)
-            lab.shapeLayer?.position = CGPoint(x: 0, y: y)
+        }
+        
+        if prevAlpha > 0 {
+            ctx.setStrokeColor(gridColor.withAlphaComponent(prevAlpha).cgColor)
+            ctx.strokePath()
         }
     }
     
@@ -79,39 +90,16 @@ class VerticalAxe: NSObject {
         var changed = false
         while vertical.count < levelsCount {
             let lab = labelsPool.getUnused()
-            if lab.shapeLayer == nil {
-                let shape = generateLineShape()
-                shape.position = CGPoint(x: 0, y: lab.frame.maxY)
-                lab.shapeLayer = shape
-            }
             view.addSubview(lab)
-            view.layer.insertSublayer(lab.shapeLayer!, at: 0)
             vertical.append(lab)
             changed = true
         }
         while vertical.count > levelsCount {
             let label = vertical.removeLast()
             label.removeFromSuperview()
-            label.shapeLayer?.removeFromSuperlayer()
             changed = true
         }
         return changed
-    }
-    
-    private func generateLineShape() -> ShapeLayer {
-        let shape = ShapeLayer()
-        shape.fillColor = nil
-        shape.lineWidth = 0.5
-        
-        let path = CGMutablePath()
-        path.move(to: CGPoint(x: 0, y: shape.lineWidth / 2))
-        // I don't wanna handle device orientation change
-        let maxDeviceSide = max(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
-        path.addLine(to: CGPoint(x: maxDeviceSide, y: shape.lineWidth / 2))
-        shape.path = path
-        
-        shape.strokeColor = gridColor.cgColor
-        return shape
     }
     
     private func updateVerticalAttachedValues(force: Bool = false) {
