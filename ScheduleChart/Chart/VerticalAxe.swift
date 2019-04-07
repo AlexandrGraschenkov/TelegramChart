@@ -56,6 +56,7 @@ class VerticalAxe: NSObject {
     }
     
     func drawGrid(ctx: CGContext, inset: UIEdgeInsets) {
+        // Note: draw in context works faster that CAShapeLayer
         let drawMaxVal = view.maxValue
         
         var attachedLabels: [AttachedLabel] = view.subviews.compactMap({$0 as? AttachedLabel})

@@ -9,7 +9,7 @@
 import UIKit
 
 class DataMaxValCalculator: NSObject {
-    static func getMaxValue(_ data: [ChartData], fromTime: Int64? = nil, toTime: Int64? = nil, dividableBy: Int = 5) -> Float {
+    static func getMaxValue(_ data: [ChartData], fromTime: Int64? = nil, toTime: Int64? = nil, stacked: Bool = false, dividableBy: Int = 5) -> Float {
         if data.count == 0 || data[0].items.count == 0 {
             return 0
         }
@@ -17,6 +17,20 @@ class DataMaxValCalculator: NSObject {
         let fromTime: Int64 = fromTime ?? data[0].items.first!.time
         let toTime: Int64 = toTime ?? data[0].items.last!.time
         var maxVal: Float = 0
+        for i in 0..<data[0].items.count {
+            var groupMax: Float = 0
+            for d in data {
+                let item = d.items[i]
+                if fromTime <= item.time && item.time <= toTime {
+                    if stacked {
+                        groupMax += item.value
+                    } else if maxVal < item.value {
+                        maxVal = item.value
+                    }
+                }
+            }
+            maxVal = max(groupMax, maxVal)
+        }
         for d in data {
             for item in d.items {
                 if fromTime <= item.time && item.time <= toTime {

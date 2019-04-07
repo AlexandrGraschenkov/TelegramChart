@@ -30,6 +30,8 @@
 		FAFD31942259511E00FDF551 /* LinesDisplayBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31932259511E00FDF551 /* LinesDisplayBehavior.swift */; };
 		FAFD31992259F26300FDF551 /* ShapeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31982259F26300FDF551 /* ShapeLayer.swift */; };
 		FAFD319B2259F70E00FDF551 /* HandleDrawView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD319A2259F70E00FDF551 /* HandleDrawView.swift */; };
+		FAFD319D225A01AF00FDF551 /* BaseDisplayBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD319C225A01AF00FDF551 /* BaseDisplayBehavior.swift */; };
+		FAFD319F225A0AE400FDF551 /* StackedBarDisplayBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD319E225A0AE400FDF551 /* StackedBarDisplayBehavior.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +60,8 @@
 		FAFD31932259511E00FDF551 /* LinesDisplayBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinesDisplayBehavior.swift; sourceTree = "<group>"; };
 		FAFD31982259F26300FDF551 /* ShapeLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeLayer.swift; sourceTree = "<group>"; };
 		FAFD319A2259F70E00FDF551 /* HandleDrawView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandleDrawView.swift; sourceTree = "<group>"; };
+		FAFD319C225A01AF00FDF551 /* BaseDisplayBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseDisplayBehavior.swift; sourceTree = "<group>"; };
+		FAFD319E225A0AE400FDF551 /* StackedBarDisplayBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackedBarDisplayBehavior.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,6 +150,8 @@
 			isa = PBXGroup;
 			children = (
 				FAFD31932259511E00FDF551 /* LinesDisplayBehavior.swift */,
+				FAFD319E225A0AE400FDF551 /* StackedBarDisplayBehavior.swift */,
+				FAFD319C225A01AF00FDF551 /* BaseDisplayBehavior.swift */,
 			);
 			path = DisplayBehaviors;
 			sourceTree = "<group>";
@@ -231,6 +237,7 @@
 				FA4BB7E322466A1C00723FA1 /* SelectChartDisplayedView.swift in Sources */,
 				FAC45E7422355A5700A165CC /* ChartData.swift in Sources */,
 				FAFD31992259F26300FDF551 /* ShapeLayer.swift in Sources */,
+				FAFD319F225A0AE400FDF551 /* StackedBarDisplayBehavior.swift in Sources */,
 				FAFD31942259511E00FDF551 /* LinesDisplayBehavior.swift in Sources */,
 				FAC45E572235222400A165CC /* AppDelegate.swift in Sources */,
 				FA4BB7E122442A2800723FA1 /* DataMaxValCalculator.swift in Sources */,
@@ -240,6 +247,7 @@
 				FAC45E692235224C00A165CC /* ChartView.swift in Sources */,
 				FAC45E6C2235243900A165CC /* DisplayLinkAnimator.swift in Sources */,
 				FAC45E702235279600A165CC /* VerticalAxe.swift in Sources */,
+				FAFD319D225A01AF00FDF551 /* BaseDisplayBehavior.swift in Sources */,
 				FAC45E722235435D00A165CC /* DebugFpsLabel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

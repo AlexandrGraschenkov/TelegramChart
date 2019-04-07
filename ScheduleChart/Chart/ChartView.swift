@@ -38,8 +38,8 @@ class ChartView: UIView {
     
     var data: [ChartData] = [] {
         didSet {
-            if lineDisplay == nil {
-                lineDisplay = LinesDisplayBehavior(view: self)
+            if display == nil {
+                display = StackedBarDisplayBehavior(view: self)
             }
             dataMinTime = -1
             dataMaxTime = -1
@@ -54,16 +54,16 @@ class ChartView: UIView {
             }
             displayRange = RangeI(from: dataMinTime, to: dataMaxTime)
             dataAlpha = Array(repeating: 1.0, count: data.count)
-            lineDisplay.data = data
+            display.data = data
             setNeedsDisplay()
         }
     }
     var shapeLayers: [CAShapeLayer] = []
     var dataAlpha: [CGFloat] {
-        get { return lineDisplay.dataAlpha }
-        set { lineDisplay.dataAlpha = newValue }
+        get { return display.dataAlpha }
+        set { display.dataAlpha = newValue }
     }
-    var lineDisplay: LinesDisplayBehavior!
+    var display: BaseDisplayBehavior!
     private(set) var dataMinTime: Int64 = -1
     private(set) var dataMaxTime: Int64 = -1
     var displayRange: RangeI = RangeI(from: 0, to: 0)
@@ -209,7 +209,7 @@ class ChartView: UIView {
         }
         let force = endAnimationFlag
         endAnimationFlag = false
-        lineDisplay.update(maxValue: maxValue, displayRange: RangeI(from: fromTime, to: toTime), rect: chartRect, force: force)
+        display.update(maxValue: maxValue, displayRange: RangeI(from: fromTime, to: toTime), rect: chartRect, force: force)
     }
     
     

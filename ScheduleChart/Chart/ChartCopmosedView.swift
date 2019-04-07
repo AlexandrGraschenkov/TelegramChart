@@ -15,6 +15,12 @@ class ChartCopmosedView: UIView {
         case day
     }
     
+    enum ChartType {
+        case line
+        case stackedBar
+        case percentageStackedBar
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
@@ -36,6 +42,7 @@ class ChartCopmosedView: UIView {
     var mode: Mode = .day {
         didSet { updateMode() }
     }
+    var chartType: ChartType = .stackedBar
     
     var data: [ChartData] = [] {
         didSet {
@@ -154,13 +161,14 @@ class ChartCopmosedView: UIView {
     
     // MARK: show\hide animation
     private func runMaxValueChangeAnimation(data: [ChartData], animDuration: Double) {
-        let totalMaxVal = DataMaxValCalculator.getMaxValue(data, dividableBy: levelsCount)
+        let stacked = chartType == .stackedBar
+        let totalMaxVal = DataMaxValCalculator.getMaxValue(data, stacked: stacked, dividableBy: levelsCount)
         selectionChart.setMaxVal(val: totalMaxVal, animationDuration: animDuration)
         
         
         let fromTime = displayChart.displayRange.from
         let toTime = displayChart.displayRange.to
-        let displayMaxVal = DataMaxValCalculator.getMaxValue(data, fromTime: fromTime, toTime: toTime, dividableBy: levelsCount)
+        let displayMaxVal = DataMaxValCalculator.getMaxValue(data, fromTime: fromTime, toTime: toTime, stacked: stacked, dividableBy: levelsCount)
         displayChart.setMaxVal(val: displayMaxVal, animationDuration: animDuration)
     }
     
@@ -242,7 +250,8 @@ extension ChartCopmosedView: ChartSelectionViewDelegate {
         displayChart.setRange(minTime: fromTime, maxTime: toTime, animated: false)
         if visibleData.count == 0 { return }
         
-        let maxVal = DataMaxValCalculator.getMaxValue(visibleData, fromTime: fromTime, toTime: toTime, dividableBy: levelsCount)
+        let stacked = chartType == .stackedBar
+        let maxVal = DataMaxValCalculator.getMaxValue(visibleData, fromTime: fromTime, toTime: toTime, stacked: stacked, dividableBy: levelsCount)
         if maxVal != 0 {
             displayChart.setMaxVal(val: maxVal, animationDuration: 0.2)
         }

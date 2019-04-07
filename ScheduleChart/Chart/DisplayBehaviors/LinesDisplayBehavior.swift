@@ -18,19 +18,16 @@ private extension CGAffineTransform {
     }
 }
 
-class LinesDisplayBehavior: NSObject {
-    typealias RangeI = ChartView.RangeI
+class LinesDisplayBehavior: BaseDisplayBehavior {
     
-    var view: ChartView
-    var layers: [CAShapeLayer] = []
-    var data: [ChartData] = [] {
+    override var data: [ChartData] {
         didSet {
             resizeShapes()
             zip(layers, data).forEach({$0.0.strokeColor = $0.1.color.cgColor})
             dataAlpha = Array(repeating: 1.0, count: data.count)
         }
     }
-    var dataAlpha: [CGFloat] = [] {
+    override var dataAlpha: [CGFloat] {
         didSet {
             for (l, a) in zip(layers, dataAlpha) {
                 if l.opacity != Float(a) {
@@ -40,14 +37,8 @@ class LinesDisplayBehavior: NSObject {
         }
     }
     var transform: CGAffineTransform = .identity
-    let timeDivider: CGFloat = 100_000
     
-    init(view: ChartView) {
-        self.view = view
-        super.init()
-    }
-    
-    func update(maxValue: Float, displayRange: RangeI, rect: CGRect, force: Bool) {
+    override func update(maxValue: Float, displayRange: RangeI, rect: CGRect, force: Bool) {
         let newT = calculateTransform(maxValue: maxValue, displayRange: displayRange, rect: rect)
         let needUpdateData: Bool = force || significantTransformChange(t1: newT, t2: transform)
         if needUpdateData {
@@ -60,40 +51,13 @@ class LinesDisplayBehavior: NSObject {
 //        updateStartEndStroke(range: displayRange)
     }
     
-    
-    private func resizeShapes() {
-        while layers.count < data.count {
-            let l = generateLayer()
-            layers.append(l)
-            view.layer.addSublayer(l)
-        }
-        while layers.count > data.count {
-            let l = layers.removeLast()
-            l.removeFromSuperlayer()
-        }
-    }
-    
-    private func generateLayer() -> CAShapeLayer {
+    override func generateLayer() -> CAShapeLayer {
         let l = ShapeLayer()
         l.lineCap = .round
         l.lineJoin = .round
         l.fillColor = nil
         l.lineWidth = view.lineWidth
         return l
-    }
-
-    
-    private func calculateTransform(maxValue: Float, displayRange: RangeI, rect: CGRect) -> CGAffineTransform {
-        let fromTime = CGFloat(displayRange.from)/timeDivider
-        let toTime = CGFloat(displayRange.to)/timeDivider
-        let maxValue = CGFloat(maxValue)
-        
-        var t: CGAffineTransform = .identity
-        let scaleX = rect.width / (toTime - fromTime)
-        t = t.translatedBy(x: rect.minX, y: rect.maxY)
-        t = t.scaledBy(x: scaleX, y: -rect.height / maxValue)
-        t = t.translatedBy(x: -fromTime, y: 0)
-        return t
     }
     
     private func significantTransformChange(t1: CGAffineTransform, t2: CGAffineTransform) -> Bool {
