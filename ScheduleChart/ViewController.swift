@@ -18,7 +18,7 @@ class ViewController: UITableViewController {
     @IBOutlet weak var debugFpsSwitch: UISwitch!
     @IBOutlet weak var selectChartDisplay: SelectChartDisplayedView!
     var dataArr: [[ChartData]] = []
-    var selectedData: Int = 4
+    var selectedData: Int = 0
     var cellBg: UIColor = .white
     
     override func viewDidLoad() {
@@ -40,11 +40,6 @@ class ViewController: UITableViewController {
         selectChartDisplay.items = ChartDataInfo.mapInfoFrom(data: chartView.data)
         chartView.displayChart.onDrawDebug = fpsLabel.drawCalled
         fpsLabel.startCapture()
-        
-        let metal = MetalChartView(frame: view.bounds.insetBy(dx: 100, dy: 0))
-        metal.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        metal.setupBuffers(maxChartDataCount: 4, maxChartItemsCount: 400)
-        view.addSubview(metal)
     }
     
     func generateData(count: Int, from: Float, to: Float, sinPower: Float? = nil) -> [Float] {

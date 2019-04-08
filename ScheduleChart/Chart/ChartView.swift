@@ -50,8 +50,8 @@ class ChartView: UIView {
 //            updateShapesData()
             setNeedsDisplay()
             
-//            setupMetal()
-//            metal.setupWithData(data: data)
+            setupMetal()
+            metal.setupWithData(data: data)
         }
     }
     var shapeLayers: [CAShapeLayer] = []
@@ -72,10 +72,10 @@ class ChartView: UIView {
     
     func setupMetal() {
         if metal != nil { return }
-//        metal = MetalChartView(frame: bounds.insetBy(dx: 100, dy: 50))
-//        metal.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-//        metal.setupBuffers(maxChartDataCount: 4, maxChartItemsCount: 400)
-//        addSubview(metal)
+        metal = MetalChartView(frame: bounds)
+        metal.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        metal.setupBuffers(maxChartDataCount: 4, maxChartItemsCount: 400)
+        insertSubview(metal, at: 0)
     }
     
     override var frame: CGRect {
@@ -218,6 +218,7 @@ class ChartView: UIView {
         } else {
             ctx.clip(to: chartRect)
         }
+        metal?.display.update(maxValue: maxValue, displayRange: RangeI(from: fromTime, to: toTime), rect: chartRect)
         if let selected = selectedDate {
             ctx.setStrokeColor(gridColor.cgColor)
             let x = convertPos(time: selected, val: 0, inRect: chartRect, fromTime: fromTime, toTime: toTime).x
@@ -227,16 +228,16 @@ class ChartView: UIView {
         }
         
         
-        ctx.setLineWidth(lineWidth)
-        ctx.setLineJoin(.round)
+//        ctx.setLineWidth(lineWidth)
+//        ctx.setLineJoin(.round)
 //        let t = caclulateTransform(fromTime: fromTime, toTime: toTime, maxValue: maxValue, inRect: chartRect)
 //        CATransaction.begin()
 //        CATransaction.setValue(true, forKey: kCATransactionDisableActions)
-        for (idx, d) in data.enumerated() {
-            let alpha = dataAlpha[idx]
+//        for (idx, d) in data.enumerated() {
+//            let alpha = dataAlpha[idx]
 //            let shape = shapeLayers[idx]
 //            shape.isHidden = (alpha == 0)
-            if alpha == 0 { continue }
+//            if alpha == 0 { continue }
 //            shape.transform = t
 //            shape.strokeColor = d.color.withAlphaComponent(alpha).cgColor
 //            let bezier = UIBezierPath(cgPath: shape.path!)
@@ -244,11 +245,11 @@ class ChartView: UIView {
 //            bezier.apply(CGAffineTransform(scaleX: 1/100, y: 1))
 //            print(bezier)
 //            drawData2(d, alpha: alpha, shape: shapeLayers[idx], from: fromTime, to: toTime, inRect: chartRect)
-            drawData(d, alpha: alpha, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
+//            drawData(d, alpha: alpha, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
 //            if let date = selectedDate {
 //                drawSelection(d, selectedDate: date, alpha: alpha, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
 //            }
-        }
+//        }
 //        CATransaction.commit()
         
         if !drawOutsideChart {
