@@ -50,8 +50,8 @@ class ChartView: UIView {
 //            updateShapesData()
             setNeedsDisplay()
             
-            setupMetal()
-            metal.setupWithData(data: data)
+//            setupMetal()
+//            metal.setupWithData(data: data)
         }
     }
     var shapeLayers: [CAShapeLayer] = []
@@ -72,10 +72,10 @@ class ChartView: UIView {
     
     func setupMetal() {
         if metal != nil { return }
-        metal = MetalChartView(frame: bounds.insetBy(dx: 100, dy: 50))
-        metal.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        metal.setupBuffers(maxChartDataCount: 4, maxChartItemsCount: 400)
-        addSubview(metal)
+//        metal = MetalChartView(frame: bounds.insetBy(dx: 100, dy: 50))
+//        metal.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+//        metal.setupBuffers(maxChartDataCount: 4, maxChartItemsCount: 400)
+//        addSubview(metal)
     }
     
     override var frame: CGRect {

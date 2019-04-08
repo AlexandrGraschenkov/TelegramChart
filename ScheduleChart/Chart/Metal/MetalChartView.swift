@@ -12,9 +12,9 @@ import MetalKit
 
 struct GlobalParameters {
     var lineWidth: Float
+    var viewport: (Float, Float)
     var transform: matrix_float3x3
     var linePointsCount: UInt
-    var temp: UInt
 }
 
 extension matrix_float3x3 {
@@ -25,7 +25,7 @@ extension matrix_float3x3 {
 
 private extension MTLDevice {
     func makeBuffer<T>(arr: [T], options: MTLResourceOptions = []) -> MTLBuffer? {
-        return makeBuffer(bytes: arr, length: MemoryLayout<T>.size * arr.count, options: options)
+        return makeBuffer(bytes: arr, length: MemoryLayout<T>.stride * arr.count, options: options)
     }
 }
 
@@ -42,7 +42,7 @@ class MetalChartView: MTKView {
     private var pipelineState : MTLRenderPipelineState! = nil
     
     var indices : [UInt16] = []
-    var globalParams = GlobalParameters(lineWidth: 0.1, transform: .identity, linePointsCount: 0, temp: 0)
+    var globalParams: GlobalParameters!
     var vertices: [vector_float2] = []
     var colors: [vector_float4] = []
     
@@ -54,8 +54,9 @@ class MetalChartView: MTKView {
 
     override init(frame frameRect: CGRect, device: MTLDevice?)
     {
-        super.init(frame: frameRect, device: device)
-        configureWithDevice(device ?? MTLCreateSystemDefaultDevice()!)
+        let d = device ?? MTLCreateSystemDefaultDevice()!
+        super.init(frame: frameRect, device: d)
+        configureWithDevice(d)
     }
     
     required init(coder: NSCoder)
@@ -64,8 +65,18 @@ class MetalChartView: MTKView {
         configureWithDevice(MTLCreateSystemDefaultDevice()!)
     }
     
+    override var drawableSize: CGSize {
+        didSet {
+            globalParams?.viewport = (Float(drawableSize.width), Float(drawableSize.height))
+            print("Viewport", drawableSize)
+        }
+    }
+    
     private func configureWithDevice(_ device : MTLDevice) {
-        self.clearColor = MTLClearColor.init(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        let viewport = (Float(drawableSize.width), Float(drawableSize.height))
+        globalParams = GlobalParameters(lineWidth: 14, viewport: viewport, transform: .identity, linePointsCount: 0)
+        
+        self.clearColor = MTLClearColor.init(red: 0.0, green: 1.0, blue: 1.0, alpha: 1.0)
         self.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.framebufferOnly = true
         self.colorPixelFormat = .bgra8Unorm
@@ -86,7 +97,11 @@ class MetalChartView: MTKView {
             library = device?.makeDefaultLibrary()
             pipelineDescriptor.vertexFunction = library?.makeFunction(name: "bezier_vertex")
             pipelineDescriptor.fragmentFunction = library?.makeFunction(name: "bezier_fragment")
-            pipelineDescriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
+//            pipelineDescriptor.vertexFunction = library?.makeFunction(name: "basic_vertex")
+//            pipelineDescriptor.fragmentFunction = library?.makeFunction(name: "basic_fragment")
+//            pipelineDescriptor.vertexFunction = library!.makeFunction(name: "vertex_main")
+//            pipelineDescriptor.fragmentFunction = library!.makeFunction(name: "fragment_main")
+            pipelineDescriptor.colorAttachments[0].pixelFormat = self.colorPixelFormat
             
             // Run with 4x MSAA:
             pipelineDescriptor.sampleCount = 4
@@ -99,7 +114,7 @@ class MetalChartView: MTKView {
             // the number of triangles, not vertexes:
             
             globalParamBuffer = (self.device?.makeBuffer(bytes: &globalParams,
-                                                         length: MemoryLayout<GlobalParameters>.size,
+                                                         length: MemoryLayout<GlobalParameters>.stride,
                                                          options: .storageModeShared))
         }
     }
@@ -113,11 +128,18 @@ class MetalChartView: MTKView {
         self.maxChartItemsCount = maxChartItemsCount
         globalParams.linePointsCount = UInt(maxChartItemsCount)
         
+        
+        chartDataCount = 1//data.count
+        chartItemsCount = 3
+        
         let totalCount: Int = maxChartItemsCount * 4 * maxChartDataCount
         indices = Array(0..<UInt16(totalCount))
         indicesBuffer = (self.device?.makeBuffer(arr: indices, options: .storageModeShared))
         
         vertices = Array(repeating: vector_float2(0, 0), count: maxChartDataCount * maxChartItemsCount)
+        vertices[0] = vector_float2(0, 0)
+        vertices[1] = vector_float2(30, 30)
+        vertices[2] = vector_float2(80, 50)
         vertexBuffer = (self.device?.makeBuffer(arr: vertices, options: .storageModeShared))
         
         colors = Array(repeating: vector_float4(0, 0, 0, 0), count: maxChartDataCount)
@@ -127,23 +149,28 @@ class MetalChartView: MTKView {
     func setupWithData(data: [ChartData]) {
         mutex.lock()
         defer { mutex.unlock() }
-        
-        chartDataCount = data.count
-        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        for (i, d) in data.enumerated() {
-            chartItemsCount = d.items.count
-            d.color.getRed(&r, green: &g, blue: &b, alpha: &a)
-            colors[i] = vector_float4(Float(r), Float(g), Float(b), Float(a))
-            
-            let vertOffset = i*maxChartItemsCount
-            for (ii, item) in d.items.enumerated() {
-                vertices[vertOffset + ii] = vector_float2(Float(ii) / 200, Float(item.value) / 5000000)
-            }
-        }
+//
+//        chartDataCount = 1//data.count
+//        chartItemsCount = 3
+//        vertices[0] = vector_float2(-1, -1)
+//        vertices[1] = vector_float2(1, -1)
+//        vertices[2] = vector_float2(-1, 1)
+//        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+//        for (i, d) in data.enumerated() {
+//            chartItemsCount = d.items.count
+//            d.color.getRed(&r, green: &g, blue: &b, alpha: &a)
+//            colors[i] = vector_float4(Float(r), Float(g), Float(b), Float(a))
+//
+//            let vertOffset = i*maxChartItemsCount
+//            for (ii, item) in d.items.enumerated() {
+//                vertices[vertOffset + ii] = vector_float2(Float(ii) / 200, Float(item.value) / 5000000)
+//            }
+//        }
     }
     
+    
     override func draw(_ rect: CGRect) {
-        if chartDataCount == 0 { return }
+//        if chartDataCount == 0 { return }
         mutex.lock()
         defer { mutex.unlock() }
         
@@ -157,16 +184,19 @@ class MetalChartView: MTKView {
         
         renderEncoder.setRenderPipelineState(pipelineState)
         
+        //        vertices = [vector_float2(-1, -1), vector_float2(1, 1), vector_float2(1, -1)]
+        //        renderEncoder.setVertexBytes(vertices, length: 3*MemoryLayout<vector_float2>.stride, index: 0)
         renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
         renderEncoder.setVertexBuffer(colorsBuffer, offset: 0, index: 1)
         renderEncoder.setVertexBuffer(globalParamBuffer, offset: 0, index: 2)
         
         // Enable this to see the actual triangles instead of a solid curve:
-        renderEncoder.setTriangleFillMode(.lines)
+//        renderEncoder.setTriangleFillMode(.lines)
         
+//        renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
         for i in 0..<chartDataCount {
             let from = (maxChartItemsCount - 1) * 4 * i
-            let count = chartItemsCount * 4
+            let count = (chartItemsCount-1) * 4
             renderEncoder.drawIndexedPrimitives(type: .triangleStrip, indexCount: count, indexType: .uint16, indexBuffer: indicesBuffer!, indexBufferOffset: from)
         }
         
@@ -175,4 +205,5 @@ class MetalChartView: MTKView {
         commandBuffer.present(self.currentDrawable!)
         commandBuffer.commit()
     }
+    
 }

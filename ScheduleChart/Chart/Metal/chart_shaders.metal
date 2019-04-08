@@ -14,6 +14,7 @@ using namespace metal;
 struct GlobalParameters
 {
     float lineWidth;
+    packed_float2 viewport;
     float3x3 transform;
     uint linePointsCount;
     uint temp;
@@ -24,7 +25,7 @@ struct VertexOut {
     float4 color;
 };
 
-vertex VertexOut bezier_vertex(constant float2 *points[[buffer(0)]],
+vertex VertexOut bezier_vertex(constant packed_float2 *points[[buffer(0)]],
                                constant float4 *colors[[buffer(1)]],
                                constant GlobalParameters& globalParams[[buffer(2)]],
                                uint vertexId [[vertex_id]])
@@ -47,6 +48,7 @@ vertex VertexOut bezier_vertex(constant float2 *points[[buffer(0)]],
     // Combine the point with the tangent and lineWidth to achieve a properly oriented
     // triangle for this point in the curve:
     vo.pos.xy = point + (tangent * lineWidthOffset);
+    vo.pos.xy = vo.pos.xy / globalParams.viewport;
     vo.pos.zw = float2(0, 1);
     vo.color = colors[chartIdx];
     
