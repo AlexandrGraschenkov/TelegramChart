@@ -19,7 +19,6 @@ class LineLevelDisplay: BaseDisplay {
     private var lines: PageAlignedContiguousArray<LineAlpha>!
     private var linesBuffer: MTLBuffer!
     private let maxLinesCount = 16
-    private var indicesBuffer: MTLBuffer!
     private var linesCount: Int = 0
     
     override init(view: MetalChartView, device: MTLDevice) {
@@ -30,6 +29,10 @@ class LineLevelDisplay: BaseDisplay {
         pipelineDescriptor.fragmentFunction = library?.makeFunction(name: "line_fragment")
         
         pipelineState = (try? device.makeRenderPipelineState(descriptor: pipelineDescriptor)) as! MTLRenderPipelineState
+    }
+    
+    override func setupBuffers(maxChartDataCount: Int, maxChartItemsCount: Int) {
+        // do not do anything
     }
     
     func update(lines: [LineAlpha]) {

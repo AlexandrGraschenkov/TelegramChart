@@ -34,7 +34,7 @@
 		FAFD319222593A2500FDF551 /* chart_shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = FAFD319122593A2500FDF551 /* chart_shaders.metal */; };
 		FAFD31C2225B5E7F00FDF551 /* BaseDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31C1225B5E7F00FDF551 /* BaseDisplay.swift */; };
 		FAFD31C4225B8AE600FDF551 /* LineDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31C3225B8AE600FDF551 /* LineDisplay.swift */; };
-		FAFD31C6225B8B4100FDF551 /* FillDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31C5225B8B4100FDF551 /* FillDisplay.swift */; };
+		FAFD31C6225B8B4100FDF551 /* StackFillDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31C5225B8B4100FDF551 /* StackFillDisplay.swift */; };
 		FAFD31D3225D0CB800FDF551 /* LineLevelDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31D2225D0CB700FDF551 /* LineLevelDisplay.swift */; };
 /* End PBXBuildFile section */
 
@@ -68,7 +68,7 @@
 		FAFD319122593A2500FDF551 /* chart_shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = chart_shaders.metal; sourceTree = "<group>"; };
 		FAFD31C1225B5E7F00FDF551 /* BaseDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseDisplay.swift; sourceTree = "<group>"; };
 		FAFD31C3225B8AE600FDF551 /* LineDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineDisplay.swift; sourceTree = "<group>"; };
-		FAFD31C5225B8B4100FDF551 /* FillDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FillDisplay.swift; sourceTree = "<group>"; };
+		FAFD31C5225B8B4100FDF551 /* StackFillDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackFillDisplay.swift; sourceTree = "<group>"; };
 		FAFD31D2225D0CB700FDF551 /* LineLevelDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineLevelDisplay.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -171,7 +171,7 @@
 				FAFD31C1225B5E7F00FDF551 /* BaseDisplay.swift */,
 				FAFD31C3225B8AE600FDF551 /* LineDisplay.swift */,
 				FAFD31D2225D0CB700FDF551 /* LineLevelDisplay.swift */,
-				FAFD31C5225B8B4100FDF551 /* FillDisplay.swift */,
+				FAFD31C5225B8B4100FDF551 /* StackFillDisplay.swift */,
 			);
 			path = Displayers;
 			sourceTree = "<group>";
@@ -271,7 +271,7 @@
 				FAC45E6C2235243900A165CC /* DisplayLinkAnimator.swift in Sources */,
 				FAC45E702235279600A165CC /* VerticalAxe.swift in Sources */,
 				FAC45E722235435D00A165CC /* DebugFpsLabel.swift in Sources */,
-				FAFD31C6225B8B4100FDF551 /* FillDisplay.swift in Sources */,
+				FAFD31C6225B8B4100FDF551 /* StackFillDisplay.swift in Sources */,
 				FAFD319222593A2500FDF551 /* chart_shaders.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

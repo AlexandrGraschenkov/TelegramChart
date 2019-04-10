@@ -19,7 +19,7 @@ extension CGAffineTransform {
 }
 
 class BaseDisplay: NSObject {
-    enum DataGroping {
+    enum DataGrouping {
         case none, stacked, percentage
     }
     
@@ -32,8 +32,17 @@ class BaseDisplay: NSObject {
     }
     var dataAlpha: [CGFloat] = []
     let timeDivider: CGFloat = 100_000
-    var grooping: DataGroping = .none
+    var grouping: DataGrouping = .none
     var showGrid: Bool = true // false for PieChart
+    
+    var indices : [UInt16] = []
+    var vertices: PageAlignedContiguousArray<vector_float2>!
+    var colors: PageAlignedContiguousArray<vector_float4>!
+    
+    var indicesBuffer : MTLBuffer!
+    var vertexBuffer : MTLBuffer!
+    var colorsBuffer : MTLBuffer!
+    
     
     var pipelineDescriptor = MTLRenderPipelineDescriptor()
     var pipelineState : MTLRenderPipelineState! = nil
@@ -55,6 +64,26 @@ class BaseDisplay: NSObject {
         // Run with 4x MSAA:
         pipelineDescriptor.sampleCount = 4
         super.init()
+    }
+    
+    func setupBuffers(maxChartDataCount: Int, maxChartItemsCount: Int) {
+        if indicesBuffer != nil && colorsBuffer.length == maxChartDataCount && vertexBuffer.length == maxChartDataCount * maxChartItemsCount {
+            return
+        }
+        
+        let totalCount: Int = maxChartItemsCount * 4 * maxChartDataCount
+        indices = generateIndices(chartCount: maxChartDataCount, itemsCount: maxChartItemsCount)
+        indicesBuffer = (view.device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: .storageModeShared))
+        
+        vertices = PageAlignedContiguousArray<vector_float2>(repeating: vector_float2(0, 0), count: maxChartDataCount * maxChartItemsCount)
+        vertexBuffer = view.device.makeBufferWithPageAlignedArray(vertices)
+        
+        colors = PageAlignedContiguousArray(repeating: vector_float4(0, 0, 0, 0), count: maxChartDataCount)
+        colorsBuffer = view.device.makeBufferWithPageAlignedArray(colors)
+    }
+    
+    func generateIndices(chartCount: Int, itemsCount: Int) -> [UInt16] {
+        return Array(0..<UInt16(chartCount * 4 * itemsCount))
     }
     
     func update(maxValue: Float, displayRange: RangeI, rect: CGRect) {

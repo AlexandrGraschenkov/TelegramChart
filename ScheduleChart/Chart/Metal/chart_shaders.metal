@@ -64,15 +64,35 @@ vertex VertexOut line_vertex(constant float2 *points[[buffer(0)]],
     return vo;
 }
 
-vertex VertexOut fill_vertex(constant float2 *points[[buffer(0)]],
+vertex VertexOut stacked_fill_vertex(constant float2 *points[[buffer(0)]],
                              constant float4 *colors[[buffer(1)]],
                              constant GlobalParameters& globalParams[[buffer(2)]],
                              uint vertexId [[vertex_id]])
 {
     uint wtfWhy = 4;
     uint chartIdx = vertexId / (wtfWhy*globalParams.linePointsCount);
+    float2 p1 = points[vertexId / 4];
+    float2 p0 = float2(p1.x, 0);
+//    p1 = (globalParams.transform * float3(p1, 1)).xy;
+//    p0 = (globalParams.transform * float3(p0, 1)).xy;
+    
+    
+    uint linePointOffset = ((vertexId / 2) % 2); // 0 or 1
+    float2 point = float(linePointOffset) * (p1-p0) + p0;
+    
+    // This is a little trick to avoid conditional code. We need to determine which side of the
+    // triangle we are processing, so as to calculate the correct "side" of the curve, so we just
+    // check for odd vs. even vertexId values to determine that:
+    float lineWidthOffset = (1 - (((float) (vertexId % 2)) * 2.0)) * globalParams.lineWidth / 2.0;
+    
     VertexOut vo;
-    vo.pos.xy = (points[vertexId] / globalParams.halfViewport) - float2(1,1);
+    
+    // Combine the point with the tangent and lineWidth to achieve a properly oriented
+    // triangle for this point in the curve:
+    point.x += lineWidthOffset;
+    
+    point = (globalParams.transform * float3(point, 1)).xy;
+    vo.pos.xy = (point / globalParams.halfViewport) - float2(1,1);
     vo.pos.zw = float2(0, 1);
     vo.color = colors[chartIdx];
     

@@ -1,5 +1,5 @@
 //
-//  LineDisplay.swift
+//  FillDisplay.swift
 //  ScheduleChart
 //
 //  Created by Alexander Graschenkov on 08/04/2019.
@@ -9,21 +9,28 @@
 import UIKit
 import MetalKit
 
-class LineDisplay: BaseDisplay {
-
-    private var dataAlphaUpdated = false
-    override var dataAlpha: [CGFloat] {
-        didSet { dataAlphaUpdated = true }
-    }
+class StackFillDisplay: BaseDisplay {
     
     override init(view: MetalChartView, device: MTLDevice) {
         super.init(view: view, device: device)
         
+        self.grouping = .stacked
         let library = device.makeDefaultLibrary()
-        pipelineDescriptor.vertexFunction = library?.makeFunction(name: "line_vertex")
+        pipelineDescriptor.vertexFunction = library?.makeFunction(name: "stacked_fill_vertex")
         pipelineDescriptor.fragmentFunction = library?.makeFunction(name: "line_fragment")
         
         pipelineState = (try? device.makeRenderPipelineState(descriptor: pipelineDescriptor)) as! MTLRenderPipelineState
+    }
+    
+    override func generateIndices(chartCount: Int, itemsCount: Int) -> [UInt16] {
+        var result: [UInt16] = []
+        result.reserveCapacity(chartCount * itemsCount * 6)
+        for i in  0..<itemsCount*chartCount {
+            let offset = UInt16(i*4)
+            result.append(contentsOf: [offset, offset + 1, offset + 2,
+                                       offset + 1, offset + 2, offset + 3])
+        }
+        return result
     }
     
     override func dataUpdated() {
@@ -39,14 +46,9 @@ class LineDisplay: BaseDisplay {
                 vertices[vertOffset + ii] = vector_float2(Float(item.time) / Float(timeDivider), Float(item.value))
             }
         }
-    }
-    
-    override func prepareDisplay() {
-        if !dataAlphaUpdated { return }
-        for i in 0..<dataAlpha.count {
-            colors[i][3] = Float(dataAlpha[i])
-        }
-        dataAlphaUpdated = false
+        let dt = data[0].items[1].time - data[0].items[0].time
+        let fixDrawSpacing: Float = 1.0015
+        view.globalParams.lineWidth = fixDrawSpacing * (Float(dt) / Float(timeDivider))
     }
     
     override func display(renderEncoder: MTLRenderCommandEncoder) {
@@ -57,9 +59,10 @@ class LineDisplay: BaseDisplay {
         
         for i in 0..<view.chartDataCount {
             let wtfWhy = 2
-            let from = view.maxChartItemsCount * 4 * i * wtfWhy
-            let count = (view.chartItemsCount-1) * 4
-            renderEncoder.drawIndexedPrimitives(type: .triangleStrip, indexCount: count, indexType: .uint16, indexBuffer: indicesBuffer, indexBufferOffset: from)
+            let from = view.maxChartItemsCount * 6 * i * wtfWhy
+            let count = view.chartItemsCount * 6
+            renderEncoder.drawIndexedPrimitives(type: .triangle, indexCount: count, indexType: .uint16, indexBuffer: indicesBuffer, indexBufferOffset: from)
         }
     }
+
 }

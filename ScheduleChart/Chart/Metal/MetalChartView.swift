@@ -46,14 +46,7 @@ class MetalChartView: MTKView {
     
     private var levelDisplay: LineLevelDisplay?
     var display: BaseDisplay!
-    var indices : [UInt16] = []
     var globalParams: GlobalParameters!
-    var vertices: PageAlignedContiguousArray<vector_float2>!
-    var colors: PageAlignedContiguousArray<vector_float4>!
-    
-    var indicesBuffer : MTLBuffer!
-    var vertexBuffer : MTLBuffer!
-    var colorsBuffer : MTLBuffer!
     private let mutex = Mutex()
 
     override init(frame frameRect: CGRect, device: MTLDevice?)
@@ -70,7 +63,8 @@ class MetalChartView: MTKView {
     }
     
     private func configureWithDevice(_ device : MTLDevice) {
-        display = LineDisplay(view: self, device: device)
+//        display = LineDisplay(view: self, device: device)
+        display = StackFillDisplay(view: self, device: device)
         
         let viewport = (Float(drawableSize.width) / 2.0,
                         Float(drawableSize.height) / 2.0)
@@ -100,23 +94,11 @@ class MetalChartView: MTKView {
     }
     
     func setupBuffers(maxChartDataCount: Int, maxChartItemsCount: Int) {
-        if indicesBuffer != nil {
-            assert(false, "Already setuped")
-            return
-        }
         self.maxChartDataCount = maxChartDataCount
         self.maxChartItemsCount = maxChartItemsCount
         globalParams.linePointsCount = UInt16(maxChartItemsCount)
         
-        let totalCount: Int = maxChartItemsCount * 4 * maxChartDataCount
-        indices = Array(0..<UInt16(totalCount))
-        indicesBuffer = (self.device?.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: .storageModeShared))
-        
-        vertices = PageAlignedContiguousArray<vector_float2>(repeating: vector_float2(0, 0), count: maxChartDataCount * maxChartItemsCount)
-        vertexBuffer = device.makeBufferWithPageAlignedArray(vertices)
-        
-        colors = PageAlignedContiguousArray(repeating: vector_float4(0, 0, 0, 0), count: maxChartDataCount)
-        colorsBuffer = device.makeBufferWithPageAlignedArray(colors)
+        display.setupBuffers(maxChartDataCount: maxChartDataCount, maxChartItemsCount: maxChartItemsCount)
     }
     
     func setupWithData(data: [ChartData]) {
