@@ -11,6 +11,20 @@ import MetalKit
 
 class LineDisplay: BaseDisplay {
 
+    private var dataAlphaUpdated = false
+    override var dataAlpha: [CGFloat] {
+        didSet { dataAlphaUpdated = true }
+    }
+    
+    override init(view: MetalChartView, device: MTLDevice) {
+        super.init(view: view, device: device)
+        
+        let library = device.makeDefaultLibrary()
+        pipelineDescriptor.vertexFunction = library?.makeFunction(name: "line_vertex")
+        pipelineDescriptor.fragmentFunction = library?.makeFunction(name: "line_fragment")
+        
+        pipelineState = (try? device.makeRenderPipelineState(descriptor: pipelineDescriptor)) as! MTLRenderPipelineState
+    }
     
     override func dataUpdated() {
         view.chartDataCount = data.count
@@ -27,7 +41,17 @@ class LineDisplay: BaseDisplay {
         }
     }
     
+    override func prepareDisplay() {
+        if !dataAlphaUpdated { return }
+        for i in 0..<dataAlpha.count {
+            view.colors[i][3] = Float(dataAlpha[i])
+        }
+        print(dataAlpha)
+        dataAlphaUpdated = false
+    }
+    
     override func display(renderEncoder: MTLRenderCommandEncoder) {
+        super.display(renderEncoder: renderEncoder)
         renderEncoder.setVertexBuffer(view.vertexBuffer, offset: 0, index: 0)
         renderEncoder.setVertexBuffer(view.colorsBuffer, offset: 0, index: 1)
         renderEncoder.setVertexBytes(&view.globalParams, length: MemoryLayout<GlobalParameters>.stride, index: 2)

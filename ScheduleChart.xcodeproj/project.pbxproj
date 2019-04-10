@@ -35,6 +35,7 @@
 		FAFD31C2225B5E7F00FDF551 /* BaseDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31C1225B5E7F00FDF551 /* BaseDisplay.swift */; };
 		FAFD31C4225B8AE600FDF551 /* LineDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31C3225B8AE600FDF551 /* LineDisplay.swift */; };
 		FAFD31C6225B8B4100FDF551 /* FillDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31C5225B8B4100FDF551 /* FillDisplay.swift */; };
+		FAFD31D3225D0CB800FDF551 /* LineLevelDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31D2225D0CB700FDF551 /* LineLevelDisplay.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,6 +69,7 @@
 		FAFD31C1225B5E7F00FDF551 /* BaseDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseDisplay.swift; sourceTree = "<group>"; };
 		FAFD31C3225B8AE600FDF551 /* LineDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineDisplay.swift; sourceTree = "<group>"; };
 		FAFD31C5225B8B4100FDF551 /* FillDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FillDisplay.swift; sourceTree = "<group>"; };
+		FAFD31D2225D0CB700FDF551 /* LineLevelDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineLevelDisplay.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -168,6 +170,7 @@
 			children = (
 				FAFD31C1225B5E7F00FDF551 /* BaseDisplay.swift */,
 				FAFD31C3225B8AE600FDF551 /* LineDisplay.swift */,
+				FAFD31D2225D0CB700FDF551 /* LineLevelDisplay.swift */,
 				FAFD31C5225B8B4100FDF551 /* FillDisplay.swift */,
 			);
 			path = Displayers;
@@ -253,6 +256,7 @@
 				FAFD31C4225B8AE600FDF551 /* LineDisplay.swift in Sources */,
 				FA1ADF612258D14A00623825 /* MetalChartView.swift in Sources */,
 				FAC45E782236FAEE00A165CC /* LabelsPool.swift in Sources */,
+				FAFD31D3225D0CB800FDF551 /* LineLevelDisplay.swift in Sources */,
 				FAC45E592235222400A165CC /* ViewController.swift in Sources */,
 				FA4BB7E322466A1C00723FA1 /* SelectChartDisplayedView.swift in Sources */,
 				FAFD31C2225B5E7F00FDF551 /* BaseDisplay.swift in Sources */,

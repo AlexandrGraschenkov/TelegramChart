@@ -7,6 +7,36 @@
 //
 
 import UIKit
+import MetalKit
+
+struct Color {
+    var r: CGFloat
+    var g: CGFloat
+    var b: CGFloat
+    var a: CGFloat
+    
+    init(r: CGFloat, g: CGFloat, b: CGFloat, a: CGFloat) {
+        self.r = r
+        self.g = g
+        self.b = b
+        self.a = a
+    }
+    
+    init(w: CGFloat, a: CGFloat) {
+        self.r = w
+        self.g = w
+        self.b = w
+        self.a = a
+    }
+    
+    var uiColor: UIColor {
+        return UIColor(red: r, green: g, blue: b, alpha: a)
+    }
+    
+    var metalClear: MTLClearColor {
+        return MTLClearColor(red: Double(r), green: Double(g), blue: Double(b), alpha: Double(a))
+    }
+}
 
 class ChartView: UIView {
     struct RangeI {
@@ -15,9 +45,7 @@ class ChartView: UIView {
     }
     
     var drawGrid: Bool = true
-    var gridColor: UIColor = UIColor(white: 0.9, alpha: 1.0) {
-        didSet { verticalAxe.gridColor = gridColor }
-    }
+    var gridColor: Color = Color(w: 0.9, a: 1.0)
     var showZeroYValue: Bool = true
     var drawOutsideChart: Bool = false
     var lineWidth: CGFloat = 2.0
@@ -34,6 +62,7 @@ class ChartView: UIView {
     
     var data: [ChartData] = [] {
         didSet {
+            setupMetal()
             dataMinTime = -1
             dataMaxTime = -1
             for d in data {
@@ -50,12 +79,15 @@ class ChartView: UIView {
 //            updateShapesData()
             setNeedsDisplay()
             
-            setupMetal()
             metal.setupWithData(data: data)
         }
     }
     var shapeLayers: [CAShapeLayer] = []
-    var dataAlpha: [CGFloat] = []
+    var dataAlpha: [CGFloat] = [] {
+        didSet {
+            metal.display.dataAlpha = dataAlpha
+        }
+    }
     private(set) var dataMinTime: Int64 = -1
     private(set) var dataMaxTime: Int64 = -1
     var displayRange: RangeI = RangeI(from: 0, to: 0)
@@ -97,7 +129,13 @@ class ChartView: UIView {
             maxValueAnimation = val
             let fromMaxVal = maxValue
             maxValAnimatorCancel = DisplayLinkAnimator.animate(duration: animationDuration) { (percent) in
+                var percent = -percent * (percent - 2) // eqse out
                 self.maxValue = (val - fromMaxVal) * Float(percent) + fromMaxVal
+                
+                if self.drawGrid {
+                    self.updateLevels()
+                }
+                
                 self.setNeedsDisplay()
                 if percent == 1 {
                     self.maxValueAnimation = nil
@@ -111,6 +149,7 @@ class ChartView: UIView {
         
         if drawGrid {
             verticalAxe.setMaxVal(val, animationDuration: animationDuration)
+            updateLevels()
         }
     }
     
@@ -164,25 +203,22 @@ class ChartView: UIView {
         return x
     }
     
-    private let divider: CGFloat = 100000000
-    private func updateShapesData() {
-        resizeShapes()
-        for (l, d) in zip(shapeLayers, data) {
-            let path = CGMutablePath()
-            let bezier = UIBezierPath()
-            
-            for (idx, item) in d.items.enumerated() {
-                let p = CGPoint(x: CGFloat(item.time) / divider, y: CGFloat(item.value))
-                if idx == 0 {
-                    path.move(to: p)
-                    bezier.move(to: p)
-                } else {
-                    path.addLine(to: p)
-                    bezier.addLine(to: p)
-                }
+    func updateLevels() {
+        metal.updateLevels(levels: self.getLevels())
+    }
+    
+    func getLevels() -> [LineAlpha] {
+        return subviews.compactMap({ lab->LineAlpha? in
+            guard let lab = lab as? AttachedLabel, let val = lab.attachedValue, lab.alpha > 0 else {
+                return nil
             }
-            l.path = path
-        }
+            
+            let vec = vector_float4(Float(gridColor.r),
+                                    Float(gridColor.g),
+                                    Float(gridColor.b),
+                                    Float(gridColor.a*lab.alpha))
+            return LineAlpha(y: val, color: vec)
+        })
     }
     
     override func draw(_ rect: CGRect) {
@@ -219,144 +255,6 @@ class ChartView: UIView {
             ctx.clip(to: chartRect)
         }
         metal?.display.update(maxValue: maxValue, displayRange: RangeI(from: fromTime, to: toTime), rect: chartRect)
-        if let selected = selectedDate {
-            ctx.setStrokeColor(gridColor.cgColor)
-            let x = convertPos(time: selected, val: 0, inRect: chartRect, fromTime: fromTime, toTime: toTime).x
-            ctx.move(to: CGPoint(x: x, y: chartRect.minY))
-            ctx.addLine(to: CGPoint(x: x, y: chartRect.maxY))
-            ctx.strokePath()
-        }
-        
-        
-//        ctx.setLineWidth(lineWidth)
-//        ctx.setLineJoin(.round)
-//        let t = caclulateTransform(fromTime: fromTime, toTime: toTime, maxValue: maxValue, inRect: chartRect)
-//        CATransaction.begin()
-//        CATransaction.setValue(true, forKey: kCATransactionDisableActions)
-//        for (idx, d) in data.enumerated() {
-//            let alpha = dataAlpha[idx]
-//            let shape = shapeLayers[idx]
-//            shape.isHidden = (alpha == 0)
-//            if alpha == 0 { continue }
-//            shape.transform = t
-//            shape.strokeColor = d.color.withAlphaComponent(alpha).cgColor
-//            let bezier = UIBezierPath(cgPath: shape.path!)
-//            bezier.apply(CATransform3DGetAffineTransform(t))
-//            bezier.apply(CGAffineTransform(scaleX: 1/100, y: 1))
-//            print(bezier)
-//            drawData2(d, alpha: alpha, shape: shapeLayers[idx], from: fromTime, to: toTime, inRect: chartRect)
-//            drawData(d, alpha: alpha, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
-//            if let date = selectedDate {
-//                drawSelection(d, selectedDate: date, alpha: alpha, ctx: ctx, from: fromTime, to: toTime, inRect: chartRect)
-//            }
-//        }
-//        CATransaction.commit()
-        
-        if !drawOutsideChart {
-            ctx.resetClip()
-        }
-    }
-    
-    private func drawData2(_ data: ChartData, alpha: CGFloat, shape: CAShapeLayer, from: Int64, to: Int64, inRect rect: CGRect) {
-        guard let drawFrom = data.floorIndex(time: from),
-            let drawTo = data.ceilIndex(time: to) else {
-                return
-        }
-        let color = data.color.withAlphaComponent(alpha).cgColor
-        shape.strokeColor = color
-        let firstItem = data.items[drawFrom]
-        let firstPoint = convertPos(time: firstItem.time, val: firstItem.value, inRect: rect, fromTime: from, toTime: to)
-        
-        let path = CGMutablePath()
-        if drawFrom == drawTo {
-            let circle = CGRect(x: firstPoint.x-lineWidth/2.0,
-                                y: firstPoint.y-lineWidth/2.0,
-                                width: lineWidth,
-                                height: lineWidth)
-            path.addEllipse(in: circle)
-            return
-        }
-        
-        path.move(to: firstPoint)
-        for i in (drawFrom+1)...drawTo {
-            let item = data.items[i]
-            
-            let p = convertPos(time: item.time, val: item.value, inRect: rect, fromTime: from, toTime: to)
-            path.addLine(to: p)
-        }
-        shape.path = path
-    }
-    
-    private func resizeShapes() {
-        while shapeLayers.count < data.count {
-            let l = generateLayer()
-            shapeLayers.append(l)
-            layer.addSublayer(l)
-        }
-        while shapeLayers.count > data.count {
-            let l = shapeLayers.removeLast()
-            l.removeFromSuperlayer()
-        }
-    }
-    
-    private func generateLayer() -> CAShapeLayer {
-        let l = CAShapeLayer()
-        l.lineCap = .round
-        l.lineJoin = .round
-        l.fillColor = nil
-        l.lineWidth = lineWidth
-        return l
-    }
-    
-    private func drawData(_ data: ChartData, alpha: CGFloat, ctx: CGContext, from: Int64, to: Int64, inRect rect: CGRect) {
-        guard let drawFrom = data.floorIndex(time: from),
-            let drawTo = data.ceilIndex(time: to) else {
-            return
-        }
-        let color = data.color.withAlphaComponent(alpha).cgColor
-        let firstItem = data.items[drawFrom]
-        let firstPoint = convertPos(time: firstItem.time, val: firstItem.value, inRect: rect, fromTime: from, toTime: to)
-        
-        if drawFrom == drawTo {
-            let circle = CGRect(x: firstPoint.x-lineWidth/2.0,
-                                y: firstPoint.y-lineWidth/2.0,
-                                width: lineWidth,
-                                height: lineWidth)
-            ctx.setFillColor(color)
-            ctx.fillEllipse(in: circle)
-            return
-        }
-        
-        ctx.setStrokeColor(color)
-        ctx.move(to: firstPoint)
-        for i in (drawFrom+1)...drawTo {
-            let item = data.items[i]
-            
-            let p = convertPos(time: item.time, val: item.value, inRect: rect, fromTime: from, toTime: to)
-            ctx.addLine(to: p)
-//            if i % 25 == 0 {
-//                ctx.strokePath()
-//                ctx.move(to: p)
-//            }
-        }
-        ctx.strokePath()
-    }
-    
-    private func drawSelection(_ data: ChartData, selectedDate: Int64, alpha: CGFloat, ctx: CGContext, from: Int64, to: Int64, inRect rect: CGRect) {
-        guard let val = data.items.first(where: {$0.time == selectedDate})?.value else {
-            return
-        }
-        let pos = convertPos(time: selectedDate, val: val, inRect: rect, fromTime: from, toTime: to)
-        let or = lineWidth*2
-        ctx.setFillColor(data.color.cgColor)
-        let outCircle = CGRect(x: pos.x - or, y: pos.y - or, width: 2*or, height: 2*or)
-        ctx.fillEllipse(in: outCircle)
-        
-        let bgColor = backgroundColor ?? UIColor.white
-        ctx.setFillColor(bgColor.cgColor)
-        let ir = or - lineWidth
-        let innerCircle = CGRect(x: pos.x - ir, y: pos.y - ir, width: 2*ir, height: 2*ir)
-        ctx.fillEllipse(in: innerCircle)
     }
     
     private func convertPos(time: Int64, val: Float, inRect rect: CGRect, fromTime: Int64, toTime: Int64) -> CGPoint {
@@ -365,18 +263,6 @@ class ChartView: UIView {
         let yPercent = val / maxValue
         let y = rect.maxY - rect.height * CGFloat(yPercent)
         return CGPoint(x: x, y: y)
-    }
-    
-    private func caclulateTransform(fromTime: Int64, toTime: Int64, maxValue: Float, inRect rect: CGRect) -> CATransform3D {
-        let fromTime = CGFloat(fromTime)/divider
-        let toTime = CGFloat(toTime)/divider
-        let maxValue = CGFloat(maxValue)
-        
-        var t = CATransform3DIdentity
-        let scaleX = rect.width / (toTime - fromTime)
-        t = CATransform3DScale(t, scaleX, rect.height / maxValue, 1)
-        t = CATransform3DTranslate(t, rect.minX - fromTime, 0, 0)
-        return t
     }
 }
 

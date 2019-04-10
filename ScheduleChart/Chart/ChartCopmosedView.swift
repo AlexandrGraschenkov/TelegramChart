@@ -60,7 +60,7 @@ class ChartCopmosedView: UIView {
         let animDuration: Double = 0.2
         
         if visibleData.count > 0 {
-            runMaxValueChangeAnimation(data: visibleData, animDuration: animDuration)
+            runMaxValueChangeAnimation(data: visibleData, animDuration: maxValDuration)
         }
         runShowHideAnimation(dataIndex: index, show: show, animDuration: animDuration)
         if let date = displayChart.selectedDate, selectInfoView != nil {
@@ -94,6 +94,7 @@ class ChartCopmosedView: UIView {
             selectInfoView?.bgColor = selectInfoBgColor
         }
     }
+    private var maxValDuration: Double = 0.3
     private var selectInfoView: SelctionInfoView?
     private var dataIsVisible: [Bool] = []
     private var visibleData: [ChartData] {
@@ -142,14 +143,23 @@ class ChartCopmosedView: UIView {
         selectionView.mode = mode
         switch mode {
         case .day:
-            backgroundColor = .white
-            displayChart.gridColor = UIColor(white: 0.9, alpha: 1.0)
+            let bg = Color(w: 1, a: 1)
+            backgroundColor = bg.uiColor
+            displayChart.metal.clearColor = bg.metalClear
+            selectionChart.metal.clearColor = bg.metalClear
+            
+            displayChart.gridColor = Color(w: 0.9, a: 1.0)
             selectInfoBgColor = UIColor(red:0.94, green:0.94, blue:0.96, alpha:1.00)
         case .night:
-            backgroundColor = UIColor(red:0.14, green:0.18, blue:0.24, alpha:1.00)
-            displayChart.gridColor = UIColor(red:0.11, green:0.15, blue:0.20, alpha:1.00)
+            let bg = Color(r: 0.14, g: 0.18, b: 0.24, a: 1)
+            backgroundColor = bg.uiColor
+            displayChart.metal.clearColor = bg.metalClear
+            selectionChart.metal.clearColor = bg.metalClear
+            
+            displayChart.gridColor = Color(r: 0.11, g: 0.15, b: 0.20, a: 1)
             selectInfoBgColor = UIColor(red:0.11, green:0.16, blue:0.21, alpha:1.00)
         }
+        displayChart.updateLevels()
     }
     
     // MARK: show\hide animation
@@ -243,7 +253,7 @@ extension ChartCopmosedView: ChartSelectionViewDelegate {
         
         let maxVal = DataMaxValCalculator.getMaxValue(visibleData, fromTime: fromTime, toTime: toTime, dividableBy: levelsCount)
         if maxVal != 0 {
-            displayChart.setMaxVal(val: maxVal, animationDuration: 0.2)
+            displayChart.setMaxVal(val: maxVal, animationDuration: maxValDuration)
         }
     }
 }

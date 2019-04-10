@@ -25,7 +25,7 @@ class VerticalAxe: NSObject {
     let view: ChartView
     var labelsPool: LabelsPool { return view.labelsPool }
     var levelsCount = 5
-    var gridColor: UIColor = UIColor(white: 0.9, alpha: 1.0)
+    var gridColor: Color = Color(w: 0.9, a: 1.0)
     
     
     fileprivate(set) var maxVal: Float!
@@ -57,7 +57,7 @@ class VerticalAxe: NSObject {
     
     func drawGrid(ctx: CGContext, inset: UIEdgeInsets) {
         let drawMaxVal = view.maxValue
-        
+
         var attachedLabels: [AttachedLabel] = view.subviews.compactMap({$0 as? AttachedLabel})
         attachedLabels.sort(by: {$0.alpha < $1.alpha})
         var prevAlpha: CGFloat = 0
@@ -65,24 +65,12 @@ class VerticalAxe: NSObject {
         for lab in attachedLabels {
             guard let val = lab.attachedValue else { continue }
             if lab.alpha == 0 { continue }
-            
-            if prevAlpha != lab.alpha && prevAlpha != 0 {
-                ctx.setStrokeColor(gridColor.withAlphaComponent(prevAlpha).cgColor)
-                ctx.strokePath()
-            }
+
             var y = frame.height * CGFloat(1 - val / drawMaxVal) + frame.origin.y
             y = round(y)
-            ctx.move(to: CGPoint(x: frame.minX, y: y))
-            ctx.addLine(to: CGPoint(x: frame.maxX, y: y))
-            prevAlpha = lab.alpha
-            
+
             lab.frame.origin = CGPoint(x: frame.minX + inset.left - lab.frame.width,
                                        y: y - lab.frame.height)
-        }
-        
-        if prevAlpha > 0 {
-            ctx.setStrokeColor(gridColor.withAlphaComponent(prevAlpha).cgColor)
-            ctx.strokePath()
         }
     }
     

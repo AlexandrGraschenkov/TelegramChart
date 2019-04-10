@@ -15,7 +15,7 @@ struct PointIn {
 
 struct GlobalParameters {
     var lineWidth: Float
-    var viewport: (Float, Float)
+    var halfViewport: (Float, Float)
     var transform: matrix_float3x3
     var linePointsCount: UInt16
 }
@@ -44,6 +44,7 @@ class MetalChartView: MTKView {
     private var pipelineDescriptor = MTLRenderPipelineDescriptor()
     private var pipelineState : MTLRenderPipelineState! = nil
     
+    private var levelDisplay: LineLevelDisplay?
     var display: BaseDisplay!
     var indices : [UInt16] = []
     var globalParams: GlobalParameters!
@@ -69,12 +70,13 @@ class MetalChartView: MTKView {
     }
     
     private func configureWithDevice(_ device : MTLDevice) {
-        display = LineDisplay(view: self)
+        display = LineDisplay(view: self, device: device)
         
-        let viewport = (Float(drawableSize.width), Float(drawableSize.height))
-        globalParams = GlobalParameters(lineWidth: 4, viewport: viewport, transform: .identity, linePointsCount: 0)
+        let viewport = (Float(drawableSize.width) / 2.0,
+                        Float(drawableSize.height) / 2.0)
+        globalParams = GlobalParameters(lineWidth: 4, halfViewport: viewport, transform: .identity, linePointsCount: 0)
         
-        self.clearColor = MTLClearColor.init(red: 0.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        self.clearColor = MTLClearColor.init(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
         self.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.framebufferOnly = true
         self.colorPixelFormat = .bgra8Unorm
@@ -92,15 +94,6 @@ class MetalChartView: MTKView {
             super.device = device
             commandQueue = (self.device?.makeCommandQueue())!
             
-            library = device?.makeDefaultLibrary()
-            pipelineDescriptor.vertexFunction = library?.makeFunction(name: "bezier_vertex")
-            pipelineDescriptor.fragmentFunction = library?.makeFunction(name: "bezier_fragment")
-            pipelineDescriptor.colorAttachments[0].pixelFormat = self.colorPixelFormat
-            
-            // Run with 4x MSAA:
-            pipelineDescriptor.sampleCount = 4
-            
-            pipelineState = (try? device?.makeRenderPipelineState(descriptor: pipelineDescriptor)) as! MTLRenderPipelineState
         }
     }
     
@@ -131,10 +124,18 @@ class MetalChartView: MTKView {
         display.data = data
     }
     
+    func updateLevels(levels: [LineAlpha]) {
+        if levelDisplay == nil {
+            levelDisplay = LineLevelDisplay(view: self, device: device)
+        }
+        levelDisplay?.update(lines: levels)
+    }
     
     override func draw(_ rect: CGRect) {
 //        if chartDataCount == 0 { return }
-        globalParams.viewport = (Float(drawableSize.width), Float(drawableSize.height))
+        globalParams.halfViewport = (Float(drawableSize.width) / 2.0,
+                                     Float(drawableSize.height) / 2.0)
+        display.prepareDisplay()
         
         mutex.lock()
         defer { mutex.unlock() }
@@ -147,7 +148,7 @@ class MetalChartView: MTKView {
         
         
         
-        renderEncoder.setRenderPipelineState(pipelineState)
+        levelDisplay?.display(renderEncoder: renderEncoder)
         
         display.display(renderEncoder: renderEncoder)
         
@@ -157,4 +158,7 @@ class MetalChartView: MTKView {
         commandBuffer.commit()
     }
     
+    func displayLevels() {
+        
+    }
 }

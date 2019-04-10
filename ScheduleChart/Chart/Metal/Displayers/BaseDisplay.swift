@@ -35,8 +35,25 @@ class BaseDisplay: NSObject {
     var grooping: DataGroping = .none
     var showGrid: Bool = true // false for PieChart
     
-    init(view: MetalChartView) {
+    var pipelineDescriptor = MTLRenderPipelineDescriptor()
+    var pipelineState : MTLRenderPipelineState! = nil
+    
+    init(view: MetalChartView, device: MTLDevice) {
         self.view = view
+        
+        pipelineDescriptor.colorAttachments[0].pixelFormat = view.colorPixelFormat
+        pipelineDescriptor.colorAttachments[0].isBlendingEnabled = true
+        pipelineDescriptor.colorAttachments[0].rgbBlendOperation = .add
+        pipelineDescriptor.colorAttachments[0].alphaBlendOperation = .add
+        
+        pipelineDescriptor.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
+        pipelineDescriptor.colorAttachments[0].sourceAlphaBlendFactor = .sourceAlpha
+        
+        pipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
+        pipelineDescriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
+        
+        // Run with 4x MSAA:
+        pipelineDescriptor.sampleCount = 4
         super.init()
     }
     
@@ -49,9 +66,12 @@ class BaseDisplay: NSObject {
         assert(false, "override it")
     }
     
+    func prepareDisplay() {
+        // optional
+    }
     
     func display(renderEncoder: MTLRenderCommandEncoder) {
-        assert(false, "override it")
+        renderEncoder.setRenderPipelineState(pipelineState)
     }
     
     func calculateTransform(maxValue: Float, displayRange: RangeI, rect: CGRect) -> CGAffineTransform {

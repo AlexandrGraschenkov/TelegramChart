@@ -14,9 +14,15 @@ using namespace metal;
 struct GlobalParameters
 {
     float lineWidth;
-    packed_float2 viewport;
+    packed_float2 halfViewport;
     float3x3 transform;
     uint linePointsCount;
+};
+
+
+struct LevelIn {
+    float y;
+    float4 color;
 };
 
 struct VertexOut {
@@ -24,7 +30,7 @@ struct VertexOut {
     float4 color;
 };
 
-vertex VertexOut bezier_vertex(constant float2 *points[[buffer(0)]],
+vertex VertexOut line_vertex(constant float2 *points[[buffer(0)]],
                                constant float4 *colors[[buffer(1)]],
                                constant GlobalParameters& globalParams[[buffer(2)]],
                                uint vertexId [[vertex_id]])
@@ -51,14 +57,55 @@ vertex VertexOut bezier_vertex(constant float2 *points[[buffer(0)]],
     // Combine the point with the tangent and lineWidth to achieve a properly oriented
     // triangle for this point in the curve:
     vo.pos.xy = point + (tangent * lineWidthOffset);
-    vo.pos.xy = (vo.pos.xy / globalParams.viewport) * float2(2.0, 2.0) - float2(1,1);
+    vo.pos.xy = (vo.pos.xy / globalParams.halfViewport) - float2(1,1);
     vo.pos.zw = float2(0, 1);
     vo.color = colors[chartIdx];
     
     return vo;
 }
 
-fragment float4 bezier_fragment(VertexOut params[[stage_in]])
+vertex VertexOut fill_vertex(constant float2 *points[[buffer(0)]],
+                             constant float4 *colors[[buffer(1)]],
+                             constant GlobalParameters& globalParams[[buffer(2)]],
+                             uint vertexId [[vertex_id]])
+{
+    uint wtfWhy = 4;
+    uint chartIdx = vertexId / (wtfWhy*globalParams.linePointsCount);
+    VertexOut vo;
+    vo.pos.xy = (points[vertexId] / globalParams.halfViewport) - float2(1,1);
+    vo.pos.zw = float2(0, 1);
+    vo.color = colors[chartIdx];
+    
+    return vo;
+}
+
+vertex VertexOut line_level_vertex(constant LevelIn *points[[buffer(0)]],
+                                   constant GlobalParameters& globalParams[[buffer(1)]],
+                                   uint vertexId [[vertex_id]])
+{
+    LevelIn point = points[vertexId / 4];
+    float y = point.y;
+    y = (globalParams.transform * float3(0.0, y, 1.0)).y;
+    float x = float((vertexId / 2) % 2) * 2.0 - 1.0;
+    
+    // This is a little trick to avoid conditional code. We need to determine which side of the
+    // triangle we are processing, so as to calculate the correct "side" of the curve, so we just
+    // check for odd vs. even vertexId values to determine that:
+    float lineWidthOffset = (1 - (((float) (vertexId % 2)) * 2.0)) * globalParams.lineWidth / 2.0;
+    y = y + lineWidthOffset;
+    
+    VertexOut vo;
+    vo.pos.x = x;
+    vo.pos.y = y / globalParams.halfViewport[1] - 1;
+    vo.pos.zw = float2(0, 1);
+    vo.color = point.color;
+    
+    return vo;
+}
+
+fragment float4 line_fragment(VertexOut params[[stage_in]])
 {
     return params.color;
 }
+
+
