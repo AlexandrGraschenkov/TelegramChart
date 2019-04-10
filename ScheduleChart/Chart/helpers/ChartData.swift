@@ -61,7 +61,7 @@ struct ChartData {
         let value: Float
     }
     
-    let items: [Item]
+    var items: [Item]
     var color: UIColor
     var name: String?
     

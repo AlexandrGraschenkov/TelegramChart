@@ -108,7 +108,7 @@ class ChartView: UIView {
         if metal != nil { return }
         metal = MetalChartView(frame: bounds)
         metal.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        metal.setupBuffers(maxChartDataCount: 4, maxChartItemsCount: 400)
+        metal.setupBuffers(maxChartDataCount: 4, maxChartItemsCount: 1600)
         insertSubview(metal, at: 0)
         metalUpdateDisplay()
     }

@@ -133,10 +133,27 @@ extension ViewController { // table
                 tableView.cellForRow(at: prevIdx)?.accessoryType = .none
                 tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
                 selectedData = indexPath.row
-                chartView.data = dataArr[selectedData]
+                var data = dataArr[selectedData]
+//                data = increaseChartSize(data: increaseChartSize(data: data))
+                chartView.data = data
                 selectChartDisplay.items = ChartDataInfo.mapInfoFrom(data: chartView.data)
             }
         }
+    }
+    
+    func increaseChartSize(data: [ChartData]) -> [ChartData] {
+        var data = data
+        let count = data[0].items.count
+        for i in (0..<count).reversed() {
+            for ii in 0..<data.count {
+                var item = data[ii].items[i]
+                let items = data[ii].items
+                let time = items[items.count-1].time - items[items.count-2].time + items[items.count-1].time
+                
+                data[ii].items.append(ChartData.Item(time: time, value: item.value))
+            }
+        }
+        return data
     }
 }
 
