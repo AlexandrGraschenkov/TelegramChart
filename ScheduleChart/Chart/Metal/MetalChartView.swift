@@ -76,15 +76,17 @@ class MetalChartView: MTKView {
                         Float(drawableSize.height) / 2.0)
         globalParams = GlobalParameters(lineWidth: 4, halfViewport: viewport, transform: .identity, linePointsCount: 0)
         
-        self.clearColor = MTLClearColor.init(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
-        self.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        self.framebufferOnly = true
-        self.colorPixelFormat = .bgra8Unorm
+        clearColor = MTLClearColor.init(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        framebufferOnly = true
+        colorPixelFormat = .bgra8Unorm
         
-        // Run with 4x MSAA:
-        self.sampleCount = 4
+        // Run with 4rx MSAA:
+        sampleCount = 4
         
-        self.preferredFramesPerSecond = 60
+        preferredFramesPerSecond = 60
+        isPaused = true
+        enableSetNeedsDisplay = true
         
         self.device = device
     }
@@ -156,9 +158,5 @@ class MetalChartView: MTKView {
         
         commandBuffer.present(self.currentDrawable!)
         commandBuffer.commit()
-    }
-    
-    func displayLevels() {
-        
     }
 }

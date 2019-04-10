@@ -52,7 +52,7 @@ class ChartView: UIView {
     var selectedDate: Int64? {
         didSet {
             if selectedDate == oldValue { return }
-            setNeedsDisplay()
+            metal.setNeedsDisplay()
         }
     }
     lazy var verticalAxe: VerticalAxe = VerticalAxe(view: self)
@@ -76,10 +76,12 @@ class ChartView: UIView {
             }
             displayRange = RangeI(from: dataMinTime, to: dataMaxTime)
             dataAlpha = Array(repeating: 1.0, count: data.count)
+            horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to)
 //            updateShapesData()
-            setNeedsDisplay()
             
             metal.setupWithData(data: data)
+            metalUpdateDisplay()
+            metal.setNeedsDisplay()
         }
     }
     var shapeLayers: [CAShapeLayer] = []
@@ -108,12 +110,14 @@ class ChartView: UIView {
         metal.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         metal.setupBuffers(maxChartDataCount: 4, maxChartItemsCount: 400)
         insertSubview(metal, at: 0)
+        metalUpdateDisplay()
     }
     
     override var frame: CGRect {
         didSet {
             if oldValue.size == frame.size { return }
-            setNeedsDisplay()
+            metalUpdateDisplay()
+            metal?.setNeedsDisplay()
         }
     }
     
@@ -129,14 +133,16 @@ class ChartView: UIView {
             maxValueAnimation = val
             let fromMaxVal = maxValue
             maxValAnimatorCancel = DisplayLinkAnimator.animate(duration: animationDuration) { (percent) in
-                var percent = -percent * (percent - 2) // eqse out
+                let percent = -percent * (percent - 2) // eqse out
                 self.maxValue = (val - fromMaxVal) * Float(percent) + fromMaxVal
                 
                 if self.drawGrid {
+                    self.verticalAxe.updateLabelsPos(inset: self.chartInset)
                     self.updateLevels()
                 }
                 
-                self.setNeedsDisplay()
+                self.metalUpdateDisplay()
+                self.metal.setNeedsDisplay()
                 if percent == 1 {
                     self.maxValueAnimation = nil
                 }
@@ -144,12 +150,17 @@ class ChartView: UIView {
         } else {
             maxValue = val
             maxValueAnimation = nil
-            self.setNeedsDisplay()
+            metalUpdateDisplay()
+            metal.setNeedsDisplay()
         }
         
         if drawGrid {
             verticalAxe.setMaxVal(val, animationDuration: animationDuration)
-            updateLevels()
+            
+            if animationDuration == 0 {
+                verticalAxe.updateLabelsPos(inset: chartInset)
+                updateLevels()
+            }
         }
     }
     
@@ -160,7 +171,8 @@ class ChartView: UIView {
             displayRange.to = maxTime
             if maxValueAnimation == nil {
                 // little hack: if we ave animation with redraws, do not need to call redraw here
-                setNeedsDisplay()
+                metalUpdateDisplay()
+                metal.setNeedsDisplay()
             }
             horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to, animationDuration: 0.2)
             // TODO
@@ -171,7 +183,8 @@ class ChartView: UIView {
         rangeAnimatorCancel = DisplayLinkAnimator.animate(duration: 0.5, closure: { (percent) in
             self.displayRange.from = Int64(CGFloat(minTime - fromRange.from) * percent) + fromRange.from
             self.displayRange.to = Int64(CGFloat(maxTime - fromRange.to) * percent) + fromRange.to
-            self.setNeedsDisplay()
+            self.metalUpdateDisplay()
+            self.metal.setNeedsDisplay()
             if percent == 1 {
                 self.rangeAnimatorCancel = nil
             }
@@ -221,27 +234,7 @@ class ChartView: UIView {
         })
     }
     
-    override func draw(_ rect: CGRect) {
-        super.draw(rect)
-       
-        guard let ctx = UIGraphicsGetCurrentContext() else {
-            return
-        }
-        
-        onDrawDebug?()
-        if drawGrid {
-            if verticalAxe.maxVal == nil {
-                verticalAxe.setMaxVal(maxValue)
-            }
-            verticalAxe.drawGrid(ctx: ctx, inset: chartInset)
-            if horisontalAxe.maxTime == 0 && data.count > 0 {
-                horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to)
-            }
-            if rangeAnimatorCancel != nil {
-                horisontalAxe.layoutLabels()
-            }
-        }
-        
+    func metalUpdateDisplay() {
         var chartRect = bounds.inset(by: chartInset)
         
         var fromTime = displayRange.from
@@ -251,10 +244,8 @@ class ChartView: UIView {
                                                             inset: chartInset,
                                                             from: fromTime,
                                                             to: toTime)
-        } else {
-            ctx.clip(to: chartRect)
         }
-        metal?.display.update(maxValue: maxValue, displayRange: RangeI(from: fromTime, to: toTime), rect: chartRect)
+        metal?.display.update(maxValue: maxValue, displayRange: displayRange, rect: chartRect)
     }
     
     private func convertPos(time: Int64, val: Float, inRect rect: CGRect, fromTime: Int64, toTime: Int64) -> CGPoint {

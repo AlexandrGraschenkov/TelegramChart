@@ -160,6 +160,8 @@ class ChartCopmosedView: UIView {
             selectInfoBgColor = UIColor(red:0.11, green:0.16, blue:0.21, alpha:1.00)
         }
         displayChart.updateLevels()
+        displayChart.metal.setNeedsDisplay()
+        selectionChart.metal.setNeedsDisplay()
     }
     
     // MARK: show\hide animation
@@ -183,10 +185,10 @@ class ChartCopmosedView: UIView {
             self.displayChart.dataAlpha[index] = alpha
             self.selectionChart.dataAlpha[index] = alpha
             if !self.displayChart.isMaxValAnimating {
-                self.displayChart.setNeedsDisplay()
+                self.displayChart.metal.setNeedsDisplay()
             }
             if !self.selectionChart.isMaxValAnimating {
-                self.selectionChart.setNeedsDisplay()
+                self.selectionChart.metal.setNeedsDisplay()
             }
             if progress == 1 {
                 self.cancelShowHideAnimation[index] = nil

@@ -55,12 +55,10 @@ class VerticalAxe: NSObject {
         _ = AttachedLabelAnimator.animateAppearDismiss(appear: vertical, dismiss: oldLabels, duration: duration)
     }
     
-    func drawGrid(ctx: CGContext, inset: UIEdgeInsets) {
+    func updateLabelsPos(inset: UIEdgeInsets) {
         let drawMaxVal = view.maxValue
 
-        var attachedLabels: [AttachedLabel] = view.subviews.compactMap({$0 as? AttachedLabel})
-        attachedLabels.sort(by: {$0.alpha < $1.alpha})
-        var prevAlpha: CGFloat = 0
+        let attachedLabels: [AttachedLabel] = view.subviews.compactMap({$0 as? AttachedLabel})
         let frame = view.bounds.inset(by: UIEdgeInsets(top: inset.top, left: 0, bottom: inset.bottom, right: 0))
         for lab in attachedLabels {
             guard let val = lab.attachedValue else { continue }

@@ -61,6 +61,7 @@ class LineLevelDisplay: BaseDisplay {
     
     override func display(renderEncoder: MTLRenderCommandEncoder) {
         if lines == nil { return }
+        if linesCount == 0 { return }
         
         super.display(renderEncoder: renderEncoder)
         
