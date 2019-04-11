@@ -45,7 +45,7 @@ class ChartView: UIView {
     }
     
     var drawGrid: Bool = true
-    var gridColor: Color = Color(w: 0.9, a: 1.0)
+    var gridColor: Color = Color(w: 0.45, a: 0.2)
     var showZeroYValue: Bool = true
     var drawOutsideChart: Bool = false
     var lineWidth: CGFloat = 2.0
@@ -81,7 +81,6 @@ class ChartView: UIView {
             
             metal.setupWithData(data: data)
             metalUpdateDisplay()
-            metal.setNeedsDisplay()
         }
     }
     var shapeLayers: [CAShapeLayer] = []
@@ -108,16 +107,15 @@ class ChartView: UIView {
         if metal != nil { return }
         metal = MetalChartView(frame: bounds)
         metal.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        metal.setupBuffers(maxChartDataCount: 4, maxChartItemsCount: 1600)
+        metal.setupBuffers(maxChartDataCount: 4, maxChartItemsCount: 2*1600)
         insertSubview(metal, at: 0)
-        metalUpdateDisplay()
+//        metalUpdateDisplay()
     }
     
     override var frame: CGRect {
         didSet {
             if oldValue.size == frame.size { return }
             metalUpdateDisplay()
-            metal?.setNeedsDisplay()
         }
     }
     
@@ -133,7 +131,7 @@ class ChartView: UIView {
             maxValueAnimation = val
             let fromMaxVal = maxValue
             maxValAnimatorCancel = DisplayLinkAnimator.animate(duration: animationDuration) { (percent) in
-                let percent = -percent * (percent - 2) // eqse out
+                let percent = -percent * (percent - 2) // ease out
                 self.maxValue = (val - fromMaxVal) * Float(percent) + fromMaxVal
                 
                 if self.drawGrid {
@@ -142,7 +140,6 @@ class ChartView: UIView {
                 }
                 
                 self.metalUpdateDisplay()
-                self.metal.setNeedsDisplay()
                 if percent == 1 {
                     self.maxValueAnimation = nil
                 }
@@ -151,7 +148,6 @@ class ChartView: UIView {
             maxValue = val
             maxValueAnimation = nil
             metalUpdateDisplay()
-            metal.setNeedsDisplay()
         }
         
         if drawGrid {
@@ -172,7 +168,6 @@ class ChartView: UIView {
             if maxValueAnimation == nil {
                 // little hack: if we ave animation with redraws, do not need to call redraw here
                 metalUpdateDisplay()
-                metal.setNeedsDisplay()
             }
             horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to, animationDuration: 0.2)
             // TODO
@@ -184,7 +179,6 @@ class ChartView: UIView {
             self.displayRange.from = Int64(CGFloat(minTime - fromRange.from) * percent) + fromRange.from
             self.displayRange.to = Int64(CGFloat(maxTime - fromRange.to) * percent) + fromRange.to
             self.metalUpdateDisplay()
-            self.metal.setNeedsDisplay()
             if percent == 1 {
                 self.rangeAnimatorCancel = nil
             }
@@ -245,7 +239,9 @@ class ChartView: UIView {
                                                             from: fromTime,
                                                             to: toTime)
         }
-        metal?.display.update(maxValue: maxValue, displayRange: displayRange, rect: chartRect)
+        
+        metal?.display.update(maxValue: maxValue, displayRange: RangeI(from: fromTime, to: toTime), rect: chartRect)
+        metal?.setNeedsDisplay()
     }
     
     private func convertPos(time: Int64, val: Float, inRect rect: CGRect, fromTime: Int64, toTime: Int64) -> CGPoint {

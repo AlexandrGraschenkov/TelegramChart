@@ -47,7 +47,7 @@ class MetalChartView: MTKView {
     private var levelDisplay: LineLevelDisplay?
     var display: BaseDisplay!
     var globalParams: GlobalParameters!
-    private let mutex = Mutex()
+    let mutex = Mutex()
 
     override init(frame frameRect: CGRect, device: MTLDevice?)
     {
@@ -63,8 +63,8 @@ class MetalChartView: MTKView {
     }
     
     private func configureWithDevice(_ device : MTLDevice) {
-//        display = LineDisplay(view: self, device: device)
-        display = StackFillDisplay(view: self, device: device)
+        display = LineDisplay(view: self, device: device)
+//        display = StackFillDisplay(view: self, device: device)
         
         let viewport = (Float(drawableSize.width) / 2.0,
                         Float(drawableSize.height) / 2.0)
@@ -132,9 +132,16 @@ class MetalChartView: MTKView {
         
         
         
-        levelDisplay?.display(renderEncoder: renderEncoder)
+        let drawLineFirst = display.groupMode == .none
+        if drawLineFirst {
+            levelDisplay?.display(renderEncoder: renderEncoder)
+        }
         
         display.display(renderEncoder: renderEncoder)
+        
+        if !drawLineFirst {
+            levelDisplay?.display(renderEncoder: renderEncoder)
+        }
         
         renderEncoder.endEncoding()
         

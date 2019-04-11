@@ -47,14 +47,14 @@ class LineLevelDisplay: BaseDisplay {
             self.lines = PageAlignedContiguousArray<LineAlpha>(repeating: LineAlpha(y: 0, color: vector_float4(0, 0, 0, 0)), count: maxLinesCount)
             linesBuffer = view.device.makeBufferWithPageAlignedArray(self.lines)
             
-            var indices: [UInt16] = []
+            var indices: [IndexType] = []
             for i in 0..<maxLinesCount {
-                let ii = UInt16(i * 4)
+                let ii = IndexType(i * 4)
                 // 2 triangle
                 indices.append(contentsOf: [ii, ii+1, ii+2,
                                             ii+1, ii+2, ii+3])
             }
-            indicesBuffer = view.device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: .storageModeShared)
+            indicesBuffer = view.device.makeBuffer(bytes: indices, length: MemoryLayout<IndexType>.stride * indices.count, options: .storageModeShared)
         }
         for (idx, l) in lines.enumerated() {
             self.lines[idx] = l
@@ -69,10 +69,10 @@ class LineLevelDisplay: BaseDisplay {
         super.display(renderEncoder: renderEncoder)
         
         var global = view.globalParams!
-        global.lineWidth = 2.0
+        global.lineWidth = 2.0 / Float(UIScreen.main.scale)
         renderEncoder.setVertexBuffer(linesBuffer, offset: 0, index: 0)
         renderEncoder.setVertexBytes(&global, length: MemoryLayout<GlobalParameters>.stride, index: 1)
         
-        renderEncoder.drawIndexedPrimitives(type: .triangle, indexCount: linesCount*6, indexType: .uint16, indexBuffer: indicesBuffer, indexBufferOffset: 0)
+        renderEncoder.drawIndexedPrimitives(type: .triangle, indexCount: linesCount*6, indexType: MTLType, indexBuffer: indicesBuffer, indexBufferOffset: 0)
     }
 }

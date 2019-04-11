@@ -56,7 +56,7 @@ class ViewController: UITableViewController {
 
     @IBAction func switchChanged(control: UISwitch) {
         chartView.displayChart.drawOutsideChart = !control.isOn
-        chartView.displayChart.setNeedsDisplay()
+        chartView.displayChart.metalUpdateDisplay()
     }
     
     @IBAction func debugFpsSwitchChanged(sender: UISwitch) {
@@ -134,7 +134,8 @@ extension ViewController { // table
                 tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
                 selectedData = indexPath.row
                 var data = dataArr[selectedData]
-//                data = increaseChartSize(data: increaseChartSize(data: data))
+                data = increaseChartSize(data: increaseChartSize(data: data))
+                data = increaseChartSize(data: data)
                 chartView.data = data
                 selectChartDisplay.items = ChartDataInfo.mapInfoFrom(data: chartView.data)
             }

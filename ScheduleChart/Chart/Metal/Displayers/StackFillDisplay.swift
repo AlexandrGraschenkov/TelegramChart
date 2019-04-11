@@ -10,11 +10,13 @@ import UIKit
 import MetalKit
 
 class StackFillDisplay: BaseDisplay {
+    private let fixDrawSpacing: Float = 1.004
     
     override init(view: MetalChartView, device: MTLDevice) {
         super.init(view: view, device: device)
         
-        self.grouping = .stacked
+        reduceSwitchOffset = -0.2
+        groupMode = .stacked
         let library = device.makeDefaultLibrary()
         pipelineDescriptor.vertexFunction = library?.makeFunction(name: "stacked_fill_vertex")
         pipelineDescriptor.fragmentFunction = library?.makeFunction(name: "line_fragment")
@@ -22,11 +24,18 @@ class StackFillDisplay: BaseDisplay {
         pipelineState = (try? device.makeRenderPipelineState(descriptor: pipelineDescriptor)) as! MTLRenderPipelineState
     }
     
-    override func generateIndices(chartCount: Int, itemsCount: Int) -> [UInt16] {
-        var result: [UInt16] = []
+    override func setReducedData(idx: Int) {
+        super.setReducedData(idx: idx)
+        let data = dataReduceSwitch[currendReduceIdx]
+        let dt = data[0][1][0] - data[0][0][0]
+        view.globalParams.lineWidth = fixDrawSpacing * Float(dt)
+    }
+    
+    override func generateIndices(chartCount: Int, itemsCount: Int) -> [IndexType] {
+        var result: [IndexType] = []
         result.reserveCapacity(chartCount * itemsCount * 6)
         for i in  0..<itemsCount*chartCount {
-            let offset = UInt16(i*4)
+            let offset = IndexType(i*4)
             result.append(contentsOf: [offset, offset + 1, offset + 2,
                                        offset + 1, offset + 2, offset + 3])
         }
@@ -34,21 +43,17 @@ class StackFillDisplay: BaseDisplay {
     }
     
     override func dataUpdated() {
-        view.chartDataCount = data.count
-        view.chartItemsCount = data.first!.items.count
-        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        for (i, d) in data.enumerated() {
-            d.color.getRed(&r, green: &g, blue: &b, alpha: &a)
-            colors[i] = vector_float4(Float(r), Float(g), Float(b), Float(a))
-            
-            let vertOffset = i*view.maxChartItemsCount
-            for (ii, item) in d.items.enumerated() {
-                vertices[vertOffset + ii] = vector_float2(Float(item.time) / Float(timeDivider), Float(item.value))
-            }
-        }
+        super.dataUpdated()
         let dt = data[0].items[1].time - data[0].items[0].time
-        let fixDrawSpacing: Float = 1.0015
         view.globalParams.lineWidth = fixDrawSpacing * (Float(dt) / Float(timeDivider))
+    }
+    
+    override func prepareDisplay() {
+        if !dataAlphaUpdated || currendReduceIdx < 0 { return }
+        dataAlphaUpdated = false
+        
+        dataReduceSwitch = DataPreparer.prepare(data: data, visiblePercent: dataAlpha, timeDivider: Float(timeDivider), mode: groupMode, reduceCount: maxReduceCount)
+        setReducedData(idx: currendReduceIdx)
     }
     
     override func display(renderEncoder: MTLRenderCommandEncoder) {
@@ -57,11 +62,13 @@ class StackFillDisplay: BaseDisplay {
         renderEncoder.setVertexBuffer(colorsBuffer, offset: 0, index: 1)
         renderEncoder.setVertexBytes(&view.globalParams, length: MemoryLayout<GlobalParameters>.stride, index: 2)
         
-        for i in 0..<view.chartDataCount {
-            let wtfWhy = 2
-            let from = view.maxChartItemsCount * 6 * i * wtfWhy
-            let count = view.chartItemsCount * 6
-            renderEncoder.drawIndexedPrimitives(type: .triangle, indexCount: count, indexType: .uint16, indexBuffer: indicesBuffer, indexBufferOffset: from)
+        for i in (0..<view.chartDataCount).reversed() {
+            let wtfWhy = MemoryLayout<IndexType>.size
+            var from = view.maxChartItemsCount * 6 * i * wtfWhy
+            from += drawFrom * 6 * wtfWhy
+            let count = (drawTo-drawFrom) * 6
+            
+            renderEncoder.drawIndexedPrimitives(type: .triangle, indexCount: count, indexType: MTLType, indexBuffer: indicesBuffer, indexBufferOffset: from)
         }
     }
 

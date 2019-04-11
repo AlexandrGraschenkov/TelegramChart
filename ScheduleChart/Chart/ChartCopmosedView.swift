@@ -62,7 +62,7 @@ class ChartCopmosedView: UIView {
         if visibleData.count > 0 {
             runMaxValueChangeAnimation(data: visibleData, animDuration: maxValDuration)
         }
-        runShowHideAnimation(dataIndex: index, show: show, animDuration: animDuration)
+        runShowHideAnimation(dataIndex: index, show: show, animDuration: alphaDuration)
         if let date = displayChart.selectedDate, selectInfoView != nil {
             updateInfoSlectedDate(date: date)
         }
@@ -95,6 +95,7 @@ class ChartCopmosedView: UIView {
         }
     }
     private var maxValDuration: Double = 0.3
+    private var alphaDuration: Double = 0.3
     private var selectInfoView: SelctionInfoView?
     private var dataIsVisible: [Bool] = []
     private var visibleData: [ChartData] {
@@ -148,7 +149,7 @@ class ChartCopmosedView: UIView {
             displayChart.metal.clearColor = bg.metalClear
             selectionChart.metal.clearColor = bg.metalClear
             
-            displayChart.gridColor = Color(w: 0.9, a: 1.0)
+            displayChart.gridColor = Color(w: 0.45, a: 0.2)
             selectInfoBgColor = UIColor(red:0.94, green:0.94, blue:0.96, alpha:1.00)
         case .night:
             let bg = Color(r: 0.14, g: 0.18, b: 0.24, a: 1)
@@ -156,7 +157,7 @@ class ChartCopmosedView: UIView {
             displayChart.metal.clearColor = bg.metalClear
             selectionChart.metal.clearColor = bg.metalClear
             
-            displayChart.gridColor = Color(r: 0.11, g: 0.15, b: 0.20, a: 1)
+            displayChart.gridColor = Color(r: 0.22, g: 0.3, b: 0.4, a: 0.5)
             selectInfoBgColor = UIColor(red:0.11, green:0.16, blue:0.21, alpha:1.00)
         }
         displayChart.updateLevels()
@@ -181,6 +182,7 @@ class ChartCopmosedView: UIView {
         let startAlpha = displayChart.dataAlpha[index]
         let endAlpha: CGFloat = show ? 1 : 0
         let cancel = DisplayLinkAnimator.animate(duration: animDuration) { (progress) in
+            let progress = -progress * (progress - 2) // ease out
             let alpha = (endAlpha - startAlpha) * progress + startAlpha
             self.displayChart.dataAlpha[index] = alpha
             self.selectionChart.dataAlpha[index] = alpha

@@ -25,8 +25,6 @@ class VerticalAxe: NSObject {
     let view: ChartView
     var labelsPool: LabelsPool { return view.labelsPool }
     var levelsCount = 5
-    var gridColor: Color = Color(w: 0.9, a: 1.0)
-    
     
     fileprivate(set) var maxVal: Float!
     var vertical: [AttachedLabel] = []

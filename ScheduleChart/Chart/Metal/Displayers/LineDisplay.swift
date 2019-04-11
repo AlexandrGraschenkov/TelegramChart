@@ -10,11 +10,6 @@ import UIKit
 import MetalKit
 
 class LineDisplay: BaseDisplay {
-
-    private var dataAlphaUpdated = false
-    override var dataAlpha: [CGFloat] {
-        didSet { dataAlphaUpdated = true }
-    }
     
     override init(view: MetalChartView, device: MTLDevice) {
         super.init(view: view, device: device)
@@ -24,21 +19,6 @@ class LineDisplay: BaseDisplay {
         pipelineDescriptor.fragmentFunction = library?.makeFunction(name: "line_fragment")
         
         pipelineState = (try? device.makeRenderPipelineState(descriptor: pipelineDescriptor)) as! MTLRenderPipelineState
-    }
-    
-    override func dataUpdated() {
-        view.chartDataCount = data.count
-        view.chartItemsCount = data.first!.items.count
-        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        for (i, d) in data.enumerated() {
-            d.color.getRed(&r, green: &g, blue: &b, alpha: &a)
-            colors[i] = vector_float4(Float(r), Float(g), Float(b), Float(a))
-            
-            let vertOffset = i*view.maxChartItemsCount
-            for (ii, item) in d.items.enumerated() {
-                vertices[vertOffset + ii] = vector_float2(Float(item.time) / Float(timeDivider), Float(item.value))
-            }
-        }
     }
     
     override func prepareDisplay() {
@@ -56,10 +36,12 @@ class LineDisplay: BaseDisplay {
         renderEncoder.setVertexBytes(&view.globalParams, length: MemoryLayout<GlobalParameters>.stride, index: 2)
         
         for i in 0..<view.chartDataCount {
-            let wtfWhy = 2
-            let from = view.maxChartItemsCount * 4 * i * wtfWhy
-            let count = (view.chartItemsCount-1) * 4
-            renderEncoder.drawIndexedPrimitives(type: .triangleStrip, indexCount: count, indexType: .uint16, indexBuffer: indicesBuffer, indexBufferOffset: from)
+            let wtfWhy = MemoryLayout<IndexType>.size
+            var from = view.maxChartItemsCount * 4 * i * wtfWhy
+            from += drawFrom * 4 * wtfWhy
+            let count = (drawTo-drawFrom-1) * 4
+            
+            renderEncoder.drawIndexedPrimitives(type: .triangleStrip, indexCount: count, indexType: MTLType, indexBuffer: indicesBuffer, indexBufferOffset: from)
         }
     }
 }
