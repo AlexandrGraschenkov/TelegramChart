@@ -26,7 +26,6 @@ class ChartSelectionView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
-        setupGestures()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -44,6 +43,15 @@ class ChartSelectionView: UIView {
         didSet { updateMode() }
     }
     weak var delegate: ChartSelectionViewDelegate?
+    
+    
+    func setupGestures(view: UIView) {
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(onPan(pan:)))
+        panGesture.delegate = self
+        view.addGestureRecognizer(panGesture)
+        self.panGesture = panGesture
+    }
+    
     
     // MARK: private
     private var leftOverlay: UIView!
@@ -84,19 +92,6 @@ class ChartSelectionView: UIView {
         rightOverlay.backgroundColor = overlayColor
         leftOverlay.backgroundColor = overlayColor
     }
-    
-    private func setupGestures() {
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(onPan(pan:)))
-        panGesture.delegate = self
-        addGestureRecognizer(panGesture)
-        self.panGesture = panGesture
-//        var s = superview
-//        while s != nil && !(s is UITableView) {
-//            s = s?.superview
-//        }
-//        print(s?.gestureRecognizers)
-    }
-    
     
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -185,7 +180,7 @@ class ChartSelectionView: UIView {
 
 extension ChartSelectionView: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        if gestureRecognizer == panGesture {
+        if gestureRecognizer == panGesture && checkRect(g: gestureRecognizer) {
             let t = panGesture!.translation(in: self)
             if abs(t.y) < abs(t.x) {
                 otherGestureRecognizer.isEnabled = false
@@ -200,6 +195,10 @@ extension ChartSelectionView: UIGestureRecognizerDelegate {
             return super.gestureRecognizerShouldBegin(g)
         }
         
+        if !checkRect(g: g) {
+            return false
+        }
+        
         if let pan = g as? UIPanGestureRecognizer {
             let t = pan.translation(in: self)
             if abs(t.y) > abs(t.x) {
@@ -207,5 +206,10 @@ extension ChartSelectionView: UIGestureRecognizerDelegate {
             }
         }
         return true
+    }
+    
+    private func checkRect(g: UIGestureRecognizer) -> Bool {
+        let expandFrame = frame.insetBy(dx: -15, dy: -4)
+        return expandFrame.contains(panGesture!.location(in: self))
     }
 }

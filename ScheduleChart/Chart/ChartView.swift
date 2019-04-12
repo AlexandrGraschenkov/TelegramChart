@@ -29,12 +29,21 @@ struct Color {
         self.a = a
     }
     
+    init(color: UIColor) {
+        r = 0; g = 0; b = 0; a = 0
+        color.getRed(&r, green: &g, blue: &b, alpha: &a)
+    }
+    
     var uiColor: UIColor {
         return UIColor(red: r, green: g, blue: b, alpha: a)
     }
     
     var metalClear: MTLClearColor {
         return MTLClearColor(red: Double(r), green: Double(g), blue: Double(b), alpha: Double(a))
+    }
+    
+    var vector: vector_float4 {
+        return vector_float4(Float(r), Float(g), Float(b), Float(a))
     }
 }
 
@@ -46,13 +55,16 @@ class ChartView: UIView {
     
     var drawGrid: Bool = true
     var gridColor: Color = Color(w: 0.45, a: 0.2)
-    var showZeroYValue: Bool = true
     var drawOutsideChart: Bool = false
-    var lineWidth: CGFloat = 2.0
     var selectedDate: Int64? {
         didSet {
             if selectedDate == oldValue { return }
-            metal.setNeedsDisplay()
+            metal.display.setSelectionDate(date: selectedDate)
+        }
+    }
+    var isSelectionView: Bool = false {
+        didSet {
+            metal?.isSelectionChart = isSelectionView
         }
     }
     lazy var verticalAxe: VerticalAxe = VerticalAxe(view: self)
@@ -60,33 +72,29 @@ class ChartView: UIView {
     let labelsPool: LabelsPool = LabelsPool()
     var metal: MetalChartView!
     
-    var data: [ChartData] = [] {
+    var data: ChartGroupData? {
         didSet {
-            setupMetal()
-            dataMinTime = -1
-            dataMaxTime = -1
-            for d in data {
-                if dataMinTime < 0 {
-                    dataMinTime = d.items.first!.time
-                    dataMaxTime = d.items.last!.time
-                    continue
-                }
-                dataMinTime = min(dataMinTime, d.items.first!.time)
-                dataMaxTime = max(dataMaxTime, d.items.last!.time)
+            guard let groupData = data else {
+                cleanUp()
+                return
             }
-            displayRange = RangeI(from: dataMinTime, to: dataMaxTime)
-            dataAlpha = Array(repeating: 1.0, count: data.count)
-            horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to)
-//            updateShapesData()
             
-            metal.setupWithData(data: data)
+            setupMetal()
+            dataMinTime = groupData.getMinTime()
+            dataMaxTime = groupData.getMaxTime()
+            displayRange = RangeI(from: dataMinTime, to: dataMaxTime)
+            dataAlpha = groupData.data.map({$0.visible ? CGFloat(1.0) : CGFloat(0.0)})
+            horisontalAxe.setRange(minTime: displayRange.from, maxTime: displayRange.to)
+            
+            metal.setupWithData(data: groupData)
+            metal.isHidden = false
             metalUpdateDisplay()
         }
     }
     var shapeLayers: [CAShapeLayer] = []
     var dataAlpha: [CGFloat] = [] {
         didSet {
-            metal.display.dataAlpha = dataAlpha
+            metal?.display?.dataAlpha = dataAlpha
         }
     }
     private(set) var dataMinTime: Int64 = -1
@@ -103,13 +111,18 @@ class ChartView: UIView {
         return maxValueAnimation != nil
     }
     
-    func setupMetal() {
+    private func setupMetal() {
         if metal != nil { return }
         metal = MetalChartView(frame: bounds)
+        metal.isSelectionChart = isSelectionView
         metal.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        metal.setupBuffers(maxChartDataCount: 4, maxChartItemsCount: 2*1600)
+        metal.setupBuffers(maxChartDataCount: 10, maxChartItemsCount: 1000)
         insertSubview(metal, at: 0)
 //        metalUpdateDisplay()
+    }
+    
+    private func cleanUp() {
+        metal?.isHidden = true
     }
     
     override var frame: CGRect {

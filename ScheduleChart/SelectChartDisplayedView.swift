@@ -13,74 +13,108 @@ struct ChartDataInfo {
     let color: UIColor
     var selected: Bool
     
-    static func mapInfoFrom(data: [ChartData]) -> [ChartDataInfo] {
-        return data.enumerated().map({ (offset, element) -> ChartDataInfo in
+    static func mapInfoFrom(groupData: ChartGroupData) -> [ChartDataInfo] {
+        return groupData.data.enumerated().map({ (offset, element) -> ChartDataInfo in
             return ChartDataInfo(name: element.name ?? "Data \(offset)",
                 color: element.color,
-                selected: true)
+                selected: element.visible)
         })
     }
 }
 
 protocol SelectChartDisplayedViewDelegate: class {
-    func chartDataDisplayChanged(index: Int, display: Bool)
+    func chartDataRequestDisplayChange(index: Int, display: Bool) -> Bool
 }
 
-class SelectChartDisplayedView: UIScrollView {
+class SelectChartDisplayedView: UIView {
+    
+    private static let defaultFont: UIFont = UIFont.systemFont(ofSize: 15)
+    
+    static func getHeightAndLayout(groupData: ChartGroupData, fixedWidth: CGFloat, layoutButtons: [UIButton] = []) -> CGFloat {
+        let infos = ChartDataInfo.mapInfoFrom(groupData: groupData)
+        if infos.count <= 1 {
+            return 0
+        }
+        
+        let buttAdditionalWidth: CGFloat = 20
+        let heightStep: CGFloat = 50
+        let xOffset: CGFloat = 10
+        let buttHeight: CGFloat = 30
+        var offset: CGPoint = CGPoint(x: xOffset, y: 0)
+        for (idx, info) in infos.enumerated() {
+            var width = (info.name as NSString).size(withAttributes: [NSAttributedString.Key.font : defaultFont]).width
+            width += buttAdditionalWidth
+            
+            if idx < layoutButtons.count {
+                layoutButtons[idx].frame = CGRect(x: offset.x,
+                                                  y: offset.y + (heightStep - buttHeight)/2.0,
+                                                  width: width,
+                                                  height: buttHeight)
+            }
+            
+            offset.x += width + xOffset
+            if offset.x > fixedWidth {
+                offset.y += heightStep
+                offset.x = xOffset
+            }
+        }
+        
+        return offset.y + heightStep
+    }
     
     weak var displayDelegate: SelectChartDisplayedViewDelegate?
     
-    var items: [ChartDataInfo] = [] {
-        didSet {
-            updateButtons()
+    func display(groupData: ChartGroupData) {
+        if groupData.data.count <= 1 {
+            while buttons.count > 0 {
+                buttons.popLast()?.removeFromSuperview()
+            }
+            return
         }
-    }
-    
-    var titleColor: UIColor = .black {
-        didSet {
-            buttons.forEach({$0.setTitleColor(titleColor, for: .normal)})
-        }
-    }
-    
-    
-    // MARK: private
-    private lazy var selectedIcon = UIImage(named: "selected_icon")?.withRenderingMode(.alwaysTemplate)
-    private lazy var deselectedIcon = UIImage(named: "unselected_icon")?.withRenderingMode(.alwaysTemplate)
-    private lazy var bgImage = UIImage(named: "borders")?.resizableImage(withCapInsets: UIEdgeInsets(top: 15, left: 15, bottom: 15, right: 15))
-    private var buttons: [UIButton] = []
-    private var buttHeight: CGFloat = 40.0
-    
-    private func updateButtons() {
-        while buttons.count > items.count {
+        
+        while buttons.count > groupData.data.count {
             buttons.popLast()?.removeFromSuperview()
         }
-        while buttons.count < items.count {
+        while buttons.count < groupData.data.count {
             buttons.append(generateButton())
         }
         
-        var offset: CGPoint = CGPoint(x: 10, y: (bounds.height - buttHeight) / 2.0)
-        for (item, butt) in zip(items, buttons) {
+        for (item, butt) in zip(groupData.data, buttons) {
             butt.setTitle(item.name, for: .normal)
             butt.tintColor = item.color
-            butt.isSelected = item.selected
-            let fitSize = butt.sizeThatFits(CGSize(width: 200, height: buttHeight))
-            let fitWidth = ceil(fitSize.width) + 10.0
-            butt.frame = CGRect(x: offset.x, y: offset.y, width: fitWidth, height: buttHeight)
-            offset.x = butt.frame.maxX + 10
+            butt.setTitleColor(item.color, for: .normal)
+            butt.isSelected = item.visible
         }
-        contentSize = CGSize(width: offset.x, height: 0)
+        
+        _ = SelectChartDisplayedView.getHeightAndLayout(groupData: groupData, fixedWidth: bounds.size.width, layoutButtons: buttons)
     }
+    
+    var titleColor: UIColor = .white {
+        didSet {
+            buttons.forEach({$0.setTitleColor(titleColor, for: .selected)})
+        }
+    }
+    
+    
+    
+    // MARK: private
+    private lazy var checkmarkIcon = UIImage(named: "checkmark")
+    private lazy var bgSelectedImage = UIImage(named: "butt_selected")?.resizableImage(withCapInsets: UIEdgeInsets(top: 7, left: 7, bottom: 7, right: 7)).withRenderingMode(.alwaysTemplate)
+    private lazy var bgDeselectedImage = UIImage(named: "butt_deselected")?.resizableImage(withCapInsets: UIEdgeInsets(top: 7, left: 7, bottom: 7, right: 7)).withRenderingMode(.alwaysTemplate)
+    private var buttons: [UIButton] = []
+    private var buttHeight: CGFloat = 30.0
     
     private func generateButton() -> UIButton {
         let butt = UIButton(frame: CGRect(x: 0, y: 0, width: 50, height: buttHeight))
         butt.autoresizingMask = [.flexibleRightMargin, .flexibleTopMargin, .flexibleBottomMargin]
         butt.titleLabel?.font = UIFont.systemFont(ofSize: 15)
-        butt.setTitleColor(titleColor, for: .normal)
-        butt.contentEdgeInsets = UIEdgeInsets(top: 0, left: 7, bottom: 0, right: 10)
+        butt.setTitleColor(titleColor, for: .selected)
+        butt.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 7)
         butt.titleEdgeInsets = UIEdgeInsets(top: 0, left: 7, bottom: 0, right: 0)
-        butt.setBackgroundImage(bgImage, for: .normal)
-        butt.setImage(selectedIcon, for: .selected)
-        butt.setImage(deselectedIcon, for: .normal)
+        butt.setBackgroundImage(bgSelectedImage, for: .selected)
+        butt.setBackgroundImage(bgDeselectedImage, for: .normal)
+        butt.setImage(checkmarkIcon, for: .selected)
+        butt.setImage(nil, for: .normal)
         butt.addTarget(self, action: #selector(itemButtonPressed(_:)), for: .touchUpInside)
         addSubview(butt)
         return butt
@@ -90,8 +124,16 @@ class SelectChartDisplayedView: UIScrollView {
         guard let idx = buttons.firstIndex(of: butt) else {
             return
         }
+        let display = !butt.isSelected
+        let allow = displayDelegate?.chartDataRequestDisplayChange(index: idx, display: display)
         
-        butt.isSelected = !butt.isSelected
-        displayDelegate?.chartDataDisplayChanged(index: idx, display: butt.isSelected)
+        if allow ?? true {
+            UIView.animate(withDuration: 0.2) {
+                // я конечно могу и тут заморочится со всякими анимациями
+                // но сон дороже
+                butt.isSelected = display
+                butt.layoutIfNeeded()
+            }
+        }
     }
 }

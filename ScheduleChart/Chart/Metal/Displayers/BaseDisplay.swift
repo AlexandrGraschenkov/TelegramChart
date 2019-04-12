@@ -26,25 +26,25 @@ class BaseDisplay: NSObject {
     typealias RangeI = ChartView.RangeI
     
     var view: MetalChartView
-    var chartDataCount: Int = 0
-    var chartItemsCount: Int = 0
-    var data: [ChartData] = [] {
+    var data: ChartGroupData? {
         didSet { dataUpdated() }
     }
+    var chartDataCount: Int = 0
+    var chartItemsCount: Int = 0
     
     var dataAlphaUpdated = false
     var dataAlpha: [CGFloat] = [] {
         didSet { dataAlphaUpdated = true }
     }
     
-    let timeDivider: CGFloat = 100_000
+    let timeDivider: Float = 100_000
     var groupMode: GroupMode = .none
     var showGrid: Bool = true // false for PieChart
     
     var dataReduceSwitch: [[[vector_float2]]] = []
     var currendReduceIdx: Int = -1
     let maxReduceCount: Int = 4
-    var reduceSwitchOffset: CGFloat = -0.5
+    var reduceSwitchOffset: Float = -0.5
     var indices : [IndexType] = []
     var vertices: PageAlignedContiguousArray<vector_float2>!
     var colors: PageAlignedContiguousArray<vector_float4>!
@@ -54,6 +54,7 @@ class BaseDisplay: NSObject {
     var colorsBuffer : MTLBuffer!
     var drawFrom: Int = 0
     var drawTo: Int = 0
+    var selectionDate: Int64?
     
     
     var pipelineDescriptor = MTLRenderPipelineDescriptor()
@@ -105,29 +106,30 @@ class BaseDisplay: NSObject {
         view.globalParams.transform = t.getMatrix()
         
         // data reduce
-        if data.count == 0 { return }
-        let reduceCount = dataReduceSwitch.count
-        let time1 = CGFloat(data[0].items.first!.time) / timeDivider
-        let time2 = CGFloat(data[0].items.last!.time) / timeDivider
-        let to = CGFloat(displayRange.to) / timeDivider
-        let from = CGFloat(displayRange.from) / timeDivider
-        let count = CGFloat(data[0].items.count)
-        let displayCount = (to - from) * count / (time2 - time1)
+        guard let groupData = data, groupData.data.count > 0 else { return }
         
-        var optimalReduceIdx = log2(displayCount / rect.width) + reduceSwitchOffset
+        let reduceCount = dataReduceSwitch.count
+        let minTime = Float(groupData.getMinTime()) / timeDivider
+        let maxTime = Float(groupData.getMaxTime()) / timeDivider
+        let to = Float(displayRange.to) / timeDivider
+        let from = Float(displayRange.from) / timeDivider
+        let count = Float(groupData.itemsCount)
+        let displayCount = (to - from) * count / (maxTime - minTime)
+        
+        var optimalReduceIdx = log2(displayCount / Float(rect.width)) + reduceSwitchOffset
         optimalReduceIdx = max(0, optimalReduceIdx)
-        if currendReduceIdx == -1 || abs(CGFloat(currendReduceIdx) - optimalReduceIdx) > 0.6 {
+        if currendReduceIdx == -1 || abs(Float(currendReduceIdx) - optimalReduceIdx) > 0.6 {
             let idx = min(reduceCount-1, Int(round(optimalReduceIdx)))
             setReducedData(idx: idx)
         }
         
-        let fromPercent: CGFloat = (from - time1) / (time2 - time1)
-        drawFrom = Int(floor(fromPercent * CGFloat(view.chartItemsCount)))
-        drawFrom = max(0, drawFrom)
+        let fromPercent: Float = (from - minTime) / (maxTime - minTime)
+        drawFrom = Int(floor(fromPercent * Float(chartItemsCount)))
+        drawFrom = max(0, drawFrom-1)
         
-        let toPercent: CGFloat = (to - time1) / (time2 - time1)
-        drawTo = Int(ceil(toPercent * CGFloat(view.chartItemsCount)))
-        drawTo = min(drawTo, view.chartItemsCount)
+        let toPercent: Float = (to - minTime) / (maxTime - minTime)
+        drawTo = Int(ceil(toPercent * Float(chartItemsCount)))
+        drawTo = min(drawTo+1, chartItemsCount)
     }
     
     func setReducedData(idx: Int) {
@@ -137,25 +139,36 @@ class BaseDisplay: NSObject {
             let vertOffset = i*view.maxChartItemsCount
             vertices.replaceSubrange(vertOffset..<vertOffset+d.count, with: d)
         }
-        view.chartItemsCount = dataReduceSwitch[idx][0].count
+        chartItemsCount = dataReduceSwitch[idx][0].count
     }
     
     func dataUpdated() {
-        view.chartDataCount = data.count
-        view.chartItemsCount = data.first!.items.count
+        guard let groupData = data, groupData.data.count > 0 else {
+            chartDataCount = 0
+            chartItemsCount = 0
+            return
+        }
         
-        dataAlpha = Array(repeating: 1, count: data.count)
-        dataReduceSwitch = DataPreparer.prepare(data: data, visiblePercent: dataAlpha, timeDivider: Float(timeDivider), mode: groupMode, reduceCount: maxReduceCount)
+        chartDataCount = groupData.data.count
+        chartItemsCount = groupData.itemsCount
+        
+        dataAlpha = groupData.data.map({$0.visible ? CGFloat(1.0) : CGFloat(0.0)})
+        dataReduceSwitch = DataPreparer.prepare(data: groupData.data, visiblePercent: dataAlpha, timeDivider: Float(timeDivider), mode: groupMode, reduceCount: maxReduceCount)
         currendReduceIdx = -1
         dataAlphaUpdated = false
         
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        for (i, d) in data.enumerated() {
+        for (i, d) in groupData.data.enumerated() {
             d.color.getRed(&r, green: &g, blue: &b, alpha: &a)
             colors[i] = vector_float4(Float(r), Float(g), Float(b), Float(a))
         }
     }
     
+    func setSelectionDate(date: Int64?) {
+        selectionDate = date
+    }
+    
+    // MARK: - display
     func prepareDisplay() {
         // optional
     }
@@ -165,8 +178,8 @@ class BaseDisplay: NSObject {
     }
     
     func calculateTransform(maxValue: Float, displayRange: RangeI, rect: CGRect) -> CGAffineTransform {
-        let fromTime = CGFloat(displayRange.from)/timeDivider
-        let toTime = CGFloat(displayRange.to)/timeDivider
+        let fromTime = CGFloat(displayRange.from)/CGFloat(timeDivider)
+        let toTime = CGFloat(displayRange.to)/CGFloat(timeDivider)
         let maxValue = CGFloat(maxValue)
         
         var t: CGAffineTransform = .identity

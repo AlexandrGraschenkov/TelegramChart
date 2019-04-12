@@ -11,6 +11,7 @@ import MetalKit
 
 class StackFillDisplay: BaseDisplay {
     private let fixDrawSpacing: Float = 1.004
+    private lazy var selectionDraw: StackFillDisplaySelection = StackFillDisplaySelection(view: self.view)
     
     override init(view: MetalChartView, device: MTLDevice) {
         super.init(view: view, device: device)
@@ -44,15 +45,23 @@ class StackFillDisplay: BaseDisplay {
     
     override func dataUpdated() {
         super.dataUpdated()
-        let dt = data[0].items[1].time - data[0].items[0].time
-        view.globalParams.lineWidth = fixDrawSpacing * (Float(dt) / Float(timeDivider))
+        guard let groupData = data else { return }
+        let dt = groupData.data[0].items[1].time - groupData.data[0].items[0].time
+        view.globalParams.lineWidth = fixDrawSpacing * (Float(dt) / timeDivider)
+    }
+    
+    
+    override func setSelectionDate(date: Int64?) {
+        super.setSelectionDate(date: date)
+        view.setNeedsDisplay()
     }
     
     override func prepareDisplay() {
         if !dataAlphaUpdated || currendReduceIdx < 0 { return }
+        guard let groupData = data else { return }
         dataAlphaUpdated = false
         
-        dataReduceSwitch = DataPreparer.prepare(data: data, visiblePercent: dataAlpha, timeDivider: Float(timeDivider), mode: groupMode, reduceCount: maxReduceCount)
+        dataReduceSwitch = DataPreparer.prepare(data: groupData.data, visiblePercent: dataAlpha, timeDivider: timeDivider, mode: groupMode, reduceCount: maxReduceCount)
         setReducedData(idx: currendReduceIdx)
     }
     
@@ -62,13 +71,18 @@ class StackFillDisplay: BaseDisplay {
         renderEncoder.setVertexBuffer(colorsBuffer, offset: 0, index: 1)
         renderEncoder.setVertexBytes(&view.globalParams, length: MemoryLayout<GlobalParameters>.stride, index: 2)
         
-        for i in (0..<view.chartDataCount).reversed() {
+        for i in (0..<chartDataCount).reversed() {
             let wtfWhy = MemoryLayout<IndexType>.size
             var from = view.maxChartItemsCount * 6 * i * wtfWhy
             from += drawFrom * 6 * wtfWhy
             let count = (drawTo-drawFrom) * 6
             
             renderEncoder.drawIndexedPrimitives(type: .triangle, indexCount: count, indexType: MTLType, indexBuffer: indicesBuffer, indexBufferOffset: from)
+        }
+        
+        if let date = selectionDate {
+            let dateDivided = Float(date) / timeDivider
+            selectionDraw.drawSelection(renderEncoder: renderEncoder, time: dateDivided, width: view.globalParams.lineWidth, reuseTriangleIndexes: indicesBuffer)
         }
     }
 

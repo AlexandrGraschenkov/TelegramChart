@@ -35,7 +35,7 @@ class SelctionInfoView: UIView {
     
     func update(data: [ChartData], time: Int64) {
         if data.count == 0 { return }
-        guard let idx = data[0].ceilIndex(time: time) else { return }
+        guard let idx = data[0].getClosestDate(date: time, mode: .ceil)?.0 else { return }
         
         yearLabel.text = yearFormatter(time)
         dateLabel.text = dateFormatter(time)

@@ -17,7 +17,9 @@ class DataPreparer: NSObject {
     
     static func prepare(data:[ChartData], visiblePercent: [CGFloat], timeDivider: Float, mode: GroupMode, reduceCount: Int = 0) -> [[[vector_float2]]] {
         var result: [[vector_float2]] = []
-        for (v, d) in zip(visiblePercent, data) {
+        result.reserveCapacity(data.count)
+        
+        for d in data {
             var vec: [vector_float2] = []
             vec.reserveCapacity(d.items.count)
             
@@ -69,6 +71,9 @@ class DataPreparer: NSObject {
                 var total: Float = 0
                 for i in 0..<data.count {
                     total += data[i][ii][1]
+                    if i > 0 {
+                        data[i][ii][1] += data[i-1][ii][1]
+                    }
                 }
                 total /= 100.0
                 for i in 0..<data.count {

@@ -17,7 +17,7 @@ struct GlobalParameters {
     var lineWidth: Float
     var halfViewport: (Float, Float)
     var transform: matrix_float3x3
-    var linePointsCount: UInt16
+    var linePointsCount: UInt32
 }
 
 extension matrix_float3x3 {
@@ -36,8 +36,7 @@ class MetalChartView: MTKView {
     
     private(set) var maxChartDataCount: Int = 0
     private(set) var maxChartItemsCount: Int = 0
-    var chartDataCount: Int = 0
-    var chartItemsCount: Int = 0
+    var isSelectionChart: Bool = false
     
     private var commandQueue: MTLCommandQueue! = nil
     private var library: MTLLibrary! = nil
@@ -62,9 +61,29 @@ class MetalChartView: MTKView {
         configureWithDevice(MTLCreateSystemDefaultDevice()!)
     }
     
+    func updateChartType(chartType: ChartType) {
+        switch chartType {
+        case .line:
+            if !(display is LineDisplay) {
+                display = LineDisplay(view: self, device: device!)
+            }
+        case .stacked:
+            if !(display is StackFillDisplay) {
+                display = StackFillDisplay(view: self, device: device!)
+            }
+        case .percentage:
+            if !(display is PercentFillDisplay) {
+                display = PercentFillDisplay(view: self, device: device!)
+            }
+        }
+        
+        display?.setupBuffers(maxChartDataCount: maxChartDataCount, maxChartItemsCount: maxChartItemsCount)
+    }
+    
     private func configureWithDevice(_ device : MTLDevice) {
-        display = LineDisplay(view: self, device: device)
+//        display = LineDisplay(view: self, device: device)
 //        display = StackFillDisplay(view: self, device: device)
+//        display = PercentFillDisplay(view: self, device: device)
         
         let viewport = (Float(drawableSize.width) / 2.0,
                         Float(drawableSize.height) / 2.0)
@@ -96,15 +115,17 @@ class MetalChartView: MTKView {
     func setupBuffers(maxChartDataCount: Int, maxChartItemsCount: Int) {
         self.maxChartDataCount = maxChartDataCount
         self.maxChartItemsCount = maxChartItemsCount
-        globalParams.linePointsCount = UInt16(maxChartItemsCount)
+        globalParams.linePointsCount = UInt32(maxChartItemsCount)
+        print(globalParams.linePointsCount)
         
-        display.setupBuffers(maxChartDataCount: maxChartDataCount, maxChartItemsCount: maxChartItemsCount)
+        display?.setupBuffers(maxChartDataCount: maxChartDataCount, maxChartItemsCount: maxChartItemsCount)
     }
     
-    func setupWithData(data: [ChartData]) {
+    func setupWithData(data: ChartGroupData) {
         mutex.lock()
         defer { mutex.unlock() }
 
+        updateChartType(chartType: data.type)
         display.data = data
     }
     
@@ -122,14 +143,16 @@ class MetalChartView: MTKView {
         display.prepareDisplay()
         
         mutex.lock()
-        defer { mutex.unlock() }
         
         guard let commandBuffer = commandQueue!.makeCommandBuffer(),
             let renderPassDescriptor = self.currentRenderPassDescriptor,
             let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
+                mutex.unlock()
             return
         }
-        
+        commandBuffer.addCompletedHandler { (_) in
+            self.mutex.unlock()
+        }
         
         
         let drawLineFirst = display.groupMode == .none

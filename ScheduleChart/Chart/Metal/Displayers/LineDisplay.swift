@@ -22,6 +22,9 @@ class LineDisplay: BaseDisplay {
     }
     
     override func prepareDisplay() {
+        let scale = Float(UIScreen.main.scale)
+        view.globalParams.lineWidth = view.isSelectionChart ? 1.5*scale : 2.0*scale
+        
         if !dataAlphaUpdated { return }
         for i in 0..<dataAlpha.count {
             colors[i][3] = Float(dataAlpha[i])
@@ -35,7 +38,7 @@ class LineDisplay: BaseDisplay {
         renderEncoder.setVertexBuffer(colorsBuffer, offset: 0, index: 1)
         renderEncoder.setVertexBytes(&view.globalParams, length: MemoryLayout<GlobalParameters>.stride, index: 2)
         
-        for i in 0..<view.chartDataCount {
+        for i in 0..<chartDataCount {
             let wtfWhy = MemoryLayout<IndexType>.size
             var from = view.maxChartItemsCount * 4 * i * wtfWhy
             from += drawFrom * 4 * wtfWhy

@@ -37,32 +37,36 @@ class ChartCopmosedView: UIView {
         didSet { updateMode() }
     }
     
-    var data: [ChartData] = [] {
+    var data: ChartGroupData? {
         didSet {
             cancelShowHideAnimation.values.forEach({$0()})
             cancelShowHideAnimation.removeAll()
             selectionChart.data = data
             displayChart.data = data
             
-            dataIsVisible = Array(repeating: true, count: data.count)
-            let maxVal = DataMaxValCalculator.getMaxValue(data, dividableBy: levelsCount)
+            let maxVal: Float
+            if displayChart.metal.display.groupMode == .percentage {
+                maxVal = 125
+            } else {
+                maxVal = DataMaxValCalculator.getMaxValue(visibleData, dividableBy: levelsCount)
+            }
             selectionChart.setMaxVal(val: maxVal, animationDuration: 0)
             displayChart.setMaxVal(val: maxVal, animationDuration: 0)
             resetState()
         }
     }
     
-    func setShowData(index: Int, show: Bool, animated: Bool) {
-        if index < 0 || index >= dataIsVisible.count { return }
-        if dataIsVisible[index] == show { return }
+    func setDisplayData(index: Int, display: Bool, animated: Bool) {
+        guard let groupData = data else { return }
+        if index < 0 || index >= groupData.data.count { return }
         
-        dataIsVisible[index] = show
-        let animDuration: Double = 0.2
-        
+        if groupData.data[index].visible != display {
+            groupData.data[index].visible = display
+        }
         if visibleData.count > 0 {
             runMaxValueChangeAnimation(data: visibleData, animDuration: maxValDuration)
         }
-        runShowHideAnimation(dataIndex: index, show: show, animDuration: alphaDuration)
+        runShowHideAnimation(dataIndex: index, show: display, animDuration: alphaDuration)
         if let date = displayChart.selectedDate, selectInfoView != nil {
             updateInfoSlectedDate(date: date)
         }
@@ -97,16 +101,18 @@ class ChartCopmosedView: UIView {
     private var maxValDuration: Double = 0.3
     private var alphaDuration: Double = 0.3
     private var selectInfoView: SelctionInfoView?
-    private var dataIsVisible: [Bool] = []
     private var visibleData: [ChartData] {
-        return zip(data, dataIsVisible).compactMap({$0.1 ? $0.0 : nil})
+        guard let groupData = data else {
+            return []
+        }
+        return groupData.data.filter({$0.visible})
     }
     private var cancelShowHideAnimation: [Int: Cancelable] = [:]
     private var panGesture: UIPanGestureRecognizer!
     
     private func setup() {
         selectionChart = ChartView()
-        selectionChart.lineWidth = 1.5
+        selectionChart.isSelectionView = true
         selectionChart.backgroundColor = backgroundColor
         selectionChart.drawGrid = false
         selectionChart.chartInset = UIEdgeInsets.zero
@@ -118,6 +124,7 @@ class ChartCopmosedView: UIView {
         selectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         selectionView.delegate = self
         selectionChart.addSubview(selectionView)
+        selectionView.setupGestures(view: self)
         
         displayChart = ChartView()
         displayChart.backgroundColor = backgroundColor
@@ -167,6 +174,9 @@ class ChartCopmosedView: UIView {
     
     // MARK: show\hide animation
     private func runMaxValueChangeAnimation(data: [ChartData], animDuration: Double) {
+        if displayChart.metal.display.groupMode == .percentage {
+            return
+        }
         let totalMaxVal = DataMaxValCalculator.getMaxValue(data, dividableBy: levelsCount)
         selectionChart.setMaxVal(val: totalMaxVal, animationDuration: animDuration)
         
@@ -202,27 +212,16 @@ class ChartCopmosedView: UIView {
     
     @objc func userSelectDate(gesture: UIGestureRecognizer) {
         if gesture.state == .cancelled { return }
-        if data.count == 0 { return }
+        guard let groupData = data, groupData.data.count > 0 else { return }
+        
         let pos = gesture.location(in: displayChart)
         guard let date = displayChart.getDate(forPos: pos) else {
             displayChart.selectedDate = nil
             return
         }
         
-        // can be boosted
-        var closestDate: Int64?
-        for item in data[0].items {
-            guard let cDate = closestDate else {
-                closestDate = item.time
-                continue
-            }
-            
-            if abs(cDate - date) > abs(date - item.time) {
-                closestDate = item.time
-            }
-        }
+        let closestDate: Int64? = groupData.getClosestDate(date: date)?.1
         displayChart.selectedDate = closestDate
-        
         if let date = closestDate {
             updateInfoSlectedDate(date: date)
         }
@@ -256,6 +255,9 @@ extension ChartCopmosedView: ChartSelectionViewDelegate {
         displayChart.setRange(minTime: fromTime, maxTime: toTime, animated: false)
         if visibleData.count == 0 { return }
         
+        if displayChart.metal.display.groupMode == .percentage {
+            return
+        }
         let maxVal = DataMaxValCalculator.getMaxValue(visibleData, fromTime: fromTime, toTime: toTime, dividableBy: levelsCount)
         if maxVal != 0 {
             displayChart.setMaxVal(val: maxVal, animationDuration: maxValDuration)
