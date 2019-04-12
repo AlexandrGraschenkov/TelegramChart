@@ -19,11 +19,15 @@ extension CGAffineTransform {
 }
 
 typealias IndexType = UInt32
-let MTLType: MTLIndexType = (MemoryLayout<IndexType>.size == 2) ? .uint16 : .uint32
+let kIndexType: MTLIndexType = (MemoryLayout<IndexType>.size == 2) ? .uint16 : .uint32
 
 class BaseDisplay: NSObject {
     typealias GroupMode = DataPreparer.GroupMode
     typealias RangeI = ChartView.RangeI
+    enum IndexDrawType {
+        case triangle
+        case triangleStrip
+    }
     
     var view: MetalChartView
     var data: ChartGroupData? {
@@ -39,28 +43,25 @@ class BaseDisplay: NSObject {
     
     let timeDivider: Float = 100_000
     var groupMode: GroupMode = .none
+    var indexType: IndexDrawType = .triangleStrip
     var showGrid: Bool = true // false for PieChart
     
     var dataReduceSwitch: [[[vector_float2]]] = []
     var currendReduceIdx: Int = -1
-    let maxReduceCount: Int = 4
+    let maxReduceCount: Int = 1
     var reduceSwitchOffset: Float = -0.5
-    var indices : [IndexType] = []
-    var vertices: PageAlignedContiguousArray<vector_float2>!
-    var colors: PageAlignedContiguousArray<vector_float4>!
     
-    var indicesBuffer : MTLBuffer!
-    var vertexBuffer : MTLBuffer!
-    var colorsBuffer : MTLBuffer!
+    var buffers: MetalBuffer!
     var drawFrom: Int = 0
     var drawTo: Int = 0
     var selectionDate: Int64?
     
     
+    
     var pipelineDescriptor = MTLRenderPipelineDescriptor()
     var pipelineState : MTLRenderPipelineState! = nil
     
-    init(view: MetalChartView, device: MTLDevice) {
+    init(view: MetalChartView, device: MTLDevice, reuseBuffers: MetalBuffer?) {
         self.view = view
         
         pipelineDescriptor.colorAttachments[0].pixelFormat = view.colorPixelFormat
@@ -76,22 +77,18 @@ class BaseDisplay: NSObject {
         
         // Run with 4x MSAA:
         pipelineDescriptor.sampleCount = 4
+        
+        buffers = reuseBuffers
         super.init()
     }
     
+    
     func setupBuffers(maxChartDataCount: Int, maxChartItemsCount: Int) {
-        if indicesBuffer != nil && colorsBuffer.length == maxChartDataCount && vertexBuffer.length == maxChartDataCount * maxChartItemsCount {
-            return
+        if buffers == nil {
+            buffers = MetalBuffer(device: view.device)
         }
-        
-        indices = generateIndices(chartCount: maxChartDataCount, itemsCount: maxChartItemsCount)
-        indicesBuffer = (view.device.makeBuffer(bytes: indices, length: MemoryLayout<IndexType>.stride * indices.count, options: .storageModeShared))
-        
-        vertices = PageAlignedContiguousArray<vector_float2>(repeating: vector_float2(0, 0), count: maxChartDataCount * maxChartItemsCount)
-        vertexBuffer = view.device.makeBufferWithPageAlignedArray(vertices)
-        
-        colors = PageAlignedContiguousArray(repeating: vector_float4(0, 0, 0, 0), count: maxChartDataCount)
-        colorsBuffer = view.device.makeBufferWithPageAlignedArray(colors)
+        let strip = (indexType == .triangleStrip)
+        buffers.setup(maxDataCount: maxChartDataCount, maxItemsCount: maxChartItemsCount, triangleStrip: strip)
     }
     
     func generateIndices(chartCount: Int, itemsCount: Int) -> [IndexType] {
@@ -133,11 +130,11 @@ class BaseDisplay: NSObject {
     }
     
     func setReducedData(idx: Int) {
-        print("••• SwitchReduce data", idx)
+//        print("••• SwitchReduce data", idx)
         currendReduceIdx = idx
         for (i, d) in dataReduceSwitch[idx].enumerated() {
             let vertOffset = i*view.maxChartItemsCount
-            vertices.replaceSubrange(vertOffset..<vertOffset+d.count, with: d)
+            buffers.vertices.replaceSubrange(vertOffset..<vertOffset+d.count, with: d)
         }
         chartItemsCount = dataReduceSwitch[idx][0].count
     }
@@ -160,7 +157,7 @@ class BaseDisplay: NSObject {
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
         for (i, d) in groupData.data.enumerated() {
             d.color.getRed(&r, green: &g, blue: &b, alpha: &a)
-            colors[i] = vector_float4(Float(r), Float(g), Float(b), Float(a))
+            buffers.colors[i] = vector_float4(Float(r), Float(g), Float(b), Float(a))
         }
     }
     

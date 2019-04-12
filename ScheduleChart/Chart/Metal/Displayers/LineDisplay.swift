@@ -11,8 +11,8 @@ import MetalKit
 
 class LineDisplay: BaseDisplay {
     
-    override init(view: MetalChartView, device: MTLDevice) {
-        super.init(view: view, device: device)
+    override init(view: MetalChartView, device: MTLDevice, reuseBuffers: MetalBuffer?) {
+        super.init(view: view, device: device, reuseBuffers: reuseBuffers)
         
         let library = device.makeDefaultLibrary()
         pipelineDescriptor.vertexFunction = library?.makeFunction(name: "line_vertex")
@@ -27,15 +27,15 @@ class LineDisplay: BaseDisplay {
         
         if !dataAlphaUpdated { return }
         for i in 0..<dataAlpha.count {
-            colors[i][3] = Float(dataAlpha[i])
+            buffers.colors[i][3] = Float(dataAlpha[i])
         }
         dataAlphaUpdated = false
     }
     
     override func display(renderEncoder: MTLRenderCommandEncoder) {
         super.display(renderEncoder: renderEncoder)
-        renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-        renderEncoder.setVertexBuffer(colorsBuffer, offset: 0, index: 1)
+        renderEncoder.setVertexBuffer(buffers.vertexBuffer, offset: 0, index: 0)
+        renderEncoder.setVertexBuffer(buffers.colorsBuffer, offset: 0, index: 1)
         renderEncoder.setVertexBytes(&view.globalParams, length: MemoryLayout<GlobalParameters>.stride, index: 2)
         
         for i in 0..<chartDataCount {
@@ -44,7 +44,7 @@ class LineDisplay: BaseDisplay {
             from += drawFrom * 4 * wtfWhy
             let count = (drawTo-drawFrom-1) * 4
             
-            renderEncoder.drawIndexedPrimitives(type: .triangleStrip, indexCount: count, indexType: MTLType, indexBuffer: indicesBuffer, indexBufferOffset: from)
+            renderEncoder.drawIndexedPrimitives(type: .triangleStrip, indexCount: count, indexType: kIndexType, indexBuffer: buffers.triangleStripIndicesBuffer, indexBufferOffset: from)
         }
     }
 }

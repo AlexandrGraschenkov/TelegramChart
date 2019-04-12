@@ -96,16 +96,19 @@ class DataPreparer: NSObject {
         var data = data
         
         let timeOffset = (data[1][0] - data[0][0]) * 0.5
+        var minMax: (Int, Int) = (0, 0)
         for i in stride(from: 0, to: elemsCount, by: 4) {
             if elemsCount-i >= 3 {
                 let toIdx = min(i+4, elemsCount)
-                let (maxIdx, minIdx) = maxMinIdx(data: data[i..<toIdx])
-                let arr: [Int] = maxIdx < minIdx ? [maxIdx, minIdx] : [minIdx, maxIdx]
+                minMax = maxMinIdx(data: data[i..<toIdx])
+                if minMax.0 > minMax.1 {
+                    minMax = (minMax.1, minMax.0)
+                }
                 result.append(vector_float2(data[i][0] + timeOffset,
-                                            data[arr[0]][1]))
+                                            data[minMax.0][1]))
                 
                 result.append(vector_float2(data[i+2][0]+timeOffset,
-                                            data[arr[1]][1]))
+                                            data[minMax.1][1]))
             } else {
                 result.append(vector_float2(data[i][0]+timeOffset,
                                             data[i][1]))

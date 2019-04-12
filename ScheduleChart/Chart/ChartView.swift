@@ -55,7 +55,7 @@ class ChartView: UIView {
     
     var drawGrid: Bool = true
     var gridColor: Color = Color(w: 0.45, a: 0.2)
-    var drawOutsideChart: Bool = false
+    var drawOutsideChart: Bool = true
     var selectedDate: Int64? {
         didSet {
             if selectedDate == oldValue { return }
@@ -243,6 +243,9 @@ class ChartView: UIView {
     
     func metalUpdateDisplay() {
         var chartRect = bounds.inset(by: chartInset)
+        if displayRange.to - displayRange.from == 0 {
+            return
+        }
         
         var fromTime = displayRange.from
         var toTime = displayRange.to

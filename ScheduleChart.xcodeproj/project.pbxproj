@@ -41,6 +41,8 @@
 		FAFE265B225FC9BC00025FBC /* StackFillDisplaySelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE265A225FC9BC00025FBC /* StackFillDisplaySelection.swift */; };
 		FAFE265D226096CE00025FBC /* ChartCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE265C226096CE00025FBC /* ChartCell.swift */; };
 		FAFE265F2260B98E00025FBC /* ChartDataParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE265E2260B98E00025FBC /* ChartDataParser.swift */; };
+		FAFE26622260D32600025FBC /* StringCachedWidthCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE26612260D32600025FBC /* StringCachedWidthCalculator.swift */; };
+		FAFE26642260D73A00025FBC /* MetalBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE26632260D73A00025FBC /* MetalBuffer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -80,6 +82,8 @@
 		FAFE265A225FC9BC00025FBC /* StackFillDisplaySelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackFillDisplaySelection.swift; sourceTree = "<group>"; };
 		FAFE265C226096CE00025FBC /* ChartCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartCell.swift; sourceTree = "<group>"; };
 		FAFE265E2260B98E00025FBC /* ChartDataParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartDataParser.swift; sourceTree = "<group>"; };
+		FAFE26612260D32600025FBC /* StringCachedWidthCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringCachedWidthCalculator.swift; sourceTree = "<group>"; };
+		FAFE26632260D73A00025FBC /* MetalBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalBuffer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +105,7 @@
 				FAFE265E2260B98E00025FBC /* ChartDataParser.swift */,
 				FA4BB7E022442A2800723FA1 /* DataMaxValCalculator.swift */,
 				FAFD318F2259372B00FDF551 /* Mutex.swift */,
+				FAFE26612260D32600025FBC /* StringCachedWidthCalculator.swift */,
 			);
 			path = helpers;
 			sourceTree = "<group>";
@@ -135,9 +140,8 @@
 			children = (
 				FAC45E562235222400A165CC /* AppDelegate.swift */,
 				FAC45E582235222400A165CC /* ViewController.swift */,
-				FA4BB7E222466A1C00723FA1 /* SelectChartDisplayedView.swift */,
 				FAC45E712235435D00A165CC /* DebugFpsLabel.swift */,
-				FAFE265C226096CE00025FBC /* ChartCell.swift */,
+				FAFE26602260D2B400025FBC /* Cell */,
 				FAC45E6A2235225100A165CC /* Chart */,
 				FAC45E5A2235222400A165CC /* Main.storyboard */,
 				FA2B41C62247CA4600C3E6BA /* Icon.xcassets */,
@@ -169,6 +173,7 @@
 		FAFD318E22590BE400FDF551 /* Metal */ = {
 			isa = PBXGroup;
 			children = (
+				FAFE26632260D73A00025FBC /* MetalBuffer.swift */,
 				FAFD31C0225B5E3300FDF551 /* Displayers */,
 				FAFD318C22590BDF00FDF551 /* PageAlignedArray.swift */,
 				FAFE263E225EF90A00025FBC /* DataPreparer.swift */,
@@ -189,6 +194,15 @@
 				FAFE2640225F2B1700025FBC /* PercentFillDisplay.swift */,
 			);
 			path = Displayers;
+			sourceTree = "<group>";
+		};
+		FAFE26602260D2B400025FBC /* Cell */ = {
+			isa = PBXGroup;
+			children = (
+				FA4BB7E222466A1C00723FA1 /* SelectChartDisplayedView.swift */,
+				FAFE265C226096CE00025FBC /* ChartCell.swift */,
+			);
+			path = Cell;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -276,9 +290,11 @@
 				FAC45E782236FAEE00A165CC /* LabelsPool.swift in Sources */,
 				FAFD31D3225D0CB800FDF551 /* LineLevelDisplay.swift in Sources */,
 				FAC45E592235222400A165CC /* ViewController.swift in Sources */,
+				FAFE26642260D73A00025FBC /* MetalBuffer.swift in Sources */,
 				FA4BB7E322466A1C00723FA1 /* SelectChartDisplayedView.swift in Sources */,
 				FAFE265D226096CE00025FBC /* ChartCell.swift in Sources */,
 				FAFD31C2225B5E7F00FDF551 /* BaseDisplay.swift in Sources */,
+				FAFE26622260D32600025FBC /* StringCachedWidthCalculator.swift in Sources */,
 				FAC45E7422355A5700A165CC /* ChartData.swift in Sources */,
 				FAC45E572235222400A165CC /* AppDelegate.swift in Sources */,
 				FA4BB7E122442A2800723FA1 /* DataMaxValCalculator.swift in Sources */,

@@ -13,10 +13,11 @@ class StackFillDisplay: BaseDisplay {
     private let fixDrawSpacing: Float = 1.004
     private lazy var selectionDraw: StackFillDisplaySelection = StackFillDisplaySelection(view: self.view)
     
-    override init(view: MetalChartView, device: MTLDevice) {
-        super.init(view: view, device: device)
+    override init(view: MetalChartView, device: MTLDevice, reuseBuffers: MetalBuffer?) {
+        super.init(view: view, device: device, reuseBuffers: reuseBuffers)
         
-        reduceSwitchOffset = -0.2
+        indexType = .triangle
+        reduceSwitchOffset = 0.2
         groupMode = .stacked
         let library = device.makeDefaultLibrary()
         pipelineDescriptor.vertexFunction = library?.makeFunction(name: "stacked_fill_vertex")
@@ -67,8 +68,8 @@ class StackFillDisplay: BaseDisplay {
     
     override func display(renderEncoder: MTLRenderCommandEncoder) {
         super.display(renderEncoder: renderEncoder)
-        renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-        renderEncoder.setVertexBuffer(colorsBuffer, offset: 0, index: 1)
+        renderEncoder.setVertexBuffer(buffers.vertexBuffer, offset: 0, index: 0)
+        renderEncoder.setVertexBuffer(buffers.colorsBuffer, offset: 0, index: 1)
         renderEncoder.setVertexBytes(&view.globalParams, length: MemoryLayout<GlobalParameters>.stride, index: 2)
         
         for i in (0..<chartDataCount).reversed() {
@@ -77,12 +78,12 @@ class StackFillDisplay: BaseDisplay {
             from += drawFrom * 6 * wtfWhy
             let count = (drawTo-drawFrom) * 6
             
-            renderEncoder.drawIndexedPrimitives(type: .triangle, indexCount: count, indexType: MTLType, indexBuffer: indicesBuffer, indexBufferOffset: from)
+            renderEncoder.drawIndexedPrimitives(type: .triangle, indexCount: count, indexType: kIndexType, indexBuffer: buffers.triangleIndicesBuffer, indexBufferOffset: from)
         }
         
         if let date = selectionDate {
             let dateDivided = Float(date) / timeDivider
-            selectionDraw.drawSelection(renderEncoder: renderEncoder, time: dateDivided, width: view.globalParams.lineWidth, reuseTriangleIndexes: indicesBuffer)
+            selectionDraw.drawSelection(renderEncoder: renderEncoder, time: dateDivided, width: view.globalParams.lineWidth, reuseTriangleIndexes: buffers.triangleIndicesBuffer)
         }
     }
 

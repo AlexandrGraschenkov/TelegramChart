@@ -57,7 +57,7 @@ class LabelsPool: NSObject {
         label.textAlignment = .center
 //        label.isHidden = true
         labels.append(label)
-        print("Labels Pool:", labels.count)
+//        print("Labels Pool:", labels.count)
 //        label.backgroundColor = UIColor.yellow
         return label
     }

@@ -10,8 +10,8 @@ import UIKit
 
 class PercentFillDisplay: BaseDisplay {
     
-    override init(view: MetalChartView, device: MTLDevice) {
-        super.init(view: view, device: device)
+    override init(view: MetalChartView, device: MTLDevice, reuseBuffers: MetalBuffer?) {
+        super.init(view: view, device: device, reuseBuffers: reuseBuffers)
         
         reduceSwitchOffset = -0.2
         groupMode = .percentage
@@ -34,8 +34,8 @@ class PercentFillDisplay: BaseDisplay {
     
     override func display(renderEncoder: MTLRenderCommandEncoder) {
         super.display(renderEncoder: renderEncoder)
-        renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-        renderEncoder.setVertexBuffer(colorsBuffer, offset: 0, index: 1)
+        renderEncoder.setVertexBuffer(buffers.vertexBuffer, offset: 0, index: 0)
+        renderEncoder.setVertexBuffer(buffers.colorsBuffer, offset: 0, index: 1)
         renderEncoder.setVertexBytes(&view.globalParams, length: MemoryLayout<GlobalParameters>.stride, index: 2)
         
         for i in (0..<chartDataCount).reversed() {
@@ -44,7 +44,7 @@ class PercentFillDisplay: BaseDisplay {
             from += drawFrom * 4 * wtfWhy
             let count = (drawTo-drawFrom-1) * 4
             
-            renderEncoder.drawIndexedPrimitives(type: .triangleStrip, indexCount: count, indexType: MTLType, indexBuffer: indicesBuffer, indexBufferOffset: from)
+            renderEncoder.drawIndexedPrimitives(type: .triangleStrip, indexCount: count, indexType: kIndexType, indexBuffer: buffers.triangleStripIndicesBuffer, indexBufferOffset: from)
         }
     }
     

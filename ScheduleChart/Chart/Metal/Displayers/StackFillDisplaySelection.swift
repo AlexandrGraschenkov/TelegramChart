@@ -76,6 +76,6 @@ class StackFillDisplaySelection: NSObject {
         renderEncoder.setVertexBytes(&vertices, length: MemoryLayout<vector_float2>.stride * vertices.count, index: 3)
         renderEncoder.setVertexBytes(&color, length: MemoryLayout<vector_float4>.stride, index: 4)
         
-        renderEncoder.drawIndexedPrimitives(type: .triangle, indexCount: 12, indexType: MTLType, indexBuffer: reuseTriangleIndexes, indexBufferOffset: 0)
+        renderEncoder.drawIndexedPrimitives(type: .triangle, indexCount: 12, indexType: kIndexType, indexBuffer: reuseTriangleIndexes, indexBufferOffset: 0)
     }
 }

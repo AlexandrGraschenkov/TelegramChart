@@ -20,10 +20,12 @@ class LineLevelDisplay: BaseDisplay {
     private var linesBuffer: MTLBuffer!
     private let maxLinesCount = 16
     private var linesCount: Int = 0
+    private var indicesBuffer : MTLBuffer!
     
-    override init(view: MetalChartView, device: MTLDevice) {
-        super.init(view: view, device: device)
+    override init(view: MetalChartView, device: MTLDevice, reuseBuffers: MetalBuffer?) {
+        super.init(view: view, device: device, reuseBuffers: reuseBuffers)
         
+        indexType = .triangle
         let library = device.makeDefaultLibrary()
         pipelineDescriptor.vertexFunction = library?.makeFunction(name: "line_level_vertex")
         pipelineDescriptor.fragmentFunction = library?.makeFunction(name: "line_fragment")
@@ -73,6 +75,6 @@ class LineLevelDisplay: BaseDisplay {
         renderEncoder.setVertexBuffer(linesBuffer, offset: 0, index: 0)
         renderEncoder.setVertexBytes(&global, length: MemoryLayout<GlobalParameters>.stride, index: 1)
         
-        renderEncoder.drawIndexedPrimitives(type: .triangle, indexCount: linesCount*6, indexType: MTLType, indexBuffer: indicesBuffer, indexBufferOffset: 0)
+        renderEncoder.drawIndexedPrimitives(type: .triangle, indexCount: linesCount*6, indexType: kIndexType, indexBuffer: indicesBuffer, indexBufferOffset: 0)
     }
 }

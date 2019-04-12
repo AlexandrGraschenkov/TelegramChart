@@ -36,13 +36,13 @@ class SelectChartDisplayedView: UIView {
             return 0
         }
         
-        let buttAdditionalWidth: CGFloat = 20
+        let buttAdditionalWidth: CGFloat = 40
         let heightStep: CGFloat = 50
         let xOffset: CGFloat = 10
         let buttHeight: CGFloat = 30
         var offset: CGPoint = CGPoint(x: xOffset, y: 0)
         for (idx, info) in infos.enumerated() {
-            var width = (info.name as NSString).size(withAttributes: [NSAttributedString.Key.font : defaultFont]).width
+            var width = info.name.getWidth(font: defaultFont)
             width += buttAdditionalWidth
             
             if idx < layoutButtons.count {

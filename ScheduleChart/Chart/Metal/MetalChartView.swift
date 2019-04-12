@@ -65,15 +65,15 @@ class MetalChartView: MTKView {
         switch chartType {
         case .line:
             if !(display is LineDisplay) {
-                display = LineDisplay(view: self, device: device!)
+                display = LineDisplay(view: self, device: device!, reuseBuffers: display?.buffers)
             }
         case .stacked:
             if !(display is StackFillDisplay) {
-                display = StackFillDisplay(view: self, device: device!)
+                display = StackFillDisplay(view: self, device: device!, reuseBuffers: display?.buffers)
             }
         case .percentage:
             if !(display is PercentFillDisplay) {
-                display = PercentFillDisplay(view: self, device: device!)
+                display = PercentFillDisplay(view: self, device: device!, reuseBuffers: display?.buffers)
             }
         }
         
@@ -131,7 +131,7 @@ class MetalChartView: MTKView {
     
     func updateLevels(levels: [LineAlpha]) {
         if levelDisplay == nil {
-            levelDisplay = LineLevelDisplay(view: self, device: device)
+            levelDisplay = LineLevelDisplay(view: self, device: device, reuseBuffers: nil)
         }
         levelDisplay?.update(lines: levels)
     }
