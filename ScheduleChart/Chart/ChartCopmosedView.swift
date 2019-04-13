@@ -53,8 +53,10 @@ class ChartCopmosedView: UIView {
                 let maxValues = groupData.data.map({DataMaxValCalculator.getMaxValue([$0], stacked: false, dividableBy: levelsCount)})
                 let maxValue: Float = maxValues.reduce(Float(0), max)
                 customScale = maxValues.map({maxValue / $0})
+                displayChart.verticalAxe.setupRightLabels(rightScale: customScale[1], leftColor: groupData.data[0].color, rightColor: groupData.data[1].color)
             } else {
                 customScale = []
+                displayChart.verticalAxe.resetRightLabels()
             }
             displayChart.metal.customScale = customScale
             selectionChart.metal.customScale = customScale

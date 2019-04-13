@@ -28,6 +28,7 @@ class VerticalAxe: NSObject {
     
     fileprivate(set) var maxVal: Float!
     var vertical: [AttachedLabel] = []
+    var verticalRight: [AttachedLabel] = []
     
     init(view: ChartView) {
         self.view = view
@@ -39,18 +40,23 @@ class VerticalAxe: NSObject {
         self.maxVal = maxVal
         if duration == 0 {
             _ = resizeVerticalIfNeeded()
-            updateVerticalAttachedValues(force: true)
+            _ = resizeVerticalRightIfNeeded()
+            updateVerticalAttachedValues()
             vertical.forEach({ $0.alpha = 1 })
+            verticalRight.forEach({ $0.alpha = 1 })
             return
         }
         
         let oldLabels = vertical
         vertical.removeAll()
+        let oldRightLabels = verticalRight
+        verticalRight.removeAll()
         
         _ = resizeVerticalIfNeeded()
-        updateVerticalAttachedValues(force: true)
+        _ = resizeVerticalRightIfNeeded()
+        updateVerticalAttachedValues()
         
-        _ = AttachedLabelAnimator.animateAppearDismiss(appear: vertical, dismiss: oldLabels, duration: duration)
+        _ = AttachedLabelAnimator.animateAppearDismiss(appear: vertical+verticalRight, dismiss: oldLabels+oldRightLabels, duration: duration)
     }
     
     func updateLabelsPos(inset: UIEdgeInsets) {
@@ -65,15 +71,37 @@ class VerticalAxe: NSObject {
             var y = frame.height * CGFloat(1 - val / drawMaxVal) + frame.origin.y
             y = round(y)
 
-            lab.frame.origin = CGPoint(x: frame.minX + inset.left - lab.frame.width,
+            let x: CGFloat
+            if lab.rightAligment {
+                x = frame.maxX - inset.right
+            } else {
+                x = frame.minX + inset.left - lab.frame.width
+            }
+            lab.frame.origin = CGPoint(x: x,
                                        y: y - lab.frame.height)
         }
     }
     
+    func resetRightLabels() {
+        
+    }
+    
+    func setupRightLabels(rightScale: Float, leftColor: UIColor, rightColor: UIColor) {
+        self.rightScale = rightScale
+        self.leftColor = leftColor
+        self.rightColor = rightColor
+    }
+    
+    
+    // mark: - private
+    private var rightScale: Float?
+    private var leftColor: UIColor?
+    private var rightColor: UIColor?
     private func resizeVerticalIfNeeded() -> Bool {
         var changed = false
         while vertical.count < levelsCount {
             let lab = labelsPool.getUnused()
+            lab.customColor = leftColor
             view.addSubview(lab)
             vertical.append(lab)
             changed = true
@@ -83,14 +111,31 @@ class VerticalAxe: NSObject {
             label.removeFromSuperview()
             changed = true
         }
+        
+        
+        return changed
+    }
+    private func resizeVerticalRightIfNeeded() -> Bool {
+        var changed = false
+        let count = rightScale == nil ? 0 : levelsCount
+        
+        while verticalRight.count < count {
+            let lab = labelsPool.getUnused()
+            lab.rightAligment = true
+            lab.customColor = rightColor
+            view.addSubview(lab)
+            verticalRight.append(lab)
+            changed = true
+        }
+        while verticalRight.count > count {
+            let label = verticalRight.removeLast()
+            label.removeFromSuperview()
+            changed = true
+        }
         return changed
     }
     
-    private func updateVerticalAttachedValues(force: Bool = false) {
-        let update = force
-        if !update {
-            return
-        }
+    private func updateVerticalAttachedValues() {
         
         let levels = generateValueLevels(maxVal: maxVal, levelsCount: vertical.count)
         
@@ -103,6 +148,26 @@ class VerticalAxe: NSObject {
         }
         
         zip(vertical, levels).forEach { (lab, val) in
+            lab.valueFormatter = formatter
+            lab.attachedValue = val
+        }
+        if let scale = rightScale {
+            updateRightVerticalAttachedValues(scale: scale)
+        }
+    }
+    
+    private func updateRightVerticalAttachedValues(scale: Float) {
+        var levels = generateValueLevels(maxVal: maxVal, levelsCount: verticalRight.count)
+        
+        let val = Int64(levels[1] / scale)
+        var formatter: ((Float)->(String))? = {"\(Int64($0 / scale))"}
+        if val % 1000000 == 0 {
+            formatter = {"\(Int64($0 / scale / 1000000))M"}
+        } else if val % 1000 == 0 {
+            formatter = {"\(Int64($0 / scale / 1000))K"}
+        }
+        
+        zip(verticalRight, levels).forEach { (lab, val) in
             lab.valueFormatter = formatter
             lab.attachedValue = val
         }

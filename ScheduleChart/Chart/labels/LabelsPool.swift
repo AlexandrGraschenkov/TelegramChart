@@ -18,7 +18,7 @@ class LabelsPool: NSObject {
     
     var color = UIColor(white: 0.4, alpha: 1.0) {
         didSet {
-            labels.forEach({$0.textColor = color})
+            labels.forEach({$0.color = color})
         }
     }
     
@@ -28,8 +28,10 @@ class LabelsPool: NSObject {
         })
         label = label ?? generate()
         label.alpha = 1
+        label.customColor = nil
         label.attachedTime = nil
         label.attachedValue = nil
+        label.rightAligment = false
         return label
     }
     
@@ -53,7 +55,7 @@ class LabelsPool: NSObject {
     private func generate() -> AttachedLabel {
         let label = AttachedLabel(frame: CGRect(x: 0, y: 0, width: 30, height: 15))
         label.font = font
-        label.textColor = color
+        label.color = color
         label.textAlignment = .center
 //        label.isHidden = true
         labels.append(label)
