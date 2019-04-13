@@ -26,6 +26,7 @@ class ChartCopmosedView: UIView {
     }
     
     var levelsCount: Int = 5
+    var minValueFixedZero: Bool = true
     var selectionChart: ChartView!
     var displayChart: ChartView!
     var selectionView: ChartSelectionView!
@@ -50,11 +51,13 @@ class ChartCopmosedView: UIView {
             }
             
             if groupData.scaled {
-                let maxValues = groupData.data.map({DataMaxValCalculator.getMaxValue([$0], stacked: false, dividableBy: levelsCount)})
+                displayChart.chartInset.right = 40
+                let maxValues = groupData.data.map({DataMaxValCalculator.getMinMaxValue([$0], stacked: false, dividableBy: levelsCount).1})
                 let maxValue: Float = maxValues.reduce(Float(0), max)
                 customScale = maxValues.map({maxValue / $0})
                 displayChart.verticalAxe.setupRightLabels(rightScale: customScale[1], leftColor: groupData.data[0].color, rightColor: groupData.data[1].color)
             } else {
+                displayChart.chartInset.right = 30
                 customScale = []
                 displayChart.verticalAxe.resetRightLabels()
             }
@@ -62,13 +65,15 @@ class ChartCopmosedView: UIView {
             selectionChart.metal.customScale = customScale
             
             let maxVal: Float
+            let minVal: Float
             if groupData.type == .percentage {
                 maxVal = 125
+                minVal = 0
             } else {
-                maxVal = getMaxValue()
+                (minVal, maxVal) = getMinMaxValue()
             }
-            selectionChart.setMaxVal(val: maxVal, animationDuration: 0)
-            displayChart.setMaxVal(val: maxVal, animationDuration: 0)
+            selectionChart.setMaxVal(val: maxVal, minVal: minVal, animationDuration: 0)
+            displayChart.setMaxVal(val: maxVal, minVal: minVal, animationDuration: 0)
             resetState()
         }
     }
@@ -198,14 +203,14 @@ class ChartCopmosedView: UIView {
         if displayChart.metal.display.groupMode == .percentage {
             return
         }
-        let totalMaxVal = getMaxValue()
-        selectionChart.setMaxVal(val: totalMaxVal, animationDuration: animDuration)
+        let (totalMaxVal, totalMinVal) = getMinMaxValue()
+        selectionChart.setMaxVal(val: totalMaxVal, minVal: totalMinVal, animationDuration: animDuration)
         
         
         let fromTime = displayChart.displayRange.from
         let toTime = displayChart.displayRange.to
-        let displayMaxVal = getMaxValue(fromTime: fromTime, toTime: toTime)
-        displayChart.setMaxVal(val: displayMaxVal, animationDuration: animDuration)
+        let displayMinMax = getMinMaxValue(fromTime: fromTime, toTime: toTime)
+        displayChart.setMaxVal(val: displayMinMax.1, minVal: displayMinMax.0, animationDuration: animDuration)
     }
     
     private func runShowHideAnimation(dataIndex index: Int, show: Bool, animDuration: Double) {
@@ -280,30 +285,36 @@ extension ChartCopmosedView: ChartSelectionViewDelegate {
             return
         }
         
-        let maxVal = getMaxValue(fromTime: fromTime, toTime: toTime)
+        let (minVal, maxVal) = getMinMaxValue(fromTime: fromTime, toTime: toTime)
         if maxVal != 0 {
-            displayChart.setMaxVal(val: maxVal, animationDuration: maxValDuration)
+            displayChart.setMaxVal(val: maxVal, minVal: minVal, animationDuration: maxValDuration)
         }
     }
     
-    func getMaxValue(fromTime: Int64? = nil, toTime: Int64? = nil) -> Float {
-        guard let groupData = data else { return 0 }
+    func getMinMaxValue(fromTime: Int64? = nil, toTime: Int64? = nil) -> (Float, Float) {
+        guard let groupData = data else { return (0,0) }
         
         if customScale.count == 0 {
             let stacked = data?.type == .stacked
-            return DataMaxValCalculator.getMaxValue(visibleData, fromTime: fromTime, toTime: toTime, stacked: stacked, dividableBy: levelsCount)
+            print("Min val fixed", minValueFixedZero)
+            return DataMaxValCalculator.getMinMaxValue(visibleData, fromTime: fromTime, toTime: toTime, stacked: stacked, withMinValue: !minValueFixedZero, dividableBy: levelsCount)
         }
         
         var maxVal: Float = 0
+        var minVal: Float!
         for (scale, d) in zip(customScale, groupData.data) {
             if !d.visible { continue }
-            var val = DataMaxValCalculator.getMaxValue([d], fromTime: fromTime, toTime: toTime, stacked: false, dividableBy: levelsCount)
-            val *= scale
-            if val > maxVal {
-                maxVal = val
+            var (val0, val1) = DataMaxValCalculator.getMinMaxValue([d], fromTime: fromTime, toTime: toTime, stacked: false, withMinValue: !minValueFixedZero, dividableBy: levelsCount)
+            val1 *= scale
+            val0 *= scale
+            if val1 > maxVal {
+                maxVal = val1
+            }
+            if minVal == nil || val0 < minVal {
+                minVal = val0
             }
         }
-        return maxVal
+        return (minVal, maxVal)
     }
 }
 

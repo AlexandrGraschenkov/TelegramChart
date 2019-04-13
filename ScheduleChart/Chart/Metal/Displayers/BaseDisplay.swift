@@ -95,11 +95,11 @@ class BaseDisplay: NSObject {
         return Array(0..<IndexType(chartCount * 4 * itemsCount))
     }
     
-    func update(maxValue: Float, displayRange: RangeI, rect: CGRect) {
+    func update(minValue: Float, maxValue: Float, displayRange: RangeI, rect: CGRect) {
         view.mutex.lock()
         defer { view.mutex.unlock() }
         
-        let t = calculateTransform(maxValue: maxValue, displayRange: displayRange, rect: rect)
+        let t = calculateTransform(maxValue: maxValue, minValue: minValue, displayRange: displayRange, rect: rect)
         view.globalParams.transform = t.getMatrix()
         
         // data reduce
@@ -179,17 +179,18 @@ class BaseDisplay: NSObject {
         renderEncoder.setRenderPipelineState(pipelineState)
     }
     
-    func calculateTransform(maxValue: Float, displayRange: RangeI, rect: CGRect) -> CGAffineTransform {
+    func calculateTransform(maxValue: Float, minValue: Float, displayRange: RangeI, rect: CGRect) -> CGAffineTransform {
         let fromTime = CGFloat(displayRange.from)/CGFloat(timeDivider)
         let toTime = CGFloat(displayRange.to)/CGFloat(timeDivider)
         let maxValue = CGFloat(maxValue)
+        let minValue = CGFloat(minValue)
         
         var t: CGAffineTransform = .identity
         let scaleX = rect.width / (toTime - fromTime)
         t = t.scaledBy(x: UIScreen.main.scale, y: UIScreen.main.scale)
         t = t.translatedBy(x: rect.minX, y: view.bounds.height - rect.maxY)
-        t = t.scaledBy(x: scaleX, y: rect.height / maxValue)
-        t = t.translatedBy(x: -fromTime, y: 0)
+        t = t.scaledBy(x: scaleX, y: rect.height / (maxValue - minValue))
+        t = t.translatedBy(x: -fromTime, y: -minValue)
         return t
     }
 }

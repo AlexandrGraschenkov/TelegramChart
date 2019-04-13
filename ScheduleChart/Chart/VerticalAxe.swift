@@ -27,6 +27,7 @@ class VerticalAxe: NSObject {
     var levelsCount = 5
     
     fileprivate(set) var maxVal: Float!
+    fileprivate(set) var minVal: Float = 0
     var vertical: [AttachedLabel] = []
     var verticalRight: [AttachedLabel] = []
     
@@ -35,9 +36,10 @@ class VerticalAxe: NSObject {
         super.init()
     }
     
-    func setMaxVal(_ maxVal: Float, animationDuration duration: Double = 0) {
-        if self.maxVal == maxVal { return }
+    func setMaxVal(_ maxVal: Float, minVal: Float = 0, animationDuration duration: Double = 0) {
+        if self.maxVal == maxVal && self.minVal == minVal { return }
         self.maxVal = maxVal
+        self.minVal = minVal
         if duration == 0 {
             _ = resizeVerticalIfNeeded()
             _ = resizeVerticalRightIfNeeded()
@@ -61,6 +63,7 @@ class VerticalAxe: NSObject {
     
     func updateLabelsPos(inset: UIEdgeInsets) {
         let drawMaxVal = view.maxValue
+        let drawMinVal = view.minValue
 
         let attachedLabels: [AttachedLabel] = view.subviews.compactMap({$0 as? AttachedLabel})
         let frame = view.bounds.inset(by: UIEdgeInsets(top: inset.top, left: 0, bottom: inset.bottom, right: 0))
@@ -68,7 +71,8 @@ class VerticalAxe: NSObject {
             guard let val = lab.attachedValue else { continue }
             if lab.alpha == 0 { continue }
 
-            var y = frame.height * CGFloat(1 - val / drawMaxVal) + frame.origin.y
+            let dMinMax = drawMaxVal - drawMinVal
+            var y = frame.height * CGFloat(1 - (val - drawMinVal) / dMinMax) + frame.origin.y
             y = round(y)
 
             let x: CGFloat
@@ -77,13 +81,14 @@ class VerticalAxe: NSObject {
             } else {
                 x = frame.minX + inset.left - lab.frame.width
             }
-            lab.frame.origin = CGPoint(x: x,
-                                       y: y - lab.frame.height)
+            lab.frame.origin = CGPoint(x: x, y: y - lab.frame.height)
         }
     }
     
     func resetRightLabels() {
-        
+        rightScale = nil
+        leftColor = nil
+        rightColor = nil
     }
     
     func setupRightLabels(rightScale: Float, leftColor: UIColor, rightColor: UIColor) {
@@ -137,13 +142,12 @@ class VerticalAxe: NSObject {
     
     private func updateVerticalAttachedValues() {
         
-        let levels = generateValueLevels(maxVal: maxVal, levelsCount: vertical.count)
+        let levels = generateValueLevels(maxVal: maxVal, minVal: minVal, levelsCount: vertical.count)
         
-        let val = Int64(levels[1])
         var formatter: ((Float)->(String))? = nil
-        if val % 1000000 == 0 {
+        if levels.allSatisfy({Int64($0) % 1000_000 == 0}) {
             formatter = {"\(Int64($0/1000000))M"}
-        } else if val % 1000 == 0 {
+        } else if levels.allSatisfy({Int64($0) % 1000 == 0}) {
             formatter = {"\(Int64($0/1000))K"}
         }
         
@@ -157,13 +161,12 @@ class VerticalAxe: NSObject {
     }
     
     private func updateRightVerticalAttachedValues(scale: Float) {
-        var levels = generateValueLevels(maxVal: maxVal, levelsCount: verticalRight.count)
+        var levels = generateValueLevels(maxVal: maxVal, minVal: minVal, levelsCount: verticalRight.count)
         
-        let val = Int64(levels[1] / scale)
         var formatter: ((Float)->(String))? = {"\(Int64($0 / scale))"}
-        if val % 1000000 == 0 {
+        if levels.allSatisfy({Int64($0) % 1000_000 == 0}) {
             formatter = {"\(Int64($0 / scale / 1000000))M"}
-        } else if val % 1000 == 0 {
+        } else if levels.allSatisfy({Int64($0) % 1000 == 0}) {
             formatter = {"\(Int64($0 / scale / 1000))K"}
         }
         
@@ -173,7 +176,7 @@ class VerticalAxe: NSObject {
         }
     }
     
-    private func generateValueLevels(maxVal: Float, levelsCount count: Int) -> [Float] {
-        return (0..<count).map({maxVal * Float($0) / Float(count)})
+    private func generateValueLevels(maxVal: Float, minVal: Float, levelsCount count: Int) -> [Float] {
+        return (0..<count).map({minVal + (maxVal - minVal) * Float($0) / Float(count)})
     }
 }

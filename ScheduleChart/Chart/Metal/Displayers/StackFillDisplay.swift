@@ -64,7 +64,7 @@ class StackFillDisplay: BaseDisplay {
         renderEncoder.setVertexBytes(&view.globalParams, length: MemoryLayout<GlobalParameters>.stride, index: 2)
         
         for i in (0..<chartDataCount).reversed() {
-            if dataAlpha[i] == 0 { continue }
+//            if dataAlpha[i] == 0 { continue }
             
             let wtfWhy = MemoryLayout<IndexType>.size
             var from = view.maxChartItemsCount * 6 * i * wtfWhy

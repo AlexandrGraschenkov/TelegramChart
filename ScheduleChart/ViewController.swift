@@ -90,32 +90,26 @@ class ViewController: UITableViewController {
 extension ViewController { // table
     
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1 //dataArr.count
+        return dataArr.count
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return dataArr.count * 2-1
+        return 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if indexPath.row % 2 == 1 {
-            return tableView.dequeueReusableCell(withIdentifier: "space_cell", for: indexPath)
-        }
         
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "ChartCell", for: indexPath) as? ChartCell else {
             return UITableViewCell()
         }
-//        print("§§§§§§§", indexPath)
         
-        cell.display(groupData: dataArr[indexPath.row / 2])
+        cell.chart.minValueFixedZero = indexPath.section >= 2
+        cell.display(groupData: dataArr[indexPath.section])
         return cell
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if indexPath.row % 2 == 1 {
-            return 150
-        }
-        let d = dataArr[indexPath.row / 2]
+        let d = dataArr[indexPath.section]
         return ChartCell.getHeight(withData: d, width: tableView.bounds.width)
     }
     

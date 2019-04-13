@@ -101,14 +101,15 @@ class ChartView: UIView {
     private(set) var dataMaxTime: Int64 = -1
     var displayRange: RangeI = RangeI(from: 0, to: 0)
     var maxValue: Float = 200
-    var maxValueAnimation: Float? = nil
+    var minValue: Float = 0
+    var minMaxValueAnimation: (Float, Float)? = nil
     var onDrawDebug: (()->())?
     var maxValAnimatorCancel: Cancelable?
     var rangeAnimatorCancel: Cancelable?
     var chartInset = UIEdgeInsets(top: 0, left: 40, bottom: 30, right: 30)
     
     var isMaxValAnimating: Bool {
-        return maxValueAnimation != nil
+        return minMaxValueAnimation != nil
     }
     
     private func setupMetal() {
@@ -132,20 +133,22 @@ class ChartView: UIView {
         }
     }
     
-    func setMaxVal(val: Float, animationDuration: Double) {
-        if let maxValueAnimation = maxValueAnimation {
-            if animationDuration > 0 && maxValueAnimation == val { return }
-        } else if maxValue == val, maxValueAnimation == nil {
+    func setMaxVal(val: Float, minVal: Float = 0, animationDuration: Double) {
+        if let (minValAnim, maxValueAnim) = minMaxValueAnimation {
+            if animationDuration > 0 && maxValueAnim == val && minValAnim == minVal { return }
+        } else if maxValue == val, minValue == minVal, minMaxValueAnimation == nil {
             return
         }
         
         maxValAnimatorCancel?()
         if animationDuration > 0 {
-            maxValueAnimation = val
+            minMaxValueAnimation = (val, minVal)
             let fromMaxVal = maxValue
+            let fromMinVal = minValue
             maxValAnimatorCancel = DisplayLinkAnimator.animate(duration: animationDuration) { (percent) in
                 let percent = -percent * (percent - 2) // ease out
                 self.maxValue = (val - fromMaxVal) * Float(percent) + fromMaxVal
+                self.minValue = (minVal - fromMinVal) * Float(percent) + fromMinVal
                 
                 if self.drawGrid {
                     self.verticalAxe.updateLabelsPos(inset: self.chartInset)
@@ -154,17 +157,18 @@ class ChartView: UIView {
                 
                 self.metalUpdateDisplay()
                 if percent == 1 {
-                    self.maxValueAnimation = nil
+                    self.minMaxValueAnimation = nil
                 }
             }
         } else {
             maxValue = val
-            maxValueAnimation = nil
+            minValue = minVal
+            minMaxValueAnimation = nil
             metalUpdateDisplay()
         }
         
         if drawGrid {
-            verticalAxe.setMaxVal(val, animationDuration: animationDuration)
+            verticalAxe.setMaxVal(val, minVal: minVal, animationDuration: animationDuration)
             
             if animationDuration == 0 {
                 verticalAxe.updateLabelsPos(inset: chartInset)
@@ -178,7 +182,7 @@ class ChartView: UIView {
         if !animated {
             displayRange.from = minTime
             displayRange.to = maxTime
-            if maxValueAnimation == nil {
+            if minMaxValueAnimation == nil {
                 // little hack: if we ave animation with redraws, do not need to call redraw here
                 metalUpdateDisplay()
             }
@@ -256,7 +260,7 @@ class ChartView: UIView {
                                                             to: toTime)
         }
         
-        metal?.display.update(maxValue: maxValue, displayRange: RangeI(from: fromTime, to: toTime), rect: chartRect)
+        metal?.display.update(minValue: minValue, maxValue: maxValue, displayRange: RangeI(from: fromTime, to: toTime), rect: chartRect)
         metal?.setNeedsDisplay()
     }
     
