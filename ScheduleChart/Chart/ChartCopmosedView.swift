@@ -39,6 +39,7 @@ class ChartCopmosedView: UIView {
     
     var data: ChartGroupData? {
         didSet {
+            if oldValue == data { return }
             cancelShowHideAnimation.values.forEach({$0()})
             cancelShowHideAnimation.removeAll()
             selectionChart.data = data

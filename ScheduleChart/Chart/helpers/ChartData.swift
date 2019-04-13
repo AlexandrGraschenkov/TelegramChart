@@ -16,7 +16,7 @@ enum ChartType {
     case percentage
 }
 
-class ChartGroupData {
+class ChartGroupData: NSObject {
     let type: ChartType
     let scaled: Bool
     var data: [ChartData]

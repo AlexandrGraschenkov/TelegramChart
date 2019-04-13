@@ -116,7 +116,7 @@ class ChartView: UIView {
         metal = MetalChartView(frame: bounds)
         metal.isSelectionChart = isSelectionView
         metal.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        metal.setupBuffers(maxChartDataCount: 10, maxChartItemsCount: 1000)
+        metal.setupBuffers(maxChartDataCount: 8, maxChartItemsCount: 400)
         insertSubview(metal, at: 0)
 //        metalUpdateDisplay()
     }
