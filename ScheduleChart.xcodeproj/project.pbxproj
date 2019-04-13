@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FA0A5BAE22618377008F671D /* PreparedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BAD22618377008F671D /* PreparedData.swift */; };
 		FA1ADF612258D14A00623825 /* MetalChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1ADF602258D14A00623825 /* MetalChartView.swift */; };
 		FA2B41C72247CA4600C3E6BA /* Icon.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA2B41C62247CA4600C3E6BA /* Icon.xcassets */; };
 		FA4BB7982239B55A00723FA1 /* HorisontalAxe.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */; };
@@ -46,6 +47,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		FA0A5BAD22618377008F671D /* PreparedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreparedData.swift; sourceTree = "<group>"; };
 		FA1ADF602258D14A00623825 /* MetalChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalChartView.swift; sourceTree = "<group>"; };
 		FA2B41C62247CA4600C3E6BA /* Icon.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Icon.xcassets; sourceTree = "<group>"; };
 		FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorisontalAxe.swift; sourceTree = "<group>"; };
@@ -100,8 +102,10 @@
 		FA4BB7D72242D63900723FA1 /* helpers */ = {
 			isa = PBXGroup;
 			children = (
+				FAFE263E225EF90A00025FBC /* DataPreparer.swift */,
 				FAC45E6B2235243900A165CC /* DisplayLinkAnimator.swift */,
 				FAC45E7322355A5700A165CC /* ChartData.swift */,
+				FA0A5BAD22618377008F671D /* PreparedData.swift */,
 				FAFE265E2260B98E00025FBC /* ChartDataParser.swift */,
 				FA4BB7E022442A2800723FA1 /* DataMaxValCalculator.swift */,
 				FAFD318F2259372B00FDF551 /* Mutex.swift */,
@@ -176,7 +180,6 @@
 				FAFE26632260D73A00025FBC /* MetalBuffer.swift */,
 				FAFD31C0225B5E3300FDF551 /* Displayers */,
 				FAFD318C22590BDF00FDF551 /* PageAlignedArray.swift */,
-				FAFE263E225EF90A00025FBC /* DataPreparer.swift */,
 				FA1ADF602258D14A00623825 /* MetalChartView.swift */,
 				FAFD319122593A2500FDF551 /* chart_shaders.metal */,
 			);
@@ -293,6 +296,7 @@
 				FAFE26642260D73A00025FBC /* MetalBuffer.swift in Sources */,
 				FA4BB7E322466A1C00723FA1 /* SelectChartDisplayedView.swift in Sources */,
 				FAFE265D226096CE00025FBC /* ChartCell.swift in Sources */,
+				FA0A5BAE22618377008F671D /* PreparedData.swift in Sources */,
 				FAFD31C2225B5E7F00FDF551 /* BaseDisplay.swift in Sources */,
 				FAFE26622260D32600025FBC /* StringCachedWidthCalculator.swift in Sources */,
 				FAC45E7422355A5700A165CC /* ChartData.swift in Sources */,

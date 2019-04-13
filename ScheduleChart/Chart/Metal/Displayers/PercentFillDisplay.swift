@@ -23,15 +23,6 @@ class PercentFillDisplay: BaseDisplay {
         pipelineState = (try? device.makeRenderPipelineState(descriptor: pipelineDescriptor)) as! MTLRenderPipelineState
     }
     
-    override func prepareDisplay() {
-        if !dataAlphaUpdated || currendReduceIdx < 0 { return }
-        guard let groupData = data else { return }
-        dataAlphaUpdated = false
-        
-        dataReduceSwitch = DataPreparer.prepare(data: groupData.data, visiblePercent: dataAlpha, timeDivider: timeDivider, mode: groupMode, reduceCount: maxReduceCount)
-        setReducedData(idx: currendReduceIdx)
-    }
-    
     override func display(renderEncoder: MTLRenderCommandEncoder) {
         super.display(renderEncoder: renderEncoder)
         renderEncoder.setVertexBuffer(buffers.vertexBuffer, offset: 0, index: 0)

@@ -20,6 +20,8 @@ class ChartGroupData: NSObject {
     let type: ChartType
     let scaled: Bool
     var data: [ChartData]
+    lazy var preparedData: PreparedData = PreparedData(groupData: self)
+    
     
     init(type: ChartType, data: [ChartData], scaled: Bool = false) {
         self.scaled = (type == .line) && scaled

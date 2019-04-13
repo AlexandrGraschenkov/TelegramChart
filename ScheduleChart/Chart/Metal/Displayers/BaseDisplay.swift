@@ -146,11 +146,12 @@ class BaseDisplay: NSObject {
             return
         }
         
+        view.globalParams.chartCount = UInt32(groupData.data.count)
         chartDataCount = groupData.data.count
         chartItemsCount = groupData.itemsCount
         
         dataAlpha = groupData.data.map({$0.visible ? CGFloat(1.0) : CGFloat(0.0)})
-        dataReduceSwitch = DataPreparer.prepare(data: groupData.data, visiblePercent: dataAlpha, timeDivider: Float(timeDivider), mode: groupMode, reduceCount: maxReduceCount)
+        dataReduceSwitch = groupData.preparedData.data
         currendReduceIdx = -1
         dataAlphaUpdated = false
         
@@ -167,7 +168,11 @@ class BaseDisplay: NSObject {
     
     // MARK: - display
     func prepareDisplay() {
-        // optional
+        if !dataAlphaUpdated { return }
+        for i in 0..<dataAlpha.count {
+            buffers.colors[i][3] = Float(dataAlpha[i])
+        }
+        dataAlphaUpdated = false
     }
     
     func display(renderEncoder: MTLRenderCommandEncoder) {

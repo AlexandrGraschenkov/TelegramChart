@@ -18,6 +18,7 @@ struct GlobalParameters {
     var halfViewport: (Float, Float)
     var transform: matrix_float3x3
     var linePointsCount: UInt32
+    var chartCount: UInt32
 }
 
 extension matrix_float3x3 {
@@ -87,7 +88,7 @@ class MetalChartView: MTKView {
         
         let viewport = (Float(drawableSize.width) / 2.0,
                         Float(drawableSize.height) / 2.0)
-        globalParams = GlobalParameters(lineWidth: 4, halfViewport: viewport, transform: .identity, linePointsCount: 0)
+        globalParams = GlobalParameters(lineWidth: 4, halfViewport: viewport, transform: .identity, linePointsCount: 0, chartCount: 0)
         
         clearColor = MTLClearColor.init(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
         autoresizingMask = [.flexibleWidth, .flexibleHeight]

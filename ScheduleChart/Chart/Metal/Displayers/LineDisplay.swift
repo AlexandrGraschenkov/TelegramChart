@@ -22,14 +22,9 @@ class LineDisplay: BaseDisplay {
     }
     
     override func prepareDisplay() {
+        super.prepareDisplay()
         let scale = Float(UIScreen.main.scale)
         view.globalParams.lineWidth = view.isSelectionChart ? 1.5*scale : 2.0*scale
-        
-        if !dataAlphaUpdated { return }
-        for i in 0..<dataAlpha.count {
-            buffers.colors[i][3] = Float(dataAlpha[i])
-        }
-        dataAlphaUpdated = false
     }
     
     override func display(renderEncoder: MTLRenderCommandEncoder) {
