@@ -34,6 +34,14 @@ class LineDisplay: BaseDisplay {
         renderEncoder.setVertexBytes(&view.globalParams, length: MemoryLayout<GlobalParameters>.stride, index: 2)
         
         for i in 0..<chartDataCount {
+            if dataAlpha[i] == 0 { continue }
+            
+            if view.customScale.count == chartDataCount {
+                var global = view.globalParams!
+                global.transform.columns.1[1] *= view.customScale[i]
+                renderEncoder.setVertexBytes(&global, length: MemoryLayout<GlobalParameters>.stride, index: 2)
+            }
+            
             let wtfWhy = MemoryLayout<IndexType>.size
             var from = view.maxChartItemsCount * 4 * i * wtfWhy
             from += drawFrom * 4 * wtfWhy

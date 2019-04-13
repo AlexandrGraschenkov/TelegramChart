@@ -49,12 +49,21 @@ class ChartCopmosedView: UIView {
                 return
             }
             
+            if groupData.scaled {
+                let maxValues = groupData.data.map({DataMaxValCalculator.getMaxValue([$0], stacked: false, dividableBy: levelsCount)})
+                let maxValue: Float = maxValues.reduce(Float(0), max)
+                customScale = maxValues.map({maxValue / $0})
+            } else {
+                customScale = []
+            }
+            displayChart.metal.customScale = customScale
+            selectionChart.metal.customScale = customScale
+            
             let maxVal: Float
             if groupData.type == .percentage {
                 maxVal = 125
             } else {
-                let stacked = groupData.type == .stacked
-                maxVal = DataMaxValCalculator.getMaxValue(visibleData, stacked: stacked, dividableBy: levelsCount)
+                maxVal = getMaxValue()
             }
             selectionChart.setMaxVal(val: maxVal, animationDuration: 0)
             displayChart.setMaxVal(val: maxVal, animationDuration: 0)
@@ -104,6 +113,7 @@ class ChartCopmosedView: UIView {
             selectInfoView?.bgColor = selectInfoBgColor
         }
     }
+    private var customScale: [Float] = []
     private var maxValDuration: Double = 0.3
     private var alphaDuration: Double = 0.3
     private var selectInfoView: SelctionInfoView?
@@ -186,14 +196,13 @@ class ChartCopmosedView: UIView {
         if displayChart.metal.display.groupMode == .percentage {
             return
         }
-        let stacked = self.data?.type == .stacked
-        let totalMaxVal = DataMaxValCalculator.getMaxValue(data, stacked: stacked, dividableBy: levelsCount)
+        let totalMaxVal = getMaxValue()
         selectionChart.setMaxVal(val: totalMaxVal, animationDuration: animDuration)
         
         
         let fromTime = displayChart.displayRange.from
         let toTime = displayChart.displayRange.to
-        let displayMaxVal = DataMaxValCalculator.getMaxValue(data, fromTime: fromTime, toTime: toTime, stacked: stacked, dividableBy: levelsCount)
+        let displayMaxVal = getMaxValue(fromTime: fromTime, toTime: toTime)
         displayChart.setMaxVal(val: displayMaxVal, animationDuration: animDuration)
     }
     
@@ -269,11 +278,30 @@ extension ChartCopmosedView: ChartSelectionViewDelegate {
             return
         }
         
-        let stacked = data?.type == .stacked
-        let maxVal = DataMaxValCalculator.getMaxValue(visibleData, fromTime: fromTime, toTime: toTime, stacked: stacked, dividableBy: levelsCount)
+        let maxVal = getMaxValue(fromTime: fromTime, toTime: toTime)
         if maxVal != 0 {
             displayChart.setMaxVal(val: maxVal, animationDuration: maxValDuration)
         }
+    }
+    
+    func getMaxValue(fromTime: Int64? = nil, toTime: Int64? = nil) -> Float {
+        guard let groupData = data else { return 0 }
+        
+        if customScale.count == 0 {
+            let stacked = data?.type == .stacked
+            return DataMaxValCalculator.getMaxValue(visibleData, fromTime: fromTime, toTime: toTime, stacked: stacked, dividableBy: levelsCount)
+        }
+        
+        var maxVal: Float = 0
+        for (scale, d) in zip(customScale, groupData.data) {
+            if !d.visible { continue }
+            var val = DataMaxValCalculator.getMaxValue([d], fromTime: fromTime, toTime: toTime, stacked: false, dividableBy: levelsCount)
+            val *= scale
+            if val > maxVal {
+                maxVal = val
+            }
+        }
+        return maxVal
     }
 }
 

@@ -47,20 +47,13 @@ extension ChartGroupData {
         }
         
         var type = ChartType.line
-        for t in types {
-            if t.value == "x" { continue }
-            switch t.value {
-            case "line":
-                type = .line
-            case "bar":
-                type = .stacked
-            case "area":
+        if (dic["stacked"] as? Bool) ?? false {
+            type = .stacked
+            if (dic["percentage"] as? Bool) ?? false {
                 type = .percentage
-            default:
-                break
             }
         }
-        let scaled = (dic["scaled"] as? Bool) ?? false
+        let scaled = (dic["y_scaled"] as? Bool) ?? false
         
         return ChartGroupData(type: type, data: data, scaled: scaled)
     }

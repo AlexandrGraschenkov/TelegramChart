@@ -47,6 +47,7 @@ class MetalChartView: MTKView {
     private var levelDisplay: LineLevelDisplay?
     var display: BaseDisplay!
     var globalParams: GlobalParameters!
+    var customScale: [Float] = []
     let mutex = Mutex()
 
     override init(frame frameRect: CGRect, device: MTLDevice?)
