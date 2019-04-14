@@ -17,7 +17,7 @@ class StackFillDisplay: BaseDisplay {
         super.init(view: view, device: device, reuseBuffers: reuseBuffers)
         
         indexType = .triangle
-        reduceSwitchOffset += 0.7
+//        reduceSwitchOffset += 0.7
         groupMode = .stacked
         let library = device.makeDefaultLibrary()
         pipelineDescriptor.vertexFunction = library?.makeFunction(name: "stacked_fill_vertex")

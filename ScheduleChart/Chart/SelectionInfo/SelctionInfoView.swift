@@ -20,7 +20,7 @@ class SelctionInfoView: UIView {
         setup()
     }
     
-    let fixedWidth: CGFloat = 130
+    let fixedWidth: CGFloat = 150
     
     var textColor: UIColor = Apereance.day.infoTextColor {
         didSet {
@@ -40,7 +40,7 @@ class SelctionInfoView: UIView {
         }
     }
     
-    func update(data: [ChartData], time: Int64, displayTotal: Bool = false) {
+    func update(data: [ChartData], time: Int64, displayTotal: Bool = false, displayPercent: Bool = false) {
         if data.count == 0 { return }
         guard let idx = data[0].getClosestDate(date: time)?.0 else { return }
         
@@ -53,7 +53,7 @@ class SelctionInfoView: UIView {
             values.append(ColorVal(val: sumVal, color: textColor, title: "All"))
         }
         displayValues(values)
-        displayTitles(values)
+        displayTitles(values, displayPercent: displayPercent)
         layoutAndResize()
     }
     
@@ -98,7 +98,7 @@ class SelctionInfoView: UIView {
         
         dateLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 30, height: 20))
         dateLabel.textColor = textColor
-        dateLabel.font = UIFont.systemFont(ofSize: 12, weight: .bold)
+        dateLabel.font = UIFont.systemFont(ofSize: 11, weight: .bold)
         dateLabel.textAlignment = .left
         addSubview(dateLabel)
     }
@@ -117,8 +117,8 @@ class SelctionInfoView: UIView {
         }
     }
     
-    private func displayTitles(_ values: [ColorVal]) {
-        let titlesIsSet = titleLabels.count == values.count
+    private func displayTitles(_ values: [ColorVal], displayPercent: Bool) {
+        let dontUpdate = !displayPercent && (titleLabels.count == values.count)
         while values.count > titleLabels.count {
             titleLabels.append(generateTitleLabel())
         }
@@ -126,16 +126,22 @@ class SelctionInfoView: UIView {
             titleLabels.popLast()?.removeFromSuperview()
         }
         
-        if titlesIsSet { return }
+        if dontUpdate { return }
+        let totalSum: Float = values.reduce(0, {$0 + $1.val})
         for (val, label) in zip(values, titleLabels) {
-            label.text = val.title
+            var text = val.title ?? ""
+            if displayPercent {
+                let percent = Int(round(100 * val.val / totalSum))
+                text = "\(percent) % \(text)"
+            }
+            label.text = text
             label.textColor = textColor
         }
     }
     
     private func generateValueLabel() -> UILabel {
         let label = UILabel(frame: CGRect(x: 0, y: 0, width: 30, height: 20))
-        label.font = UIFont.monospacedDigitSystemFont(ofSize: 12, weight: .bold)
+        label.font = UIFont.monospacedDigitSystemFont(ofSize: 11, weight: .bold)
         label.textAlignment = .right
         addSubview(label)
         return label
@@ -143,7 +149,7 @@ class SelctionInfoView: UIView {
     
     private func generateTitleLabel() -> UILabel {
         let label = UILabel(frame: CGRect(x: 0, y: 0, width: 30, height: 20))
-        label.font = UIFont.systemFont(ofSize: 13)
+        label.font = UIFont.systemFont(ofSize: 12)
         label.textAlignment = .left
         addSubview(label)
         return label
@@ -157,7 +163,7 @@ class SelctionInfoView: UIView {
                                  width: fixedWidth - (inset.left + inset.right),
                                  height: labelsHeight)
         
-        var offset = CGPoint(x: inset.left, y: inset.top + 20)
+        var offset = CGPoint(x: inset.left, y: inset.top + 16)
         for (lab1, lab2) in zip(valLabels, titleLabels) {
             lab1.frame = CGRect(x: offset.x, y: offset.y, width: dateLabel.bounds.width, height: labelsHeight)
             lab2.frame = lab1.frame

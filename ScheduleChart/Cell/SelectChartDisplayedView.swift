@@ -37,29 +37,29 @@ class SelectChartDisplayedView: UIView {
         }
         
         let buttAdditionalWidth: CGFloat = 40
-        let heightStep: CGFloat = 50
-        let xOffset: CGFloat = 10
+        let heightStep: CGFloat = 10
+        let xStep: CGFloat = 10
         let buttHeight: CGFloat = 30
-        var offset: CGPoint = CGPoint(x: xOffset, y: 0)
+        var offset: CGPoint = CGPoint(x: xStep, y: heightStep)
         for (idx, info) in infos.enumerated() {
             var width = info.name.getWidth(font: defaultFont)
             width += buttAdditionalWidth
+            if width + offset.x + xStep > fixedWidth {
+                offset.y += buttHeight + heightStep
+                offset.x = xStep
+            }
             
             if idx < layoutButtons.count {
                 layoutButtons[idx].frame = CGRect(x: offset.x,
-                                                  y: offset.y + (heightStep - buttHeight)/2.0,
+                                                  y: offset.y,
                                                   width: width,
                                                   height: buttHeight)
             }
             
-            offset.x += width + xOffset
-            if offset.x > fixedWidth {
-                offset.y += heightStep
-                offset.x = xOffset
-            }
+            offset.x += width + xStep
         }
         
-        return offset.y + heightStep
+        return offset.y + buttHeight + heightStep
     }
     
     weak var displayDelegate: SelectChartDisplayedViewDelegate?

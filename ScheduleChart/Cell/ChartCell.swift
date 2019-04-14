@@ -15,8 +15,6 @@ class ChartCell: UITableViewCell {
     @IBOutlet weak var selectChart: SelectChartDisplayedView!
     var groupData: ChartGroupData?
     
-    static var createdCount = 0
-    
     
     
     static func getHeight(withData data: ChartGroupData, width: CGFloat) -> CGFloat {
@@ -40,9 +38,7 @@ class ChartCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
-        ChartCell.createdCount += 1
-        print("Cell created count", ChartCell.createdCount)
+        
         selectChart.displayDelegate = self
     }
 

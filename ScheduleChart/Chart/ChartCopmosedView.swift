@@ -158,10 +158,7 @@ class ChartCopmosedView: UIView {
     private var cancelShowHideAnimation: [Int: Cancelable] = [:]
     private var panGesture: UIPanGestureRecognizer!
     
-    static var test = 0
     private func setup() {
-        ChartCopmosedView.test += 1
-        print("••••Chart count", ChartCopmosedView.test)
         selectionChart = ChartView()
         selectionChart.isSelectionView = true
         selectionChart.backgroundColor = backgroundColor

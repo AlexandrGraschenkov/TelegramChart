@@ -118,7 +118,6 @@ class MetalChartView: MTKView {
         self.maxChartDataCount = maxChartDataCount
         self.maxChartItemsCount = maxChartItemsCount
         globalParams.linePointsCount = UInt32(maxChartItemsCount)
-        print(globalParams.linePointsCount)
         
         display?.setupBuffers(maxChartDataCount: maxChartDataCount, maxChartItemsCount: maxChartItemsCount)
     }

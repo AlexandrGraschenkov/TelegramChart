@@ -44,6 +44,7 @@ class SelectionInfoBehavior {
     func dismissSelectedDate(animated: Bool) {
         if !isDisplayed { return }
         chart.selectedDate = nil
+        selectionDisplay.deselect()
         if !animated {
             infoView.removeFromSuperview()
             isDisplayed = false
@@ -82,8 +83,9 @@ class SelectionInfoBehavior {
                 lastSelectionDate = date
                 chart.selectedDate = date
             }
-            let displayTotal = (chart.data!.type == .percentage)
-            infoView.update(data: data, time: date, displayTotal: displayTotal)
+            let displayTotal = (chart.data!.type == .stacked)
+            let displayPercent = (chart.data!.type == .percentage)
+            infoView.update(data: data, time: date, displayTotal: displayTotal, displayPercent: displayPercent)
             infoView.alpha = 1
         }
         
