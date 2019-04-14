@@ -20,6 +20,7 @@ class ChartCopmosedView: UIView {
         setup()
     }
     
+    var topDateLabel: UILabel!
     var levelsCount: Int = 5
     var minValueFixedZero: Bool = true
     var selectionChart: ChartView!
@@ -71,6 +72,7 @@ class ChartCopmosedView: UIView {
             }
             selectionChart.setMaxVal(val: maxVal, minVal: minVal, animationDuration: 0)
             displayChart.setMaxVal(val: maxVal, minVal: minVal, animationDuration: 0)
+            updateTopLabelDates()
             resetState()
         }
     }
@@ -110,6 +112,7 @@ class ChartCopmosedView: UIView {
     
     func update(apereance: Apereance) {
         backgroundColor = apereance.bg
+        topDateLabel.textColor = apereance.textColor
         let clear = apereance.bg.myColor.metalClear
         displayChart.metal.clearColor = clear
         selectionChart.metal.clearColor = clear
@@ -117,25 +120,6 @@ class ChartCopmosedView: UIView {
         selectionView.update(apereance: apereance)
         selectInfo.update(apereance: apereance)
         displayChart.labelsPool.color = apereance.chartTextColor
-        
-        //        switch mode {
-        //        case .day:
-        //            let bg = Color(w: 1, a: 1)
-        //            backgroundColor = bg.uiColor
-        //            displayChart.metal.clearColor = bg.metalClear
-        //            selectionChart.metal.clearColor = bg.metalClear
-        //
-        //            displayChart.gridColor = Color(w: 0.45, a: 0.2)
-        //            selectInfo.bgColor = UIColor(red:0.94, green:0.94, blue:0.96, alpha:1.00)
-        //        case .night:
-        //            let bg = Color(r: 0.14, g: 0.18, b: 0.24, a: 1)
-        //            backgroundColor = bg.uiColor
-        //            displayChart.metal.clearColor = bg.metalClear
-        //            selectionChart.metal.clearColor = bg.metalClear
-        //
-        //            displayChart.gridColor = Color(r: 0.22, g: 0.3, b: 0.4, a: 0.5)
-        //            selectInfo.bgColor = UIColor(red:0.11, green:0.16, blue:0.21, alpha:1.00)
-        //        }
         displayChart.updateLevels()
         displayChart.metal.setNeedsDisplay()
         selectionChart.metal.setNeedsDisplay()
@@ -166,6 +150,14 @@ class ChartCopmosedView: UIView {
     private var customScale: [Float] = []
     private var maxValDuration: Double = 0.3
     private var alphaDuration: Double = 0.3
+    
+    private lazy var dateFormatter: (Int64)->(String) = {
+        let df = DateFormatter()
+        df.dateFormat = "d MMM yyyy"
+        return { (time: Int64) -> String in
+            return df.string(from: Date(timeIntervalSince1970: TimeInterval(time) / 1000.0))
+        }
+    }()
     private var visibleData: [ChartData] {
         guard let groupData = data else {
             return []
@@ -196,6 +188,13 @@ class ChartCopmosedView: UIView {
         displayChart.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height - selectionHeight)
         addSubview(displayChart)
         
+        topDateLabel = UILabel(frame: CGRect(x: 0, y: 0, width: bounds.width, height: 30))
+        topDateLabel.autoresizingMask = [.flexibleWidth, .flexibleBottomMargin]
+        topDateLabel.font = UIFont.boldSystemFont(ofSize: 13)
+        topDateLabel.textColor = Apereance.day.textColor
+        topDateLabel.textAlignment = .center
+        addSubview(topDateLabel)
+        
         let pan = UIPanGestureRecognizer(target: self, action: #selector(userSelectDate(gesture:)))
         pan.delegate = self
         displayChart.addGestureRecognizer(pan)
@@ -209,6 +208,16 @@ class ChartCopmosedView: UIView {
         selectionView.range = ChartSelectionView.Range(from: 0, to: 1)
         displayChart.selectedDate = nil
         selectInfo.dismissSelectedDate(animated: false)
+    }
+    
+    private func updateTopLabelDates() {
+        let from = displayChart.displayRange.from
+        let to = displayChart.displayRange.to
+        if to <= 0 {
+            topDateLabel.text = ""
+            return
+        }
+        topDateLabel.text = dateFormatter(from) + " - " + dateFormatter(to)
     }
     
     // MARK: show\hide animation
@@ -308,6 +317,7 @@ extension ChartCopmosedView: ChartSelectionViewDelegate {
             }
         }
         
+        updateTopLabelDates()
         selectInfo.updateInfoFrame(dataUpdated: nil)
     }
     

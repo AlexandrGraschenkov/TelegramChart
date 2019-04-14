@@ -18,7 +18,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <button key="tableFooterView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="Ucz-wa-wF6">
-                            <rect key="frame" x="0.0" y="467.5" width="375" height="50"/>
+                            <rect key="frame" x="0.0" y="567.5" width="375" height="50"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <state key="normal" title="Switch to Night Mode"/>
@@ -27,20 +27,20 @@
                             </connections>
                         </button>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="ChartCell" rowHeight="350" id="JKO-0p-h5A" customClass="ChartCell" customModule="ScheduleChart" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="55.5" width="375" height="350"/>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="ChartCell" rowHeight="450" id="JKO-0p-h5A" customClass="ChartCell" customModule="ScheduleChart" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="55.5" width="375" height="450"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="JKO-0p-h5A" id="srm-ge-H7L">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="349.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="449.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <view contentMode="scaleToFill" id="PCL-Fd-wc2" customClass="SelectChartDisplayedView" customModule="ScheduleChart" customModuleProvider="target">
-                                            <rect key="frame" x="0.0" y="300" width="375" height="50"/>
+                                            <rect key="frame" x="0.0" y="400" width="375" height="50"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         </view>
                                         <view contentMode="scaleToFill" id="wbr-8D-x4g" customClass="ChartCopmosedView" customModule="ScheduleChart" customModuleProvider="target">
-                                            <rect key="frame" x="0.0" y="0.0" width="375" height="300"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="400"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         </view>
@@ -52,7 +52,7 @@
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="space_cell" id="HpA-gX-A8M">
-                                <rect key="frame" x="0.0" y="405.5" width="375" height="44"/>
+                                <rect key="frame" x="0.0" y="505.5" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="HpA-gX-A8M" id="vg2-b5-ktL">
                                     <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>

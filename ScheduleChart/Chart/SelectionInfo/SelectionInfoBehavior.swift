@@ -98,7 +98,7 @@ class SelectionInfoBehavior {
         }
         selectionDisplay.selectDate(date: date, transform: chart.calculateTransform())
         
-        infoView.center = CGPoint(x: centerX, y: 5)
+        infoView.center = CGPoint(x: centerX, y: 35)
         updateAnchorPoint(animated: !infoAdded)
     }
     
