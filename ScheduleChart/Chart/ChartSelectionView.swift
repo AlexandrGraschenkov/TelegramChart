@@ -21,7 +21,6 @@ class ChartSelectionView: UIView {
             return lhs.from == rhs.from && lhs.to == rhs.to
         }
     }
-    typealias Mode = ChartCopmosedView.Mode
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -39,9 +38,6 @@ class ChartSelectionView: UIView {
         }
     }
     var minRangeDist: CGFloat = 0.1
-    var mode: Mode = .day {
-        didSet { updateMode() }
-    }
     weak var delegate: ChartSelectionViewDelegate?
     
     
@@ -78,19 +74,12 @@ class ChartSelectionView: UIView {
         selectionImgView.autoresizingMask = autoresize
 //        selectionImgView.backgroundColor = UIColor.red
         addSubview(selectionImgView)
-        updateMode()
+        update(apereance: .day)
     }
     
-    private func updateMode() {
-        let overlayColor: UIColor
-        switch mode {
-        case .day:
-            overlayColor = UIColor(red:0.95, green:0.96, blue:0.98, alpha:0.80)
-        case .night:
-            overlayColor = UIColor(red:0.10, green:0.13, blue:0.17, alpha:0.80)
-        }
-        rightOverlay.backgroundColor = overlayColor
-        leftOverlay.backgroundColor = overlayColor
+    func update(apereance: Apereance) {
+        rightOverlay.backgroundColor = apereance.selectionChartOverlay
+        leftOverlay.backgroundColor = apereance.selectionChartOverlay
     }
     
     override func layoutSubviews() {

@@ -16,7 +16,7 @@ class LabelsPool: NSObject {
         }
     }
     
-    var color = UIColor(white: 0.4, alpha: 1.0) {
+    var color = Apereance.day.chartTextColor {
         didSet {
             labels.forEach({$0.color = color})
         }

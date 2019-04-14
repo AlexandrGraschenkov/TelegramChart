@@ -9,11 +9,6 @@
 import UIKit
 
 class ChartCopmosedView: UIView {
-
-    enum Mode {
-        case night
-        case day
-    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -32,10 +27,6 @@ class ChartCopmosedView: UIView {
     var selectionView: ChartSelectionView!
     var selectionHeight: CGFloat = 40 {
         didSet { setNeedsLayout(); layoutIfNeeded() }
-    }
-    
-    var mode: Mode = .day {
-        didSet { updateMode() }
     }
     
     var data: ChartGroupData? {
@@ -98,6 +89,39 @@ class ChartCopmosedView: UIView {
         if selectInfo.isDisplayed {
             selectInfo.updateInfoSelectedDate(date: selectInfo.lastSelectionDate, data: visibleData, forceUpdateContent: true)
         }
+    }
+    
+    func update(apereance: Apereance) {
+        backgroundColor = apereance.bg
+        let clear = apereance.bg.myColor.metalClear
+        displayChart.metal.clearColor = clear
+        selectionChart.metal.clearColor = clear
+        displayChart.gridColor = apereance.gridColor.myColor
+        selectionView.update(apereance: apereance)
+        selectInfo.update(apereance: apereance)
+        displayChart.labelsPool.color = apereance.chartTextColor
+        
+        //        switch mode {
+        //        case .day:
+        //            let bg = Color(w: 1, a: 1)
+        //            backgroundColor = bg.uiColor
+        //            displayChart.metal.clearColor = bg.metalClear
+        //            selectionChart.metal.clearColor = bg.metalClear
+        //
+        //            displayChart.gridColor = Color(w: 0.45, a: 0.2)
+        //            selectInfo.bgColor = UIColor(red:0.94, green:0.94, blue:0.96, alpha:1.00)
+        //        case .night:
+        //            let bg = Color(r: 0.14, g: 0.18, b: 0.24, a: 1)
+        //            backgroundColor = bg.uiColor
+        //            displayChart.metal.clearColor = bg.metalClear
+        //            selectionChart.metal.clearColor = bg.metalClear
+        //
+        //            displayChart.gridColor = Color(r: 0.22, g: 0.3, b: 0.4, a: 0.5)
+        //            selectInfo.bgColor = UIColor(red:0.11, green:0.16, blue:0.21, alpha:1.00)
+        //        }
+        displayChart.updateLevels()
+        displayChart.metal.setNeedsDisplay()
+        selectionChart.metal.setNeedsDisplay()
     }
     
     override var backgroundColor: UIColor? {
@@ -172,31 +196,6 @@ class ChartCopmosedView: UIView {
         displayChart.selectedDate = nil
         selectInfo.dismissSelectedDate(animated: false)
     }
-        
-    private func updateMode() {
-        selectionView.mode = mode
-        switch mode {
-        case .day:
-            let bg = Color(w: 1, a: 1)
-            backgroundColor = bg.uiColor
-            displayChart.metal.clearColor = bg.metalClear
-            selectionChart.metal.clearColor = bg.metalClear
-            
-            displayChart.gridColor = Color(w: 0.45, a: 0.2)
-            selectInfo.bgColor = UIColor(red:0.94, green:0.94, blue:0.96, alpha:1.00)
-        case .night:
-            let bg = Color(r: 0.14, g: 0.18, b: 0.24, a: 1)
-            backgroundColor = bg.uiColor
-            displayChart.metal.clearColor = bg.metalClear
-            selectionChart.metal.clearColor = bg.metalClear
-            
-            displayChart.gridColor = Color(r: 0.22, g: 0.3, b: 0.4, a: 0.5)
-            selectInfo.bgColor = UIColor(red:0.11, green:0.16, blue:0.21, alpha:1.00)
-        }
-        displayChart.updateLevels()
-        displayChart.metal.setNeedsDisplay()
-        selectionChart.metal.setNeedsDisplay()
-    }
     
     // MARK: show\hide animation
     private func runMaxValueChangeAnimation(data: [ChartData], animDuration: Double) {
@@ -263,14 +262,13 @@ extension ChartCopmosedView: ChartSelectionViewDelegate {
         displayChart.setRange(minTime: fromTime, maxTime: toTime, animated: false)
         if visibleData.count == 0 { return }
         
-        if displayChart.metal.display.groupMode == .percentage {
-            return
+        if displayChart.metal.display.groupMode != .percentage {
+            let (minVal, maxVal) = getMinMaxValue(fromTime: fromTime, toTime: toTime)
+            if maxVal != 0 {
+                displayChart.setMaxVal(val: maxVal, minVal: minVal, animationDuration: maxValDuration)
+            }
         }
         
-        let (minVal, maxVal) = getMinMaxValue(fromTime: fromTime, toTime: toTime)
-        if maxVal != 0 {
-            displayChart.setMaxVal(val: maxVal, minVal: minVal, animationDuration: maxValDuration)
-        }
         selectInfo.updateInfoFrame(dataUpdated: nil)
     }
     

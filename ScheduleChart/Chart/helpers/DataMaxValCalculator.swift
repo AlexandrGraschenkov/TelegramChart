@@ -20,6 +20,9 @@ class DataMaxValCalculator: NSObject {
         var minVal: Float = -1
         if stacked {
             for ii in 0..<data[0].items.count {
+                if fromTime > data[0].items[ii].time || data[0].items[ii].time > toTime {
+                    continue
+                }
                 let sumVal: Float = data.reduce(0, {$0+$1.items[ii].value})
                 if sumVal > maxVal {
                     maxVal = sumVal

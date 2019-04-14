@@ -89,6 +89,10 @@ class SelectChartDisplayedView: UIView {
         _ = SelectChartDisplayedView.getHeightAndLayout(groupData: groupData, fixedWidth: bounds.size.width, layoutButtons: buttons)
     }
     
+    func update(apereance: Apereance) {
+        backgroundColor = apereance.bg
+    }
+    
     var titleColor: UIColor = .white {
         didSet {
             buttons.forEach({$0.setTitleColor(titleColor, for: .selected)})

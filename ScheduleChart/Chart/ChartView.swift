@@ -47,6 +47,12 @@ struct Color {
     }
 }
 
+extension UIColor {
+    var myColor: Color {
+        return Color(color: self)
+    }
+}
+
 class ChartView: UIView {
     struct RangeI {
         var from: Int64

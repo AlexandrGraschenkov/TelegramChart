@@ -22,7 +22,7 @@ class SelctionInfoView: UIView {
     
     let fixedWidth: CGFloat = 130
     
-    var textColor: UIColor = UIColor(white: 0.4, alpha: 1.0) {
+    var textColor: UIColor = Apereance.day.infoTextColor {
         didSet {
             dateLabel.textColor = textColor
             for lab in titleLabels {
@@ -42,7 +42,7 @@ class SelctionInfoView: UIView {
     
     func update(data: [ChartData], time: Int64, displayTotal: Bool = false) {
         if data.count == 0 { return }
-        guard let idx = data[0].getClosestDate(date: time, mode: .ceil)?.0 else { return }
+        guard let idx = data[0].getClosestDate(date: time)?.0 else { return }
         
         lastDisplayAll = displayTotal
         dateLabel.text = dateFormatter(time)

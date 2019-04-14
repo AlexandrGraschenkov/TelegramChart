@@ -11,10 +11,10 @@ import UIKit
 class ViewController: UITableViewController {
 
     @IBOutlet weak var dayNightModeButt: UIButton!
-    @IBOutlet weak var selectChartDisplay: SelectChartDisplayedView!
     var dataArr: [ChartGroupData] = []
     var selectedData: Int = 0
     var cellBg: UIColor = .white
+    var mode: Mode = .day
     
     var cells: [IndexPath: ChartCell] = [:]
     
@@ -38,53 +38,46 @@ class ViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 20, right: 0)
         readChartData()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+    }
+    
     @IBAction func switchNightDayMode(sender: UIButton) {
-//        let newMode: ChartCopmosedView.Mode
-//        if chartView.mode == .day {
-//            newMode = .night
-//        } else {
-//            newMode = .day
-//        }
+        let aper: Apereance
+        if mode == .day {
+            mode = .night
+            aper = .night
+            dayNightModeButt.setTitle("Switch to Day Mode", for: .normal)
+        } else {
+            mode = .day
+            aper = .day
+            dayNightModeButt.setTitle("Switch to Night Mode", for: .normal)
+        }
+        dayNightModeButt.backgroundColor = aper.bg
         
-        
+        for cell in cells.values {
+            cell.backgroundColor = aper.bg
+            cell.chart.update(apereance: aper)
+            cell.selectChart.update(apereance: aper)
+        }
 //        UIView.animate(withDuration: 0.2) {
 //        self.chartView.mode = newMode
-//        self.setMode(newMode)
+        update(apereance: aper)
+//        setMode(mode)
 //        }
     }
     
-    func setMode(_ mode: ChartCopmosedView.Mode) {
-        let bgColor: UIColor
-        let separatorColor: UIColor
-        let textColor: UIColor
-        
-        if mode == .night {
-            textColor = UIColor.white
-            bgColor = UIColor(red:0.10, green:0.13, blue:0.17, alpha:1.00)
-            separatorColor = UIColor(red:0.07, green:0.10, blue:0.13, alpha:1.00)
-            cellBg = UIColor(red:0.14, green:0.18, blue:0.24, alpha:1.00)
-            dayNightModeButt.setTitle("Switch to Day Mode", for: .normal)
-            dayNightModeButt.setTitleColor(UIColor(red:0.25, green:0.59, blue:1.00, alpha:1.00), for: .normal)
-            navigationController?.navigationBar.barStyle = .black
-        } else {
-            textColor = UIColor.black
-            bgColor = UIColor(red:0.94, green:0.94, blue:0.96, alpha:1.00)
-            separatorColor = UIColor(red:0.78, green:0.78, blue:0.80, alpha:1.00)
-            cellBg = .white
-            dayNightModeButt.setTitle("Switch to Night Mode", for: .normal)
-            dayNightModeButt.setTitleColor(UIColor(red:0.18, green:0.49, blue:0.96, alpha:1.00), for: .normal)
-            navigationController?.navigationBar.barStyle = .default
-        }
-        
-        tableView.separatorColor = separatorColor
-        tableView.backgroundColor = bgColor
-        tableView.visibleCells.forEach({$0.backgroundColor = self.cellBg})
-        selectChartDisplay.backgroundColor = cellBg
-        selectChartDisplay.titleColor = textColor
-        navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: textColor]
+    func update(apereance: Apereance) {
+        navigationController?.navigationBar.barStyle = apereance.navBarStyle
+        cellBg = apereance.bg
+        tableView.backgroundColor = apereance.scrollBg
+        tableView.separatorColor = apereance.tableSeparator
+        navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: apereance.textColor]
     }
 }
 

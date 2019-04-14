@@ -11,6 +11,7 @@
 		FA0A5BB022632EE8008F671D /* SelectionDisplayBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BAF22632EE8008F671D /* SelectionDisplayBehavior.swift */; };
 		FA0A5BB32263392C008F671D /* ShapeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BB22263392C008F671D /* ShapeLayer.swift */; };
 		FA0A5BB622637534008F671D /* SelectionInfoBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BB522637534008F671D /* SelectionInfoBehavior.swift */; };
+		FA0A5BB82263993B008F671D /* Apereance.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BB72263993B008F671D /* Apereance.swift */; };
 		FA1ADF612258D14A00623825 /* MetalChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1ADF602258D14A00623825 /* MetalChartView.swift */; };
 		FA2B41C72247CA4600C3E6BA /* Icon.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA2B41C62247CA4600C3E6BA /* Icon.xcassets */; };
 		FA4BB7982239B55A00723FA1 /* HorisontalAxe.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */; };
@@ -54,6 +55,7 @@
 		FA0A5BAF22632EE8008F671D /* SelectionDisplayBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionDisplayBehavior.swift; sourceTree = "<group>"; };
 		FA0A5BB22263392C008F671D /* ShapeLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeLayer.swift; sourceTree = "<group>"; };
 		FA0A5BB522637534008F671D /* SelectionInfoBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionInfoBehavior.swift; sourceTree = "<group>"; };
+		FA0A5BB72263993B008F671D /* Apereance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Apereance.swift; sourceTree = "<group>"; };
 		FA1ADF602258D14A00623825 /* MetalChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalChartView.swift; sourceTree = "<group>"; };
 		FA2B41C62247CA4600C3E6BA /* Icon.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Icon.xcassets; sourceTree = "<group>"; };
 		FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorisontalAxe.swift; sourceTree = "<group>"; };
@@ -134,6 +136,7 @@
 				FA4BB7E022442A2800723FA1 /* DataMaxValCalculator.swift */,
 				FAFD318F2259372B00FDF551 /* Mutex.swift */,
 				FAFE26612260D32600025FBC /* StringCachedWidthCalculator.swift */,
+				FA0A5BB72263993B008F671D /* Apereance.swift */,
 			);
 			path = helpers;
 			sourceTree = "<group>";
@@ -336,6 +339,7 @@
 				FAFE2641225F2B1700025FBC /* PercentFillDisplay.swift in Sources */,
 				FAC45E702235279600A165CC /* VerticalAxe.swift in Sources */,
 				FAC45E722235435D00A165CC /* DebugFpsLabel.swift in Sources */,
+				FA0A5BB82263993B008F671D /* Apereance.swift in Sources */,
 				FAFE265F2260B98E00025FBC /* ChartDataParser.swift in Sources */,
 				FAFD31C6225B8B4100FDF551 /* StackFillDisplay.swift in Sources */,
 				FA0A5BB32263392C008F671D /* ShapeLayer.swift in Sources */,

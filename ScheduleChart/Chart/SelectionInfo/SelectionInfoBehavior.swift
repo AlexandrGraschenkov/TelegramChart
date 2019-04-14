@@ -35,6 +35,11 @@ class SelectionInfoBehavior {
         }
     }
     
+    func update(apereance: Apereance) {
+        bgColor = apereance.infoBg
+        infoView.textColor = apereance.infoTextColor
+        selectionDisplay.update(apereance: apereance)
+    }
     
     func dismissSelectedDate(animated: Bool) {
         if !isDisplayed { return }

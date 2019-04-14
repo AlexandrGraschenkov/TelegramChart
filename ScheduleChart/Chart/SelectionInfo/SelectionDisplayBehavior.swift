@@ -33,6 +33,12 @@ class SelectionDisplayBehavior: NSObject {
         }
     }
     
+    func update(apereance: Apereance) {
+        for c in selectionCircles {
+            c.fillColor = apereance.bg.cgColor
+        }
+    }
+    
     func selectDate(date: Int64, transform: CGAffineTransform) {
         if needShowLine {
             generateSelectLineIfNeeded()
