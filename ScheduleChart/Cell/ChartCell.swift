@@ -70,4 +70,14 @@ extension ChartCell: SelectChartDisplayedViewDelegate {
         chart.setDisplayData(index: index, display: display, animated: true)
         return true
     }
+    
+    func displayOnly(index: Int) {
+        guard let groupData = groupData else {
+            return
+        }
+        for i in 0..<groupData.data.count {
+            groupData.data[i].visible = (i == index)
+        }
+        chart.setDisplayDataOnly(index: index, animated: true)
+    }
 }

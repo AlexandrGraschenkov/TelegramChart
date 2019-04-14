@@ -24,6 +24,7 @@ struct ChartDataInfo {
 
 protocol SelectChartDisplayedViewDelegate: class {
     func chartDataRequestDisplayChange(index: Int, display: Bool) -> Bool
+    func displayOnly(index: Int)
 }
 
 class SelectChartDisplayedView: UIView {
@@ -120,6 +121,10 @@ class SelectChartDisplayedView: UIView {
         butt.setImage(checkmarkIcon, for: .selected)
         butt.setImage(nil, for: .normal)
         butt.addTarget(self, action: #selector(itemButtonPressed(_:)), for: .touchUpInside)
+        
+        let long = UILongPressGestureRecognizer(target: self, action: #selector(itemButtonLongPressed(_:)))
+        butt.addGestureRecognizer(long)
+        
         addSubview(butt)
         return butt
     }
@@ -139,5 +144,16 @@ class SelectChartDisplayedView: UIView {
                 butt.layoutIfNeeded()
             }
         }
+    }
+    
+    @objc func itemButtonLongPressed(_ press: UILongPressGestureRecognizer) {
+        guard let butt = press.view as? UIButton,
+            let idx = buttons.firstIndex(of: butt) else {
+            return
+        }
+        for (i, b) in buttons.enumerated() {
+            b.isSelected = (i == idx)
+        }
+        displayDelegate?.displayOnly(index: idx)
     }
 }

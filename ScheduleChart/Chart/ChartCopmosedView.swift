@@ -91,6 +91,23 @@ class ChartCopmosedView: UIView {
         }
     }
     
+    func setDisplayDataOnly(index: Int, animated: Bool) {
+        guard let groupData = data else { return }
+        if index < 0 || index >= groupData.data.count { return }
+        
+        let count = groupData.data.count
+        for i in 0..<count {
+            groupData.data[i].visible = i == index
+        }
+        if visibleData.count > 0 {
+            runMaxValueChangeAnimation(data: visibleData, animDuration: maxValDuration)
+        }
+        runShowHideAnimation(visible: (0..<count).map{$0 == index}, animDuration: alphaDuration)
+        if selectInfo.isDisplayed {
+            selectInfo.updateInfoSelectedDate(date: selectInfo.lastSelectionDate, data: visibleData, forceUpdateContent: true)
+        }
+    }
+    
     func update(apereance: Apereance) {
         backgroundColor = apereance.bg
         let clear = apereance.bg.myColor.metalClear
@@ -226,10 +243,35 @@ class ChartCopmosedView: UIView {
             }
             if progress == 1 {
                 self.cancelShowHideAnimation[index] = nil
-//                self.setShowData(index: index, show: !show, animated: true)
+                //                self.setShowData(index: index, show: !show, animated: true)
             }
         }
         cancelShowHideAnimation[index] = cancel
+    }
+    
+    private func runShowHideAnimation(visible: [Bool], animDuration: Double) {
+        let animIdx = displayChart.dataAlpha.count
+        cancelShowHideAnimation[animIdx]?()
+        let startAlpha = displayChart.dataAlpha
+        let endAlpha = visible.map{$0 ? CGFloat(1) : CGFloat(0)}
+        let cancel = DisplayLinkAnimator.animate(duration: animDuration) { (progress) in
+            let progress = -progress * (progress - 2) // ease out
+            for i in 0..<startAlpha.count {
+                let alpha = (endAlpha[i] - startAlpha[i]) * progress + startAlpha[i]
+                self.displayChart.dataAlpha[i] = alpha
+                self.selectionChart.dataAlpha[i] = alpha
+            }
+            if !self.displayChart.isMaxValAnimating {
+                self.displayChart.metal.setNeedsDisplay()
+            }
+            if !self.selectionChart.isMaxValAnimating {
+                self.selectionChart.metal.setNeedsDisplay()
+            }
+            if progress == 1 {
+                self.cancelShowHideAnimation[animIdx] = nil
+            }
+        }
+        cancelShowHideAnimation[animIdx] = cancel
     }
     
     @objc func userSelectDate(gesture: UIGestureRecognizer) {
