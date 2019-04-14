@@ -10,6 +10,7 @@
 		FA0A5BAE22618377008F671D /* PreparedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BAD22618377008F671D /* PreparedData.swift */; };
 		FA0A5BB022632EE8008F671D /* SelectionDisplayBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BAF22632EE8008F671D /* SelectionDisplayBehavior.swift */; };
 		FA0A5BB32263392C008F671D /* ShapeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BB22263392C008F671D /* ShapeLayer.swift */; };
+		FA0A5BB622637534008F671D /* SelectionInfoBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BB522637534008F671D /* SelectionInfoBehavior.swift */; };
 		FA1ADF612258D14A00623825 /* MetalChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1ADF602258D14A00623825 /* MetalChartView.swift */; };
 		FA2B41C72247CA4600C3E6BA /* Icon.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA2B41C62247CA4600C3E6BA /* Icon.xcassets */; };
 		FA4BB7982239B55A00723FA1 /* HorisontalAxe.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */; };
@@ -52,6 +53,7 @@
 		FA0A5BAD22618377008F671D /* PreparedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreparedData.swift; sourceTree = "<group>"; };
 		FA0A5BAF22632EE8008F671D /* SelectionDisplayBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionDisplayBehavior.swift; sourceTree = "<group>"; };
 		FA0A5BB22263392C008F671D /* ShapeLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeLayer.swift; sourceTree = "<group>"; };
+		FA0A5BB522637534008F671D /* SelectionInfoBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionInfoBehavior.swift; sourceTree = "<group>"; };
 		FA1ADF602258D14A00623825 /* MetalChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalChartView.swift; sourceTree = "<group>"; };
 		FA2B41C62247CA4600C3E6BA /* Icon.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Icon.xcassets; sourceTree = "<group>"; };
 		FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorisontalAxe.swift; sourceTree = "<group>"; };
@@ -106,10 +108,19 @@
 		FA0A5BB12263338B008F671D /* Selections */ = {
 			isa = PBXGroup;
 			children = (
-				FA0A5BAF22632EE8008F671D /* SelectionDisplayBehavior.swift */,
-				FA0A5BB22263392C008F671D /* ShapeLayer.swift */,
 			);
 			path = Selections;
+			sourceTree = "<group>";
+		};
+		FA0A5BB42263750F008F671D /* SelectionInfo */ = {
+			isa = PBXGroup;
+			children = (
+				FA0A5BAF22632EE8008F671D /* SelectionDisplayBehavior.swift */,
+				FA0A5BB22263392C008F671D /* ShapeLayer.swift */,
+				FA4BB7EC2247A6BD00723FA1 /* SelctionInfoView.swift */,
+				FA0A5BB522637534008F671D /* SelectionInfoBehavior.swift */,
+			);
+			path = SelectionInfo;
 			sourceTree = "<group>";
 		};
 		FA4BB7D72242D63900723FA1 /* helpers */ = {
@@ -179,7 +190,7 @@
 				FAFD318E22590BE400FDF551 /* Metal */,
 				FAC45E682235224C00A165CC /* ChartView.swift */,
 				FA4BB7D92242D7FD00723FA1 /* ChartCopmosedView.swift */,
-				FA4BB7EC2247A6BD00723FA1 /* SelctionInfoView.swift */,
+				FA0A5BB42263750F008F671D /* SelectionInfo */,
 				FA4BB7DB2242D8C100723FA1 /* ChartSelectionView.swift */,
 				FAC45E6F2235279600A165CC /* VerticalAxe.swift */,
 				FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */,
@@ -328,6 +339,7 @@
 				FAFE265F2260B98E00025FBC /* ChartDataParser.swift in Sources */,
 				FAFD31C6225B8B4100FDF551 /* StackFillDisplay.swift in Sources */,
 				FA0A5BB32263392C008F671D /* ShapeLayer.swift in Sources */,
+				FA0A5BB622637534008F671D /* SelectionInfoBehavior.swift in Sources */,
 				FAFD319222593A2500FDF551 /* chart_shaders.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

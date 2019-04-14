@@ -41,6 +41,12 @@ class ChartCopmosedView: UIView {
     var data: ChartGroupData? {
         didSet {
             if oldValue == data { return }
+            if let chartType = data?.type {
+                selectInfo.selectionDisplay.setChartType(chartType)
+            } else {
+                selectInfo.selectionDisplay.deselect()
+            }
+            
             cancelShowHideAnimation.values.forEach({$0()})
             cancelShowHideAnimation.removeAll()
             selectionChart.data = data
@@ -89,8 +95,8 @@ class ChartCopmosedView: UIView {
             runMaxValueChangeAnimation(data: visibleData, animDuration: maxValDuration)
         }
         runShowHideAnimation(dataIndex: index, show: display, animDuration: alphaDuration)
-        if let date = displayChart.selectedDate, selectInfoView != nil {
-            updateInfoSlectedDate(date: date)
+        if selectInfo.isDisplayed {
+            selectInfo.updateInfoSelectedDate(date: selectInfo.lastSelectionDate, data: visibleData, forceUpdateContent: true)
         }
     }
     
@@ -115,15 +121,10 @@ class ChartCopmosedView: UIView {
     
     
     // MARK: private
-    private var selectInfoBgColor: UIColor = UIColor(red:0.94, green:0.94, blue:0.96, alpha:1.00) {
-        didSet {
-            selectInfoView?.bgColor = selectInfoBgColor
-        }
-    }
+    private lazy var selectInfo: SelectionInfoBehavior = SelectionInfoBehavior(chart: self.displayChart)
     private var customScale: [Float] = []
     private var maxValDuration: Double = 0.3
     private var alphaDuration: Double = 0.3
-    private var selectInfoView: SelctionInfoView?
     private var visibleData: [ChartData] {
         guard let groupData = data else {
             return []
@@ -169,8 +170,7 @@ class ChartCopmosedView: UIView {
     private func resetState() {
         selectionView.range = ChartSelectionView.Range(from: 0, to: 1)
         displayChart.selectedDate = nil
-        selectInfoView?.removeFromSuperview()
-        selectInfoView = nil
+        selectInfo.dismissSelectedDate(animated: false)
     }
         
     private func updateMode() {
@@ -183,7 +183,7 @@ class ChartCopmosedView: UIView {
             selectionChart.metal.clearColor = bg.metalClear
             
             displayChart.gridColor = Color(w: 0.45, a: 0.2)
-            selectInfoBgColor = UIColor(red:0.94, green:0.94, blue:0.96, alpha:1.00)
+            selectInfo.bgColor = UIColor(red:0.94, green:0.94, blue:0.96, alpha:1.00)
         case .night:
             let bg = Color(r: 0.14, g: 0.18, b: 0.24, a: 1)
             backgroundColor = bg.uiColor
@@ -191,7 +191,7 @@ class ChartCopmosedView: UIView {
             selectionChart.metal.clearColor = bg.metalClear
             
             displayChart.gridColor = Color(r: 0.22, g: 0.3, b: 0.4, a: 0.5)
-            selectInfoBgColor = UIColor(red:0.11, green:0.16, blue:0.21, alpha:1.00)
+            selectInfo.bgColor = UIColor(red:0.11, green:0.16, blue:0.21, alpha:1.00)
         }
         displayChart.updateLevels()
         displayChart.metal.setNeedsDisplay()
@@ -247,29 +247,11 @@ class ChartCopmosedView: UIView {
         }
         
         let closestDate: Int64? = groupData.getClosestDate(date: date)?.1
-        displayChart.selectedDate = closestDate
         if let date = closestDate {
-            updateInfoSlectedDate(date: date)
+            selectInfo.updateInfoSelectedDate(date: date, data: visibleData, forceUpdateContent: false)
         }
     }
     
-    private func updateInfoSlectedDate(date: Int64) {
-        if selectInfoView == nil {
-            selectInfoView = SelctionInfoView(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
-            selectInfoView?.bgColor = selectInfoBgColor
-            addSubview(selectInfoView!)
-        }
-        if let view = selectInfoView {
-            view.update(data: visibleData, time: date)
-            let centerX = displayChart.getXPos(date: date)
-            let frame = CGRect(x: round(centerX - view.bounds.width / 2.0),
-                               y: 5,
-                               width: view.bounds.width,
-                               height: view.bounds.height)
-            view.frame = convert(frame, from: displayChart)
-            //            selectInfoView?.center =
-        }
-    }
 }
 
 extension ChartCopmosedView: ChartSelectionViewDelegate {
@@ -289,6 +271,7 @@ extension ChartCopmosedView: ChartSelectionViewDelegate {
         if maxVal != 0 {
             displayChart.setMaxVal(val: maxVal, minVal: minVal, animationDuration: maxValDuration)
         }
+        selectInfo.updateInfoFrame(dataUpdated: nil)
     }
     
     func getMinMaxValue(fromTime: Int64? = nil, toTime: Int64? = nil) -> (Float, Float) {

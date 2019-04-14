@@ -88,9 +88,9 @@ struct ChartData {
         case .ceil:
             percentIdx = Int(ceil(percent * Float(count-1)))
         case .floor:
-            percentIdx = Int(ceil(percent * Float(count-1)))
+            percentIdx = Int(floor(percent * Float(count-1)))
         case .close:
-            percentIdx = Int(ceil(percent * Float(count-1)))
+            percentIdx = Int(round(percent * Float(count-1)))
         }
         return (percentIdx, items[percentIdx].time)
     }

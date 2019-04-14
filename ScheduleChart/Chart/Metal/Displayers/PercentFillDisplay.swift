@@ -10,8 +10,6 @@ import UIKit
 
 class PercentFillDisplay: BaseDisplay {
     
-    lazy var selectionBehavior: SelectionDisplayBehavior = SelectionDisplayBehavior(display: self)
-    
     override init(view: MetalChartView, device: MTLDevice, reuseBuffers: MetalBuffer?) {
         super.init(view: view, device: device, reuseBuffers: reuseBuffers)
         
@@ -23,15 +21,6 @@ class PercentFillDisplay: BaseDisplay {
         pipelineDescriptor.fragmentFunction = library?.makeFunction(name: "line_fragment")
         
         pipelineState = (try? device.makeRenderPipelineState(descriptor: pipelineDescriptor)) as! MTLRenderPipelineState
-    }
-    
-    override func setSelectionDate(date: Int64?) {
-        selectionDate = date
-        if let date = date {
-            selectionBehavior.selectDate(date: date, transform: view.globalParams.transform)
-        } else {
-            selectionBehavior.deselect()
-        }
     }
     
     override func display(renderEncoder: MTLRenderCommandEncoder) {

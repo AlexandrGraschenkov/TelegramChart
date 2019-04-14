@@ -20,10 +20,17 @@ class SelctionInfoView: UIView {
         setup()
     }
     
+    let fixedWidth: CGFloat = 130
+    
     var textColor: UIColor = UIColor(white: 0.4, alpha: 1.0) {
         didSet {
             dateLabel.textColor = textColor
-            yearLabel.textColor = textColor
+            for lab in titleLabels {
+                lab.textColor = textColor
+            }
+            if lastDisplayAll {
+                valLabels.last?.textColor = textColor
+            }
         }
     }
     
@@ -33,23 +40,29 @@ class SelctionInfoView: UIView {
         }
     }
     
-    func update(data: [ChartData], time: Int64) {
+    func update(data: [ChartData], time: Int64, displayTotal: Bool = false) {
         if data.count == 0 { return }
         guard let idx = data[0].getClosestDate(date: time, mode: .ceil)?.0 else { return }
         
-        yearLabel.text = yearFormatter(time)
+        lastDisplayAll = displayTotal
         dateLabel.text = dateFormatter(time)
         
-        let values: [ColorVal] = data.map{ColorVal(val: $0.items[idx].value, color: $0.color)}
+        var values: [ColorVal] = data.map{ColorVal(val: $0.items[idx].value, color: $0.color, title: $0.name)}
+        if displayTotal {
+            let sumVal = data.reduce(0, { $0 + $1.items[idx].value })
+            values.append(ColorVal(val: sumVal, color: textColor, title: "All"))
+        }
         displayValues(values)
+        displayTitles(values)
         layoutAndResize()
     }
     
     // MARK: private
     private var valLabels: [UILabel] = []
+    private var titleLabels: [UILabel] = []
     private var dateLabel: UILabel!
-    private var yearLabel: UILabel!
     private var bg: UIImageView!
+    private var lastDisplayAll: Bool = false
 
     private lazy var valueFormatter: (Float)->(String) = {
         let formatter = NumberFormatter()
@@ -62,15 +75,7 @@ class SelctionInfoView: UIView {
     
     private lazy var dateFormatter: (Int64)->(String) = {
         let df = DateFormatter()
-        df.dateFormat = "MMM dd"
-        return { (time: Int64) -> String in
-            return df.string(from: Date(timeIntervalSince1970: TimeInterval(time) / 1000.0))
-        }
-    }()
-    
-    private lazy var yearFormatter: (Int64)->(String) = {
-        let df = DateFormatter()
-        df.dateFormat = "yyyy"
+        df.dateFormat = "EEE, d MMM yyyy"
         return { (time: Int64) -> String in
             return df.string(from: Date(timeIntervalSince1970: TimeInterval(time) / 1000.0))
         }
@@ -79,6 +84,7 @@ class SelctionInfoView: UIView {
     private struct ColorVal {
         let val: Float
         let color: UIColor
+        let title: String?
     }
     
     // MARK: methods
@@ -93,12 +99,8 @@ class SelctionInfoView: UIView {
         dateLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 30, height: 20))
         dateLabel.textColor = textColor
         dateLabel.font = UIFont.systemFont(ofSize: 12, weight: .bold)
+        dateLabel.textAlignment = .left
         addSubview(dateLabel)
-        
-        yearLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 30, height: 20))
-        yearLabel.textColor = textColor
-        yearLabel.font = UIFont.systemFont(ofSize: 12, weight: .regular)
-        addSubview(yearLabel)
     }
     
     private func displayValues(_ values: [ColorVal]) {
@@ -115,6 +117,22 @@ class SelctionInfoView: UIView {
         }
     }
     
+    private func displayTitles(_ values: [ColorVal]) {
+        let titlesIsSet = titleLabels.count == values.count
+        while values.count > titleLabels.count {
+            titleLabels.append(generateTitleLabel())
+        }
+        while values.count < titleLabels.count {
+            titleLabels.popLast()?.removeFromSuperview()
+        }
+        
+        if titlesIsSet { return }
+        for (val, label) in zip(values, titleLabels) {
+            label.text = val.title
+            label.textColor = textColor
+        }
+    }
+    
     private func generateValueLabel() -> UILabel {
         let label = UILabel(frame: CGRect(x: 0, y: 0, width: 30, height: 20))
         label.font = UIFont.monospacedDigitSystemFont(ofSize: 12, weight: .bold)
@@ -123,30 +141,31 @@ class SelctionInfoView: UIView {
         return label
     }
     
+    private func generateTitleLabel() -> UILabel {
+        let label = UILabel(frame: CGRect(x: 0, y: 0, width: 30, height: 20))
+        label.font = UIFont.systemFont(ofSize: 13)
+        label.textAlignment = .left
+        addSubview(label)
+        return label
+    }
+    
     private func layoutAndResize() {
         let labelsHeight: CGFloat = 16
         let inset = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
-        let largeSize = CGSize(width: 400, height: labelsHeight)
         dateLabel.frame = CGRect(x: inset.left,
                                  y: inset.top,
-                                 width: dateLabel.sizeThatFits(largeSize).width,
+                                 width: fixedWidth - (inset.left + inset.right),
                                  height: labelsHeight)
-        yearLabel.frame = CGRect(x: inset.left,
-                                 y: dateLabel.frame.maxY,
-                                 width: dateLabel.sizeThatFits(largeSize).width,
-                                 height: labelsHeight)
-        let xValOffset = max(dateLabel.frame.maxX, yearLabel.frame.maxX)
         
-        let maxValWidth: CGFloat = valLabels.reduce(0, {max($0, $1.sizeThatFits(largeSize).width)})
-        var offset = CGPoint(x: xValOffset + 10, y: inset.top)
-        for lab in valLabels {
-            lab.frame = CGRect(x: offset.x, y: offset.y, width: maxValWidth, height: labelsHeight)
-            offset.y = lab.frame.maxY
+        var offset = CGPoint(x: inset.left, y: inset.top + 20)
+        for (lab1, lab2) in zip(valLabels, titleLabels) {
+            lab1.frame = CGRect(x: offset.x, y: offset.y, width: dateLabel.bounds.width, height: labelsHeight)
+            lab2.frame = lab1.frame
+            offset.y = lab1.frame.maxY
         }
         
-        let width = (valLabels.first?.frame.maxX ?? xValOffset) + inset.right
-        let height = max(offset.y, yearLabel.frame.maxY) + inset.bottom
-        resizeTo(CGSize(width: width, height: height))
+        let height = offset.y + inset.bottom
+        resizeTo(CGSize(width: fixedWidth, height: height))
     }
     
     private func resizeTo(_ newSize: CGSize) {

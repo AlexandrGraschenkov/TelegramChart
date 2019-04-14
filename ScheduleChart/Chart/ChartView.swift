@@ -107,6 +107,7 @@ class ChartView: UIView {
     var maxValAnimatorCancel: Cancelable?
     var rangeAnimatorCancel: Cancelable?
     var chartInset = UIEdgeInsets(top: 0, left: 40, bottom: 30, right: 30)
+    var onMinMaxValueAnimChange: (()->())?
     
     var isMaxValAnimating: Bool {
         return minMaxValueAnimation != nil
@@ -149,6 +150,7 @@ class ChartView: UIView {
                 let percent = -percent * (percent - 2) // ease out
                 self.maxValue = (val - fromMaxVal) * Float(percent) + fromMaxVal
                 self.minValue = (minVal - fromMinVal) * Float(percent) + fromMinVal
+                self.onMinMaxValueAnimChange?()
                 
                 if self.drawGrid {
                     self.verticalAxe.updateLabelsPos(inset: self.chartInset)
@@ -262,6 +264,22 @@ class ChartView: UIView {
         
         metal?.display.update(minValue: minValue, maxValue: maxValue, displayRange: RangeI(from: fromTime, to: toTime), rect: chartRect)
         metal?.setNeedsDisplay()
+    }
+    
+    
+    func calculateTransform() -> CGAffineTransform {
+        let fromTime = CGFloat(displayRange.from)
+        let toTime = CGFloat(displayRange.to)
+        let maxVal = CGFloat(maxValue)
+        let minVal = CGFloat(minValue)
+        let rect = bounds.inset(by: chartInset)
+        
+        var t: CGAffineTransform = .identity
+        let scaleX = rect.width / (toTime - fromTime)
+        t = t.translatedBy(x: rect.minX, y: rect.maxY)
+        t = t.scaledBy(x: scaleX, y: -rect.height / (maxVal - minVal))
+        t = t.translatedBy(x: -fromTime, y: -minVal)
+        return t
     }
     
     private func convertPos(time: Int64, val: Float, inRect rect: CGRect, fromTime: Int64, toTime: Int64) -> CGPoint {
