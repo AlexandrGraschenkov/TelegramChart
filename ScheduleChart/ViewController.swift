@@ -17,6 +17,8 @@ class ViewController: UITableViewController {
     var selectedData: Int = 0
     var cellBg: UIColor = .white
     
+    var cells: [IndexPath: ChartCell] = [:]
+    
     func readChartData() {
         for i in 1...5 {
             let path = "contest/\(i)/overview"
@@ -99,12 +101,21 @@ extension ViewController { // table
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
+        // table view have strange logic with reuse cells
+        // if we do not see this cell, it creates anyway on screen appear
+        // so all cells are created in one time, then seams some of them frees
+        // only after this it start to reuse cells
+        
+        if let cell = cells[indexPath] {
+            return cell
+        }
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "ChartCell", for: indexPath) as? ChartCell else {
             return UITableViewCell()
         }
         
         cell.chart.minValueFixedZero = indexPath.section >= 2
         cell.display(groupData: dataArr[indexPath.section])
+        cells[indexPath] = cell
         return cell
     }
     

@@ -76,11 +76,11 @@ vertex VertexOut stacked_fill_vertex(constant float2 *points[[buffer(0)]],
     uint pointId = vertexId / 4;
     uint pointOffset = pointId % globalParams.linePointsCount;
     
-    for (uint i = 0; i < chartIdx; i++) {
+    for (uint i = 0; i <= chartIdx; i++) {
         yVal += points[pointOffset + i * globalParams.linePointsCount].y * colors[i].w;
     }
     float2 p1 = points[pointId];
-    p1.y += yVal;
+    p1.y = yVal;
     float2 p0 = float2(p1.x, 0);
     
     

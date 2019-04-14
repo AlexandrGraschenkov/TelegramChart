@@ -13,7 +13,7 @@ class PercentFillDisplay: BaseDisplay {
     override init(view: MetalChartView, device: MTLDevice, reuseBuffers: MetalBuffer?) {
         super.init(view: view, device: device, reuseBuffers: reuseBuffers)
         
-        reduceSwitchOffset = -0.2
+        reduceSwitchOffset += 0.5
         groupMode = .percentage
         
         let library = device.makeDefaultLibrary()

@@ -203,7 +203,7 @@ class ChartCopmosedView: UIView {
         if displayChart.metal.display.groupMode == .percentage {
             return
         }
-        let (totalMaxVal, totalMinVal) = getMinMaxValue()
+        let (totalMinVal, totalMaxVal) = getMinMaxValue()
         selectionChart.setMaxVal(val: totalMaxVal, minVal: totalMinVal, animationDuration: animDuration)
         
         
@@ -296,7 +296,6 @@ extension ChartCopmosedView: ChartSelectionViewDelegate {
         
         if customScale.count == 0 {
             let stacked = data?.type == .stacked
-            print("Min val fixed", minValueFixedZero)
             return DataMaxValCalculator.getMinMaxValue(visibleData, fromTime: fromTime, toTime: toTime, stacked: stacked, withMinValue: !minValueFixedZero, dividableBy: levelsCount)
         }
         

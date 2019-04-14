@@ -29,7 +29,7 @@ class BaseDisplay: NSObject {
         case triangleStrip
     }
     
-    var view: MetalChartView
+    weak var view: MetalChartView!
     var data: ChartGroupData? {
         didSet { dataUpdated() }
     }
@@ -64,6 +64,9 @@ class BaseDisplay: NSObject {
     init(view: MetalChartView, device: MTLDevice, reuseBuffers: MetalBuffer?) {
         self.view = view
         
+//        if view.isSelectionChart {
+//            reduceSwitchOffset += 1.0
+//        }
         pipelineDescriptor.colorAttachments[0].pixelFormat = view.colorPixelFormat
         pipelineDescriptor.colorAttachments[0].isBlendingEnabled = true
         pipelineDescriptor.colorAttachments[0].rgbBlendOperation = .add
