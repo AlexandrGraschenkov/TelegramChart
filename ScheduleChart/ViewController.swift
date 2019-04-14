@@ -10,7 +10,6 @@ import UIKit
 
 class ViewController: UITableViewController {
 
-    @IBOutlet weak var chartView: ChartCopmosedView!
     @IBOutlet weak var dayNightModeButt: UIButton!
     @IBOutlet weak var selectChartDisplay: SelectChartDisplayedView!
     var dataArr: [ChartGroupData] = []
@@ -43,17 +42,17 @@ class ViewController: UITableViewController {
     }
     
     @IBAction func switchNightDayMode(sender: UIButton) {
-        let newMode: ChartCopmosedView.Mode
-        if chartView.mode == .day {
-            newMode = .night
-        } else {
-            newMode = .day
-        }
+//        let newMode: ChartCopmosedView.Mode
+//        if chartView.mode == .day {
+//            newMode = .night
+//        } else {
+//            newMode = .day
+//        }
         
         
 //        UIView.animate(withDuration: 0.2) {
-        self.chartView.mode = newMode
-        self.setMode(newMode)
+//        self.chartView.mode = newMode
+//        self.setMode(newMode)
 //        }
     }
     

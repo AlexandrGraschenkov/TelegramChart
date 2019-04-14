@@ -55,6 +55,7 @@ class BaseDisplay: NSObject {
     var drawFrom: Int = 0
     var drawTo: Int = 0
     var selectionDate: Int64?
+    var lastDisplayRect: CGRect = .zero
     
     
     
@@ -102,6 +103,7 @@ class BaseDisplay: NSObject {
         view.mutex.lock()
         defer { view.mutex.unlock() }
         
+        lastDisplayRect = rect
         let t = calculateTransform(maxValue: maxValue, minValue: minValue, displayRange: displayRange, rect: rect)
         view.globalParams.transform = t.getMatrix()
         
