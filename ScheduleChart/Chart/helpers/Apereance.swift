@@ -25,7 +25,8 @@ struct Apereance {
                                infoBg: UIColor(red:0.94, green:0.94, blue:0.96, alpha:1.00),
                                infoTextColor: UIColor(red:0.43, green:0.43, blue:0.45, alpha:1.00),
                                navBarStyle: .default,
-                               tableSeparator: UIColor(red:0.78, green:0.78, blue:0.80, alpha:1.00))
+                               tableSeparator: UIColor(red:0.78, green:0.78, blue:0.80, alpha:1.00),
+                               mode: .day)
     
     static let night = Apereance(bg: UIColor(red:0.14, green:0.18, blue:0.24, alpha:1.00),
                                  scrollBg: UIColor(red:0.10, green:0.13, blue:0.17, alpha:1.00),
@@ -37,7 +38,8 @@ struct Apereance {
                                  infoBg: UIColor(red:0.11, green:0.14, blue:0.18, alpha:1.00),
                                  infoTextColor: UIColor.white,
                                  navBarStyle: .black,
-                                 tableSeparator: UIColor(red:0.07, green:0.10, blue:0.13, alpha:1.00))
+                                 tableSeparator: UIColor(red:0.07, green:0.10, blue:0.13, alpha:1.00),
+                                 mode: .night)
     
     let bg: UIColor
     let scrollBg: UIColor
@@ -50,6 +52,7 @@ struct Apereance {
     let infoTextColor: UIColor
     let navBarStyle: UIBarStyle
     let tableSeparator: UIColor
+    let mode: Mode
     
 }
 

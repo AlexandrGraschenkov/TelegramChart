@@ -168,6 +168,11 @@ class ChartCopmosedView: UIView {
     private var panGesture: UIPanGestureRecognizer!
     
     private func setup() {
+        displayChart = ChartView()
+        displayChart.backgroundColor = backgroundColor
+        displayChart.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height - selectionHeight)
+        addSubview(displayChart)
+        
         selectionChart = ChartView()
         selectionChart.isSelectionView = true
         selectionChart.backgroundColor = backgroundColor
@@ -182,11 +187,6 @@ class ChartCopmosedView: UIView {
         selectionView.delegate = self
         selectionChart.addSubview(selectionView)
         selectionView.setupGestures(view: self)
-        
-        displayChart = ChartView()
-        displayChart.backgroundColor = backgroundColor
-        displayChart.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height - selectionHeight)
-        addSubview(displayChart)
         
         topDateLabel = UILabel(frame: CGRect(x: 0, y: 0, width: bounds.width, height: 30))
         topDateLabel.autoresizingMask = [.flexibleWidth, .flexibleBottomMargin]

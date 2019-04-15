@@ -65,7 +65,7 @@ class SelectionDisplayBehavior: NSObject {
     }
     
     func deselect() {
-        selectionLine.isHidden = true
+        selectionLine?.isHidden = true
         selectionCircles.forEach({$0.removeFromSuperlayer()})
     }
     

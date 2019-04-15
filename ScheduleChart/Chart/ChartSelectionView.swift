@@ -41,6 +41,21 @@ class ChartSelectionView: UIView {
     weak var delegate: ChartSelectionViewDelegate?
     
     
+    func update(apereance: Apereance) {
+        let imgName: String
+        switch apereance.mode {
+        case .day:
+            imgName = "white_selector"
+        case .night:
+            imgName = "dark_selector"
+        }
+        selectionImgView.image = UIImage(named: imgName)?.resizableImage(withCapInsets: UIEdgeInsets(top: 3, left: 13, bottom: 3, right: 13))
+        cornerBorders.tintColor = apereance.bg
+        
+        rightOverlay.backgroundColor = apereance.selectionChartOverlay
+        leftOverlay.backgroundColor = apereance.selectionChartOverlay
+    }
+    
     func setupGestures(view: UIView) {
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(onPan(pan:)))
         panGesture.delegate = self
@@ -53,6 +68,7 @@ class ChartSelectionView: UIView {
     private var leftOverlay: UIView!
     private var rightOverlay: UIView!
     private var selectionImgView: UIImageView!
+    private var cornerBorders: UIImageView!
     private var panStartRange: Range = Range(from: 0, to: 1)
     private var panGesture: UIPanGestureRecognizer?
     
@@ -63,6 +79,7 @@ class ChartSelectionView: UIView {
     
     private func setupViews() {
         let autoresize: UIView.AutoresizingMask = [.flexibleWidth, .flexibleHeight, .flexibleLeftMargin, .flexibleRightMargin]
+        clipsToBounds = false
         
         leftOverlay = UIView(frame: bounds)
         addSubview(leftOverlay)
@@ -70,16 +87,16 @@ class ChartSelectionView: UIView {
         rightOverlay = UIView(frame: bounds)
         addSubview(rightOverlay)
         
-        selectionImgView = UIImageView(image: UIImage(named: "selection_area")?.resizableImage(withCapInsets: UIEdgeInsets(top: 3, left: 6, bottom: 3, right: 6)))
+        cornerBorders = UIImageView(image: UIImage(named: "selection_border_mask")?.resizableImage(withCapInsets: UIEdgeInsets(top: 7, left: 7, bottom: 7, right: 7)).withRenderingMode(.alwaysTemplate))
+        cornerBorders.frame = bounds
+        cornerBorders.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
+        selectionImgView = UIImageView()
         selectionImgView.autoresizingMask = autoresize
-//        selectionImgView.backgroundColor = UIColor.red
+        addSubview(cornerBorders)
         addSubview(selectionImgView)
+        
         update(apereance: .day)
-    }
-    
-    func update(apereance: Apereance) {
-        rightOverlay.backgroundColor = apereance.selectionChartOverlay
-        leftOverlay.backgroundColor = apereance.selectionChartOverlay
     }
     
     override func layoutSubviews() {
@@ -87,10 +104,11 @@ class ChartSelectionView: UIView {
         
         let leftX = range.from * bounds.width
         let righX = range.to * bounds.width
+        let offset = CGFloat(3)
         
-        leftOverlay.frame = CGRect(x: 0, y: 0, width: leftX, height: bounds.height)
-        rightOverlay.frame = CGRect(x: righX, y: 0, width: bounds.width-righX, height: bounds.height)
-        selectionImgView.frame = CGRect(x: leftX, y: 0, width: righX-leftX, height: bounds.height)
+        leftOverlay.frame = CGRect(x: 0, y: 0, width: leftX+offset, height: bounds.height)
+        rightOverlay.frame = CGRect(x: righX-offset, y: 0, width: bounds.width-righX+offset, height: bounds.height)
+        selectionImgView.frame = CGRect(x: leftX, y: 0, width: righX-leftX, height: bounds.height).insetBy(dx: -1, dy: -2)
     }
 
     
