@@ -86,6 +86,9 @@ class BaseDisplay: NSObject {
         super.init()
     }
     
+    func onRemove() {
+        
+    }
     
     func setupBuffers(maxChartDataCount: Int, maxChartItemsCount: Int) {
         if buffers == nil {

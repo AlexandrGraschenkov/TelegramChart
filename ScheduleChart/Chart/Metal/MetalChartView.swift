@@ -45,7 +45,9 @@ class MetalChartView: MTKView {
     private var pipelineState : MTLRenderPipelineState! = nil
     
     private var levelDisplay: LineLevelDisplay?
-    var display: BaseDisplay!
+    var display: BaseDisplay! {
+        didSet { oldValue?.onRemove() }
+    }
     var globalParams: GlobalParameters!
     var customScale: [Float] = []
     let mutex = Mutex()

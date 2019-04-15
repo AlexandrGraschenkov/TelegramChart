@@ -23,6 +23,7 @@ class SelctionInfoView: UIView {
     let fixedWidth: CGFloat = 150
     var onTapClosure: (()->())? = nil {
         didSet {
+            detailButt.isHidden = onTapClosure == nil
             self.isUserInteractionEnabled = onTapClosure != nil
         }
     }
@@ -68,6 +69,7 @@ class SelctionInfoView: UIView {
     private var dateLabel: UILabel!
     private var bg: UIImageView!
     private var lastDisplayAll: Bool = false
+    private var detailButt: UIButton!
 
     private lazy var valueFormatter: (Float)->(String) = {
         let formatter = NumberFormatter()
@@ -107,8 +109,17 @@ class SelctionInfoView: UIView {
         dateLabel.textAlignment = .left
         addSubview(dateLabel)
         
-        let tap = UIGestureRecognizer(target: self, action: #selector(onTap))
-        addGestureRecognizer(tap)
+        let butt = UIButton(frame: bounds)
+        butt.autoresizingMask = [.flexibleWidth, .flexibleBottomMargin]
+        butt.frame.size.height = 20
+        butt.contentHorizontalAlignment = .right
+        butt.contentEdgeInsets = UIEdgeInsets(top: 0, left: 4, bottom: 0, right: 4)
+        butt.setTitle(">", for: .normal)
+        butt.setTitleColor(.red, for: .normal)
+        butt.isHidden = true
+        butt.addTarget(self, action: #selector(onTap), for: .touchUpInside)
+        addSubview(butt)
+        detailButt = butt
     }
     
     private func displayValues(_ values: [ColorVal]) {

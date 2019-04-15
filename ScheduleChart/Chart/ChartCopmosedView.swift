@@ -26,6 +26,9 @@ class ChartCopmosedView: UIView {
     var selectionChart: ChartView!
     var displayChart: ChartView!
     var selectionView: ChartSelectionView!
+    var closeDetailButt: UIButton!
+    var cacheGlobalDisplay: PercentFillDisplay?
+    var showDetail: Bool = false
     var selectionHeight: CGFloat = 40 {
         didSet { setNeedsLayout(); layoutIfNeeded() }
     }
@@ -85,6 +88,7 @@ class ChartCopmosedView: UIView {
     func setDisplayData(index: Int, display: Bool, animated: Bool) {
         guard let groupData = data else { return }
         if index < 0 || index >= groupData.data.count { return }
+        if showDetail { return }
         
         if groupData.data[index].visible != display {
             groupData.data[index].visible = display
@@ -200,6 +204,13 @@ class ChartCopmosedView: UIView {
         topDateLabel.textAlignment = .center
         addSubview(topDateLabel)
         
+        closeDetailButt = UIButton(frame: CGRect(x: 0, y: 0, width: 120, height: 30))
+        closeDetailButt.setTitleColor(UIColor(red:0.32, green:0.65, blue:0.97, alpha:1.00), for: .normal)
+        closeDetailButt.setTitle("Zoom Out", for: .normal)
+        closeDetailButt.alpha = 0
+        closeDetailButt.addTarget(self, action: #selector(openGlobal), for: .touchUpInside)
+        addSubview(closeDetailButt)
+        
         let pan = UIPanGestureRecognizer(target: self, action: #selector(userSelectDate(gesture:)))
         pan.delegate = self
         displayChart.addGestureRecognizer(pan)
@@ -290,10 +301,6 @@ class ChartCopmosedView: UIView {
     
     @objc func userSelectDate(gesture: UIGestureRecognizer) {
         let ppp = gesture.location(in: selectInfo.infoView)
-        if selectInfo.infoView.bounds.contains(ppp) {
-            openDetail()
-            return
-        }
         if gesture.state == .cancelled { return }
         guard let groupData = data, groupData.data.count > 0 else { return }
         
@@ -358,17 +365,37 @@ extension ChartCopmosedView: ChartSelectionViewDelegate {
     
     
     func openDetail() {
-        lastDisplay = lastDisplay ?? displayChart.metal.display as! PercentFillDisplay
-        if displayChart.metal.display is PercentPieTransitionDisplay {
-            displayChart.metal.display = lastDisplay
-        } else {
-            let pie = PercentPieTransitionDisplay(percentFill: lastDisplay!, day: selectInfo.lastSelectionDate)
-            displayChart.metal.display = pie
+        guard let percent = displayChart.metal.display as? PercentFillDisplay else {
+            return
         }
-        displayChart.metal.setNeedsDisplay()
+        cacheGlobalDisplay = percent
+        selectInfo.dismissSelectedDate(animated: true)
+        UIView.animate(withDuration: 0.3, animations: {
+            self.closeDetailButt.alpha = 1
+//            self.displayChart.drawGrid = false
+        }, completion: nil)
+        
+        topDateLabel.text = "Not fully implemented"
+        topDateLabel.backgroundColor = UIColor.red
+        
+        showDetail = true
+        let pieTransition = PercentPieTransitionDisplay(percentFill: percent, day: selectInfo.lastSelectionDate, goDetail: true)
+        displayChart.metal.display = pieTransition
+    }
+    
+    @objc func openGlobal() {
+        UIView.animate(withDuration: 0.3) {
+            self.closeDetailButt.alpha = 0
+        }
+        
+        showDetail = false
+        topDateLabel.backgroundColor = .clear
+        
+        let pieTransition = PercentPieTransitionDisplay(percentFill: cacheGlobalDisplay!, day: selectInfo.lastSelectionDate, goDetail: false)
+        pieTransition.pieDisplay = displayChart.metal.display as! PieDisplay
+        displayChart.metal.display = pieTransition
     }
 }
-private var lastDisplay: PercentFillDisplay?
 
 extension ChartCopmosedView: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
