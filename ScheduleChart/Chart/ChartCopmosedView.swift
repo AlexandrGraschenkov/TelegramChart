@@ -35,6 +35,11 @@ class ChartCopmosedView: UIView {
             if oldValue == data { return }
             if let chartType = data?.type {
                 selectInfo.selectionDisplay.setChartType(chartType)
+                if chartType == .percentage {
+                    selectInfo.onTapClosure = { [weak self] in
+                        self?.openDetail()
+                    }
+                }
             } else {
                 selectInfo.selectionDisplay.deselect()
             }
@@ -284,6 +289,11 @@ class ChartCopmosedView: UIView {
     }
     
     @objc func userSelectDate(gesture: UIGestureRecognizer) {
+        let ppp = gesture.location(in: selectInfo.infoView)
+        if selectInfo.infoView.bounds.contains(ppp) {
+            openDetail()
+            return
+        }
         if gesture.state == .cancelled { return }
         guard let groupData = data, groupData.data.count > 0 else { return }
         
@@ -345,7 +355,20 @@ extension ChartCopmosedView: ChartSelectionViewDelegate {
         }
         return (minVal, maxVal)
     }
+    
+    
+    func openDetail() {
+        lastDisplay = lastDisplay ?? displayChart.metal.display as! PercentFillDisplay
+        if displayChart.metal.display is PercentPieTransitionDisplay {
+            displayChart.metal.display = lastDisplay
+        } else {
+            let pie = PercentPieTransitionDisplay(percentFill: lastDisplay!, day: selectInfo.lastSelectionDate)
+            displayChart.metal.display = pie
+        }
+        displayChart.metal.setNeedsDisplay()
+    }
 }
+private var lastDisplay: PercentFillDisplay?
 
 extension ChartCopmosedView: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {

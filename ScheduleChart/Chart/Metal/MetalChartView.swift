@@ -157,13 +157,13 @@ class MetalChartView: MTKView {
         
         
         let drawLineFirst = display.groupMode == .none
-        if drawLineFirst {
+        if display.showGrid && drawLineFirst {
             levelDisplay?.display(renderEncoder: renderEncoder)
         }
         
         display.display(renderEncoder: renderEncoder)
         
-        if !drawLineFirst {
+        if display.showGrid && !drawLineFirst {
             levelDisplay?.display(renderEncoder: renderEncoder)
         }
         

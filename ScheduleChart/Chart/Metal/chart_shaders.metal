@@ -184,3 +184,79 @@ fragment float4 line_fragment(VertexOut params[[stage_in]])
 }
 
 
+
+// pie transition
+
+
+struct SlopeAndAngle {
+    float slope;
+    float angle;
+};
+
+vertex VertexOut pie_transition_vertex(constant float2 *points[[buffer(0)]],
+                                     constant float4 *colors[[buffer(1)]],
+                                     constant GlobalParameters& globalParams[[buffer(2)]],
+                                       constant SlopeAndAngle *slopes[[buffer(3)]],
+                                     uint vertexId [[vertex_id]])
+{
+    uint wtfWhy = 4;
+    uint chartIdx = vertexId / (wtfWhy * globalParams.linePointsCount);
+    uint pointId = vertexId / 4 + ((vertexId / 2) % 2);
+    uint dataPointOffset = pointId % globalParams.linePointsCount;
+    
+    float allSum = 0;
+    float valSum = 0;
+    for (uint i = 0; i < globalParams.chartCount; i++) {
+        allSum += points[dataPointOffset + i * globalParams.linePointsCount].y * colors[i].w;
+        if (i == chartIdx) {
+            valSum = allSum;
+        }
+    }
+    
+    float2 p1 = points[pointId];
+    p1.y = 100.0 * valSum / allSum;
+    float2 p0 = float2(p1.x, 0);
+    
+    
+    uint linePointOffset = vertexId % 2; // 0 or 1
+    float2 point = float(linePointOffset) * (p1-p0) + p0;
+    point = (globalParams.transform * float3(point, 1)).xy;
+    point = (point / globalParams.halfViewport) - float2(1,1);
+    
+    if (chartIdx == globalParams.chartCount-1) {
+        VertexOut vo;
+        vo.pos.xy = point;
+        vo.pos.zw = float2(0, 1);
+        vo.color = colors[chartIdx];
+        vo.color.w = 1;
+        
+        return vo;
+    }
+    
+    SlopeAndAngle sam = slopes[chartIdx];
+    float percentAnim = globalParams.lineWidth;
+    if (linePointOffset == 1) {
+        float yy = 0;
+        if (point.x < 0) {
+            yy = point.x * sam.slope;
+        } else {
+            yy = -point.x * sam.slope;
+        }
+//        point.y = yy;
+        point.y = (yy - point.y) * percentAnim + point.y;
+    } else {
+        point.y -= percentAnim;
+    }
+    float a = sam.angle * globalParams.lineWidth;
+    float sinA = sin(a);
+    float cosA = cos(a);
+    point = float2x2(float2(cosA, sinA), float2(-sinA, cosA)) * point;
+    
+    VertexOut vo;
+    vo.pos.xy = point;
+    vo.pos.zw = float2(0, 1);
+    vo.color = colors[chartIdx];
+    vo.color.w = 1;
+    
+    return vo;
+}

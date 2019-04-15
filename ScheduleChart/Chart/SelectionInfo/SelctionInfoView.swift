@@ -21,6 +21,11 @@ class SelctionInfoView: UIView {
     }
     
     let fixedWidth: CGFloat = 150
+    var onTapClosure: (()->())? = nil {
+        didSet {
+            self.isUserInteractionEnabled = onTapClosure != nil
+        }
+    }
     
     var textColor: UIColor = Apereance.day.infoTextColor {
         didSet {
@@ -101,6 +106,9 @@ class SelctionInfoView: UIView {
         dateLabel.font = UIFont.systemFont(ofSize: 11, weight: .bold)
         dateLabel.textAlignment = .left
         addSubview(dateLabel)
+        
+        let tap = UIGestureRecognizer(target: self, action: #selector(onTap))
+        addGestureRecognizer(tap)
     }
     
     private func displayValues(_ values: [ColorVal]) {
@@ -179,5 +187,9 @@ class SelctionInfoView: UIView {
                        y: frame.minY,
                        width: newSize.width,
                        height: newSize.height)
+    }
+    
+    @objc func onTap() {
+        onTapClosure?()
     }
 }

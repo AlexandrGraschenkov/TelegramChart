@@ -12,6 +12,8 @@
 		FA0A5BB32263392C008F671D /* ShapeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BB22263392C008F671D /* ShapeLayer.swift */; };
 		FA0A5BB622637534008F671D /* SelectionInfoBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BB522637534008F671D /* SelectionInfoBehavior.swift */; };
 		FA0A5BB82263993B008F671D /* Apereance.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BB72263993B008F671D /* Apereance.swift */; };
+		FA0A5BD72264D28E008F671D /* PercentPieTransitionDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BD62264D28E008F671D /* PercentPieTransitionDisplay.swift */; };
+		FA0A5BDB22651BDA008F671D /* PieDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BDA22651BDA008F671D /* PieDisplay.swift */; };
 		FA1ADF612258D14A00623825 /* MetalChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1ADF602258D14A00623825 /* MetalChartView.swift */; };
 		FA2B41C72247CA4600C3E6BA /* Icon.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA2B41C62247CA4600C3E6BA /* Icon.xcassets */; };
 		FA4BB7982239B55A00723FA1 /* HorisontalAxe.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */; };
@@ -56,6 +58,8 @@
 		FA0A5BB22263392C008F671D /* ShapeLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeLayer.swift; sourceTree = "<group>"; };
 		FA0A5BB522637534008F671D /* SelectionInfoBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionInfoBehavior.swift; sourceTree = "<group>"; };
 		FA0A5BB72263993B008F671D /* Apereance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Apereance.swift; sourceTree = "<group>"; };
+		FA0A5BD62264D28E008F671D /* PercentPieTransitionDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PercentPieTransitionDisplay.swift; sourceTree = "<group>"; };
+		FA0A5BDA22651BDA008F671D /* PieDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieDisplay.swift; sourceTree = "<group>"; };
 		FA1ADF602258D14A00623825 /* MetalChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalChartView.swift; sourceTree = "<group>"; };
 		FA2B41C62247CA4600C3E6BA /* Icon.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Icon.xcassets; sourceTree = "<group>"; };
 		FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorisontalAxe.swift; sourceTree = "<group>"; };
@@ -123,6 +127,14 @@
 				FA0A5BB522637534008F671D /* SelectionInfoBehavior.swift */,
 			);
 			path = SelectionInfo;
+			sourceTree = "<group>";
+		};
+		FA0A5BD52264D267008F671D /* Transitions */ = {
+			isa = PBXGroup;
+			children = (
+				FA0A5BD62264D28E008F671D /* PercentPieTransitionDisplay.swift */,
+			);
+			path = Transitions;
 			sourceTree = "<group>";
 		};
 		FA4BB7D72242D63900723FA1 /* helpers */ = {
@@ -207,6 +219,7 @@
 				FAFE26632260D73A00025FBC /* MetalBuffer.swift */,
 				FAFD31C0225B5E3300FDF551 /* Displayers */,
 				FAFD318C22590BDF00FDF551 /* PageAlignedArray.swift */,
+				FA0A5BD52264D267008F671D /* Transitions */,
 				FA1ADF602258D14A00623825 /* MetalChartView.swift */,
 				FAFD319122593A2500FDF551 /* chart_shaders.metal */,
 			);
@@ -223,6 +236,7 @@
 				FAFD31C5225B8B4100FDF551 /* StackFillDisplay.swift */,
 				FAFE265A225FC9BC00025FBC /* StackFillDisplaySelection.swift */,
 				FAFE2640225F2B1700025FBC /* PercentFillDisplay.swift */,
+				FA0A5BDA22651BDA008F671D /* PieDisplay.swift */,
 			);
 			path = Displayers;
 			sourceTree = "<group>";
@@ -310,6 +324,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA0A5BD72264D28E008F671D /* PercentPieTransitionDisplay.swift in Sources */,
 				FA4BB7DA2242D7FD00723FA1 /* ChartCopmosedView.swift in Sources */,
 				FAFD318D22590BE000FDF551 /* PageAlignedArray.swift in Sources */,
 				FAFD31902259372B00FDF551 /* Mutex.swift in Sources */,
@@ -328,6 +343,7 @@
 				FA0A5BAE22618377008F671D /* PreparedData.swift in Sources */,
 				FAFD31C2225B5E7F00FDF551 /* BaseDisplay.swift in Sources */,
 				FAFE26622260D32600025FBC /* StringCachedWidthCalculator.swift in Sources */,
+				FA0A5BDB22651BDA008F671D /* PieDisplay.swift in Sources */,
 				FAC45E7422355A5700A165CC /* ChartData.swift in Sources */,
 				FAC45E572235222400A165CC /* AppDelegate.swift in Sources */,
 				FA4BB7E122442A2800723FA1 /* DataMaxValCalculator.swift in Sources */,

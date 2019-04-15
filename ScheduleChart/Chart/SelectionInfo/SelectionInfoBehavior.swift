@@ -24,6 +24,7 @@ class SelectionInfoBehavior {
         }
     }
     
+    var onTapClosure: (()->())?
     var showLineSelection: Bool = true
     var showCirclesOnSelection: Bool = true
     lazy var selectionDisplay = SelectionDisplayBehavior(chart: self.chart)
@@ -76,6 +77,7 @@ class SelectionInfoBehavior {
             chart.addSubview(infoView)
             infoAdded = true
         }
+        infoView.onTapClosure = onTapClosure
         
         if lastSelectionDate != date || forceUpdateContent {
             // content
@@ -105,7 +107,7 @@ class SelectionInfoBehavior {
     
     // mark: private
     private weak var chart: ChartView!
-    private lazy var infoView: SelctionInfoView = createSelectionInfoView()
+    lazy var infoView: SelctionInfoView = createSelectionInfoView()
     private var selectInfoViewOnRight: Bool = true
     
     
