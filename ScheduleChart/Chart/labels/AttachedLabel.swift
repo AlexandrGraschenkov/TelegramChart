@@ -29,11 +29,22 @@ class AttachedLabel: UILabel {
         }
     }
     
-    override var alpha: CGFloat {
+    var customColor: UIColor? {
         didSet {
-            shapeLayer?.opacity = Float(alpha)
+            if customColor == oldValue { return }
+            textColor = customColor ?? color
         }
     }
+    
+    var color: UIColor? {
+        didSet {
+            if color == oldValue { return }
+            if customColor != nil { return }
+            textColor = color
+        }
+    }
+    
+    var rightAligment: Bool = false
 
     var valueFormatter: ((Float)->(String))?
     var timeFormatter: ((Int64)->(String))?
@@ -42,13 +53,10 @@ class AttachedLabel: UILabel {
         return superview != nil
     }
     
-    var shapeLayer: CAShapeLayer?
-    
     func unuse() {
         attachedValue = nil
         attachedTime = nil
         removeFromSuperview()
-        shapeLayer?.removeFromSuperlayer()
     }
 }
 

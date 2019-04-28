@@ -10,139 +10,124 @@ import UIKit
 
 class ViewController: UITableViewController {
 
-    @IBOutlet weak var chartView: ChartCopmosedView!
-    @IBOutlet weak var fpsLabel: DebugFpsLabel!
-    @IBOutlet weak var clipSwitch: UISwitch!
     @IBOutlet weak var dayNightModeButt: UIButton!
-    @IBOutlet var labels: [UILabel] = []
-    @IBOutlet weak var debugFpsSwitch: UISwitch!
-    @IBOutlet weak var selectChartDisplay: SelectChartDisplayedView!
-    var dataArr: [[ChartData]] = []
+    var dataArr: [ChartGroupData] = []
     var selectedData: Int = 0
     var cellBg: UIColor = .white
+    var mode: Mode = .day
+    
+    var cells: [IndexPath: ChartCell] = [:]
+    
+    func readChartData() {
+        for i in 1...5 {
+            let path = "contest/\(i)/overview"
+            
+            if let url = Bundle.main.url(forResource: path, withExtension: "json"),
+                let data = try? Data(contentsOf: url),
+                let obj = try? JSONSerialization.jsonObject(with: data, options: []),
+                let json = obj as? [String: Any] {
+                
+                let groupData = ChartGroupData.readDictionary(dic: json)
+                if groupData.data.count > 0 {
+                    dataArr.append(groupData)
+                }
+            }
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        if let url = Bundle.main.url(forResource: "chart_data", withExtension: "json"),
-            let data = try? Data(contentsOf: url),
-            let obj = try? JSONSerialization.jsonObject(with: data, options: []),
-            let json = obj as? [[String: Any]] {
-            for i in 0..<5 {
-                let data = ChartData.generateData(dic: json[i])
-                dataArr.append(data)
-            }
-        }
         
-        selectChartDisplay.displayDelegate = self
-        fpsLabel.isEnabled = debugFpsSwitch.isOn
-        chartView.data = dataArr[selectedData]
-        selectChartDisplay.items = ChartDataInfo.mapInfoFrom(data: chartView.data)
-        chartView.displayChart.onDrawDebug = fpsLabel.drawCalled
-        fpsLabel.startCapture()
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 20, right: 0)
+        readChartData()
     }
     
-    func generateData(count: Int, from: Float, to: Float, sinPower: Float? = nil) -> [Float] {
-        var result: [Float] = []
-        for i in 0..<count {
-            var val = Float.random(in: from...to)
-            if let p = sinPower {
-                val += p * sin(Float(i) / 10)
-            }
-            result.append(val)
-        }
-        return result
-    }
-
-    @IBAction func switchChanged(control: UISwitch) {
-        chartView.displayChart.drawOutsideChart = !control.isOn
-        chartView.displayChart.setNeedsDisplay()
-    }
-    
-    @IBAction func debugFpsSwitchChanged(sender: UISwitch) {
-        fpsLabel.isEnabled = sender.isOn
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
     }
     
     @IBAction func switchNightDayMode(sender: UIButton) {
-        let newMode: ChartCopmosedView.Mode
-        if chartView.mode == .day {
-            newMode = .night
+        let aper: Apereance
+        if mode == .day {
+            mode = .night
+            aper = .night
+            dayNightModeButt.setTitle("Switch to Day Mode", for: .normal)
         } else {
-            newMode = .day
+            mode = .day
+            aper = .day
+            dayNightModeButt.setTitle("Switch to Night Mode", for: .normal)
         }
+        dayNightModeButt.backgroundColor = aper.bg
         
+        for cell in cells.values {
+            cell.backgroundColor = aper.bg
+            cell.chart.update(apereance: aper)
+            cell.selectChart.update(apereance: aper)
+        }
 //        UIView.animate(withDuration: 0.2) {
-        self.chartView.mode = newMode
-        self.setMode(newMode)
+//        self.chartView.mode = newMode
+        update(apereance: aper)
+//        setMode(mode)
 //        }
     }
     
-    func setMode(_ mode: ChartCopmosedView.Mode) {
-        let bgColor: UIColor
-        let separatorColor: UIColor
-        let textColor: UIColor
-        
-        if mode == .night {
-            textColor = UIColor.white
-            bgColor = UIColor(red:0.10, green:0.13, blue:0.17, alpha:1.00)
-            separatorColor = UIColor(red:0.07, green:0.10, blue:0.13, alpha:1.00)
-            cellBg = UIColor(red:0.14, green:0.18, blue:0.24, alpha:1.00)
-            dayNightModeButt.setTitle("Switch to Day Mode", for: .normal)
-            dayNightModeButt.setTitleColor(UIColor(red:0.25, green:0.59, blue:1.00, alpha:1.00), for: .normal)
-            navigationController?.navigationBar.barStyle = .black
-        } else {
-            textColor = UIColor.black
-            bgColor = UIColor(red:0.94, green:0.94, blue:0.96, alpha:1.00)
-            separatorColor = UIColor(red:0.78, green:0.78, blue:0.80, alpha:1.00)
-            cellBg = .white
-            dayNightModeButt.setTitle("Switch to Night Mode", for: .normal)
-            dayNightModeButt.setTitleColor(UIColor(red:0.18, green:0.49, blue:0.96, alpha:1.00), for: .normal)
-            navigationController?.navigationBar.barStyle = .default
-        }
-        
-        tableView.separatorColor = separatorColor
-        tableView.backgroundColor = bgColor
-        tableView.visibleCells.forEach({$0.backgroundColor = self.cellBg})
-        selectChartDisplay.backgroundColor = cellBg
-        selectChartDisplay.titleColor = textColor
-        labels.forEach({$0.textColor = textColor})
-        navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: textColor]
+    func update(apereance: Apereance) {
+        navigationController?.navigationBar.barStyle = apereance.navBarStyle
+        cellBg = apereance.bg
+        tableView.backgroundColor = apereance.scrollBg
+        tableView.separatorColor = apereance.tableSeparator
+        navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: apereance.textColor]
     }
 }
 
 extension ViewController { // table
     
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        return dataArr.count
+    }
+    
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 1
+    }
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = super.tableView(tableView, cellForRowAt: indexPath)
-        if indexPath.section == 2 {
-            if indexPath.item == selectedData {
-                cell.accessoryType = .checkmark
-            } else {
-                cell.accessoryType = .none
-            }
+        
+        // table view have strange logic with reuse cells
+        // if we do not see this cell, it creates anyway on screen appear
+        // so all cells are created in one time, then seams some of them frees
+        // only after this it start to reuse cells
+        
+        if let cell = cells[indexPath] {
+            return cell
         }
-        cell.backgroundColor = cellBg
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "ChartCell", for: indexPath) as? ChartCell else {
+            return UITableViewCell()
+        }
+        
+        cell.chart.minValueFixedZero = indexPath.section >= 2
+        cell.display(groupData: dataArr[indexPath.section])
+        cells[indexPath] = cell
         return cell
     }
     
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        if indexPath.section == 2 {
-            let prevIdx = IndexPath(row: selectedData, section: 2)
-            if prevIdx != indexPath {
-                tableView.cellForRow(at: prevIdx)?.accessoryType = .none
-                tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-                selectedData = indexPath.row
-                chartView.data = dataArr[selectedData]
-                selectChartDisplay.items = ChartDataInfo.mapInfoFrom(data: chartView.data)
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        let d = dataArr[indexPath.section]
+        return ChartCell.getHeight(withData: d, width: tableView.bounds.width)
+    }
+    
+    func increaseChartSize(groupData: ChartGroupData) -> ChartGroupData {
+        var data = groupData.data
+        let count = data[0].items.count
+        for i in (0..<count).reversed() {
+            for ii in 0..<data.count {
+                let items = data[ii].items
+                let time = items[items.count-1].time - items[items.count-2].time + items[items.count-1].time
+                
+                data[ii].items.append(ChartData.Item(time: time, value: items[i].value))
             }
         }
-    }
-}
-
-extension ViewController: SelectChartDisplayedViewDelegate {
-    func chartDataDisplayChanged(index: Int, display: Bool) {
-        chartView.setShowData(index: index, show: display, animated: true)
+        return ChartGroupData(type: groupData.type, data: data, scaled: groupData.scaled)
     }
 }
 

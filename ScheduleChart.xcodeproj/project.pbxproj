@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FA0A5BAE22618377008F671D /* PreparedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BAD22618377008F671D /* PreparedData.swift */; };
+		FA0A5BB022632EE8008F671D /* SelectionDisplayBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BAF22632EE8008F671D /* SelectionDisplayBehavior.swift */; };
+		FA0A5BB32263392C008F671D /* ShapeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BB22263392C008F671D /* ShapeLayer.swift */; };
+		FA0A5BB622637534008F671D /* SelectionInfoBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BB522637534008F671D /* SelectionInfoBehavior.swift */; };
+		FA0A5BB82263993B008F671D /* Apereance.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0A5BB72263993B008F671D /* Apereance.swift */; };
+		FA1ADF612258D14A00623825 /* MetalChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1ADF602258D14A00623825 /* MetalChartView.swift */; };
 		FA2B41C72247CA4600C3E6BA /* Icon.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA2B41C62247CA4600C3E6BA /* Icon.xcassets */; };
 		FA4BB7982239B55A00723FA1 /* HorisontalAxe.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */; };
 		FA4BB7DA2242D7FD00723FA1 /* ChartCopmosedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4BB7D92242D7FD00723FA1 /* ChartCopmosedView.swift */; };
@@ -27,14 +33,30 @@
 		FAC45E762235753500A165CC /* chart_data.json in Resources */ = {isa = PBXBuildFile; fileRef = FAC45E752235753500A165CC /* chart_data.json */; };
 		FAC45E782236FAEE00A165CC /* LabelsPool.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC45E772236FAEE00A165CC /* LabelsPool.swift */; };
 		FAC45E7A2236FEB300A165CC /* AttachedLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC45E792236FEB300A165CC /* AttachedLabel.swift */; };
-		FAFD31942259511E00FDF551 /* LinesDisplayBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31932259511E00FDF551 /* LinesDisplayBehavior.swift */; };
-		FAFD31992259F26300FDF551 /* ShapeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31982259F26300FDF551 /* ShapeLayer.swift */; };
-		FAFD319B2259F70E00FDF551 /* HandleDrawView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD319A2259F70E00FDF551 /* HandleDrawView.swift */; };
-		FAFD319D225A01AF00FDF551 /* BaseDisplayBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD319C225A01AF00FDF551 /* BaseDisplayBehavior.swift */; };
-		FAFD319F225A0AE400FDF551 /* StackedBarDisplayBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD319E225A0AE400FDF551 /* StackedBarDisplayBehavior.swift */; };
+		FAFD318D22590BE000FDF551 /* PageAlignedArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD318C22590BDF00FDF551 /* PageAlignedArray.swift */; };
+		FAFD31902259372B00FDF551 /* Mutex.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD318F2259372B00FDF551 /* Mutex.swift */; };
+		FAFD319222593A2500FDF551 /* chart_shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = FAFD319122593A2500FDF551 /* chart_shaders.metal */; };
+		FAFD31C2225B5E7F00FDF551 /* BaseDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31C1225B5E7F00FDF551 /* BaseDisplay.swift */; };
+		FAFD31C4225B8AE600FDF551 /* LineDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31C3225B8AE600FDF551 /* LineDisplay.swift */; };
+		FAFD31C6225B8B4100FDF551 /* StackFillDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31C5225B8B4100FDF551 /* StackFillDisplay.swift */; };
+		FAFD31D3225D0CB800FDF551 /* LineLevelDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD31D2225D0CB700FDF551 /* LineLevelDisplay.swift */; };
+		FAFE263F225EF90A00025FBC /* DataPreparer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE263E225EF90A00025FBC /* DataPreparer.swift */; };
+		FAFE2641225F2B1700025FBC /* PercentFillDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE2640225F2B1700025FBC /* PercentFillDisplay.swift */; };
+		FAFE2659225F8DD100025FBC /* contest in Resources */ = {isa = PBXBuildFile; fileRef = FAFE2658225F8DD000025FBC /* contest */; };
+		FAFE265B225FC9BC00025FBC /* StackFillDisplaySelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE265A225FC9BC00025FBC /* StackFillDisplaySelection.swift */; };
+		FAFE265D226096CE00025FBC /* ChartCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE265C226096CE00025FBC /* ChartCell.swift */; };
+		FAFE265F2260B98E00025FBC /* ChartDataParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE265E2260B98E00025FBC /* ChartDataParser.swift */; };
+		FAFE26622260D32600025FBC /* StringCachedWidthCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE26612260D32600025FBC /* StringCachedWidthCalculator.swift */; };
+		FAFE26642260D73A00025FBC /* MetalBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE26632260D73A00025FBC /* MetalBuffer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		FA0A5BAD22618377008F671D /* PreparedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreparedData.swift; sourceTree = "<group>"; };
+		FA0A5BAF22632EE8008F671D /* SelectionDisplayBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionDisplayBehavior.swift; sourceTree = "<group>"; };
+		FA0A5BB22263392C008F671D /* ShapeLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeLayer.swift; sourceTree = "<group>"; };
+		FA0A5BB522637534008F671D /* SelectionInfoBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionInfoBehavior.swift; sourceTree = "<group>"; };
+		FA0A5BB72263993B008F671D /* Apereance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Apereance.swift; sourceTree = "<group>"; };
+		FA1ADF602258D14A00623825 /* MetalChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalChartView.swift; sourceTree = "<group>"; };
 		FA2B41C62247CA4600C3E6BA /* Icon.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Icon.xcassets; sourceTree = "<group>"; };
 		FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorisontalAxe.swift; sourceTree = "<group>"; };
 		FA4BB7D92242D7FD00723FA1 /* ChartCopmosedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartCopmosedView.swift; sourceTree = "<group>"; };
@@ -57,11 +79,21 @@
 		FAC45E752235753500A165CC /* chart_data.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = chart_data.json; sourceTree = "<group>"; };
 		FAC45E772236FAEE00A165CC /* LabelsPool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelsPool.swift; sourceTree = "<group>"; };
 		FAC45E792236FEB300A165CC /* AttachedLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachedLabel.swift; sourceTree = "<group>"; };
-		FAFD31932259511E00FDF551 /* LinesDisplayBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinesDisplayBehavior.swift; sourceTree = "<group>"; };
-		FAFD31982259F26300FDF551 /* ShapeLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeLayer.swift; sourceTree = "<group>"; };
-		FAFD319A2259F70E00FDF551 /* HandleDrawView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandleDrawView.swift; sourceTree = "<group>"; };
-		FAFD319C225A01AF00FDF551 /* BaseDisplayBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseDisplayBehavior.swift; sourceTree = "<group>"; };
-		FAFD319E225A0AE400FDF551 /* StackedBarDisplayBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackedBarDisplayBehavior.swift; sourceTree = "<group>"; };
+		FAFD318C22590BDF00FDF551 /* PageAlignedArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PageAlignedArray.swift; sourceTree = "<group>"; };
+		FAFD318F2259372B00FDF551 /* Mutex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mutex.swift; sourceTree = "<group>"; };
+		FAFD319122593A2500FDF551 /* chart_shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = chart_shaders.metal; sourceTree = "<group>"; };
+		FAFD31C1225B5E7F00FDF551 /* BaseDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseDisplay.swift; sourceTree = "<group>"; };
+		FAFD31C3225B8AE600FDF551 /* LineDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineDisplay.swift; sourceTree = "<group>"; };
+		FAFD31C5225B8B4100FDF551 /* StackFillDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackFillDisplay.swift; sourceTree = "<group>"; };
+		FAFD31D2225D0CB700FDF551 /* LineLevelDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineLevelDisplay.swift; sourceTree = "<group>"; };
+		FAFE263E225EF90A00025FBC /* DataPreparer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataPreparer.swift; sourceTree = "<group>"; };
+		FAFE2640225F2B1700025FBC /* PercentFillDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PercentFillDisplay.swift; sourceTree = "<group>"; };
+		FAFE2658225F8DD000025FBC /* contest */ = {isa = PBXFileReference; lastKnownFileType = folder; path = contest; sourceTree = "<group>"; };
+		FAFE265A225FC9BC00025FBC /* StackFillDisplaySelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackFillDisplaySelection.swift; sourceTree = "<group>"; };
+		FAFE265C226096CE00025FBC /* ChartCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartCell.swift; sourceTree = "<group>"; };
+		FAFE265E2260B98E00025FBC /* ChartDataParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartDataParser.swift; sourceTree = "<group>"; };
+		FAFE26612260D32600025FBC /* StringCachedWidthCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringCachedWidthCalculator.swift; sourceTree = "<group>"; };
+		FAFE26632260D73A00025FBC /* MetalBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalBuffer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,14 +107,36 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FA0A5BB12263338B008F671D /* Selections */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Selections;
+			sourceTree = "<group>";
+		};
+		FA0A5BB42263750F008F671D /* SelectionInfo */ = {
+			isa = PBXGroup;
+			children = (
+				FA0A5BAF22632EE8008F671D /* SelectionDisplayBehavior.swift */,
+				FA0A5BB22263392C008F671D /* ShapeLayer.swift */,
+				FA4BB7EC2247A6BD00723FA1 /* SelctionInfoView.swift */,
+				FA0A5BB522637534008F671D /* SelectionInfoBehavior.swift */,
+			);
+			path = SelectionInfo;
+			sourceTree = "<group>";
+		};
 		FA4BB7D72242D63900723FA1 /* helpers */ = {
 			isa = PBXGroup;
 			children = (
-				FAFD31982259F26300FDF551 /* ShapeLayer.swift */,
+				FAFE263E225EF90A00025FBC /* DataPreparer.swift */,
 				FAC45E6B2235243900A165CC /* DisplayLinkAnimator.swift */,
 				FAC45E7322355A5700A165CC /* ChartData.swift */,
+				FA0A5BAD22618377008F671D /* PreparedData.swift */,
+				FAFE265E2260B98E00025FBC /* ChartDataParser.swift */,
 				FA4BB7E022442A2800723FA1 /* DataMaxValCalculator.swift */,
-				FAFD319A2259F70E00FDF551 /* HandleDrawView.swift */,
+				FAFD318F2259372B00FDF551 /* Mutex.swift */,
+				FAFE26612260D32600025FBC /* StringCachedWidthCalculator.swift */,
+				FA0A5BB72263993B008F671D /* Apereance.swift */,
 			);
 			path = helpers;
 			sourceTree = "<group>";
@@ -117,12 +171,13 @@
 			children = (
 				FAC45E562235222400A165CC /* AppDelegate.swift */,
 				FAC45E582235222400A165CC /* ViewController.swift */,
-				FA4BB7E222466A1C00723FA1 /* SelectChartDisplayedView.swift */,
 				FAC45E712235435D00A165CC /* DebugFpsLabel.swift */,
+				FAFE26602260D2B400025FBC /* Cell */,
 				FAC45E6A2235225100A165CC /* Chart */,
 				FAC45E5A2235222400A165CC /* Main.storyboard */,
 				FA2B41C62247CA4600C3E6BA /* Icon.xcassets */,
 				FAC45E5D2235222600A165CC /* Assets.xcassets */,
+				FAFE2658225F8DD000025FBC /* contest */,
 				FAC45E5F2235222600A165CC /* LaunchScreen.storyboard */,
 				FAC45E752235753500A165CC /* chart_data.json */,
 				FAC45E622235222600A165CC /* Info.plist */,
@@ -135,10 +190,10 @@
 			children = (
 				FA4BB7D72242D63900723FA1 /* helpers */,
 				FA4BB7D82242D65300723FA1 /* labels */,
-				FAFD31952259512200FDF551 /* DisplayBehaviors */,
+				FAFD318E22590BE400FDF551 /* Metal */,
 				FAC45E682235224C00A165CC /* ChartView.swift */,
 				FA4BB7D92242D7FD00723FA1 /* ChartCopmosedView.swift */,
-				FA4BB7EC2247A6BD00723FA1 /* SelctionInfoView.swift */,
+				FA0A5BB42263750F008F671D /* SelectionInfo */,
 				FA4BB7DB2242D8C100723FA1 /* ChartSelectionView.swift */,
 				FAC45E6F2235279600A165CC /* VerticalAxe.swift */,
 				FA4BB7972239B55A00723FA1 /* HorisontalAxe.swift */,
@@ -146,14 +201,39 @@
 			path = Chart;
 			sourceTree = "<group>";
 		};
-		FAFD31952259512200FDF551 /* DisplayBehaviors */ = {
+		FAFD318E22590BE400FDF551 /* Metal */ = {
 			isa = PBXGroup;
 			children = (
-				FAFD31932259511E00FDF551 /* LinesDisplayBehavior.swift */,
-				FAFD319E225A0AE400FDF551 /* StackedBarDisplayBehavior.swift */,
-				FAFD319C225A01AF00FDF551 /* BaseDisplayBehavior.swift */,
+				FAFE26632260D73A00025FBC /* MetalBuffer.swift */,
+				FAFD31C0225B5E3300FDF551 /* Displayers */,
+				FAFD318C22590BDF00FDF551 /* PageAlignedArray.swift */,
+				FA1ADF602258D14A00623825 /* MetalChartView.swift */,
+				FAFD319122593A2500FDF551 /* chart_shaders.metal */,
 			);
-			path = DisplayBehaviors;
+			path = Metal;
+			sourceTree = "<group>";
+		};
+		FAFD31C0225B5E3300FDF551 /* Displayers */ = {
+			isa = PBXGroup;
+			children = (
+				FA0A5BB12263338B008F671D /* Selections */,
+				FAFD31C1225B5E7F00FDF551 /* BaseDisplay.swift */,
+				FAFD31C3225B8AE600FDF551 /* LineDisplay.swift */,
+				FAFD31D2225D0CB700FDF551 /* LineLevelDisplay.swift */,
+				FAFD31C5225B8B4100FDF551 /* StackFillDisplay.swift */,
+				FAFE265A225FC9BC00025FBC /* StackFillDisplaySelection.swift */,
+				FAFE2640225F2B1700025FBC /* PercentFillDisplay.swift */,
+			);
+			path = Displayers;
+			sourceTree = "<group>";
+		};
+		FAFE26602260D2B400025FBC /* Cell */ = {
+			isa = PBXGroup;
+			children = (
+				FA4BB7E222466A1C00723FA1 /* SelectChartDisplayedView.swift */,
+				FAFE265C226096CE00025FBC /* ChartCell.swift */,
+			);
+			path = Cell;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -217,6 +297,7 @@
 				FAC45E612235222600A165CC /* LaunchScreen.storyboard in Resources */,
 				FAC45E5E2235222600A165CC /* Assets.xcassets in Resources */,
 				FAC45E762235753500A165CC /* chart_data.json in Resources */,
+				FAFE2659225F8DD100025FBC /* contest in Resources */,
 				FAC45E5C2235222400A165CC /* Main.storyboard in Resources */,
 				FA2B41C72247CA4600C3E6BA /* Icon.xcassets in Resources */,
 			);
@@ -230,15 +311,24 @@
 			buildActionMask = 2147483647;
 			files = (
 				FA4BB7DA2242D7FD00723FA1 /* ChartCopmosedView.swift in Sources */,
+				FAFD318D22590BE000FDF551 /* PageAlignedArray.swift in Sources */,
+				FAFD31902259372B00FDF551 /* Mutex.swift in Sources */,
 				FA4BB7ED2247A6BD00723FA1 /* SelctionInfoView.swift in Sources */,
+				FAFD31C4225B8AE600FDF551 /* LineDisplay.swift in Sources */,
+				FAFE263F225EF90A00025FBC /* DataPreparer.swift in Sources */,
+				FA1ADF612258D14A00623825 /* MetalChartView.swift in Sources */,
+				FAFE265B225FC9BC00025FBC /* StackFillDisplaySelection.swift in Sources */,
+				FA0A5BB022632EE8008F671D /* SelectionDisplayBehavior.swift in Sources */,
 				FAC45E782236FAEE00A165CC /* LabelsPool.swift in Sources */,
+				FAFD31D3225D0CB800FDF551 /* LineLevelDisplay.swift in Sources */,
 				FAC45E592235222400A165CC /* ViewController.swift in Sources */,
-				FAFD319B2259F70E00FDF551 /* HandleDrawView.swift in Sources */,
+				FAFE26642260D73A00025FBC /* MetalBuffer.swift in Sources */,
 				FA4BB7E322466A1C00723FA1 /* SelectChartDisplayedView.swift in Sources */,
+				FAFE265D226096CE00025FBC /* ChartCell.swift in Sources */,
+				FA0A5BAE22618377008F671D /* PreparedData.swift in Sources */,
+				FAFD31C2225B5E7F00FDF551 /* BaseDisplay.swift in Sources */,
+				FAFE26622260D32600025FBC /* StringCachedWidthCalculator.swift in Sources */,
 				FAC45E7422355A5700A165CC /* ChartData.swift in Sources */,
-				FAFD31992259F26300FDF551 /* ShapeLayer.swift in Sources */,
-				FAFD319F225A0AE400FDF551 /* StackedBarDisplayBehavior.swift in Sources */,
-				FAFD31942259511E00FDF551 /* LinesDisplayBehavior.swift in Sources */,
 				FAC45E572235222400A165CC /* AppDelegate.swift in Sources */,
 				FA4BB7E122442A2800723FA1 /* DataMaxValCalculator.swift in Sources */,
 				FAC45E7A2236FEB300A165CC /* AttachedLabel.swift in Sources */,
@@ -246,9 +336,15 @@
 				FA4BB7982239B55A00723FA1 /* HorisontalAxe.swift in Sources */,
 				FAC45E692235224C00A165CC /* ChartView.swift in Sources */,
 				FAC45E6C2235243900A165CC /* DisplayLinkAnimator.swift in Sources */,
+				FAFE2641225F2B1700025FBC /* PercentFillDisplay.swift in Sources */,
 				FAC45E702235279600A165CC /* VerticalAxe.swift in Sources */,
-				FAFD319D225A01AF00FDF551 /* BaseDisplayBehavior.swift in Sources */,
 				FAC45E722235435D00A165CC /* DebugFpsLabel.swift in Sources */,
+				FA0A5BB82263993B008F671D /* Apereance.swift in Sources */,
+				FAFE265F2260B98E00025FBC /* ChartDataParser.swift in Sources */,
+				FAFD31C6225B8B4100FDF551 /* StackFillDisplay.swift in Sources */,
+				FA0A5BB32263392C008F671D /* ShapeLayer.swift in Sources */,
+				FA0A5BB622637534008F671D /* SelectionInfoBehavior.swift in Sources */,
+				FAFD319222593A2500FDF551 /* chart_shaders.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

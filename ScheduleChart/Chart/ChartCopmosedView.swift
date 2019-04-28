@@ -9,17 +9,6 @@
 import UIKit
 
 class ChartCopmosedView: UIView {
-
-    enum Mode {
-        case night
-        case day
-    }
-    
-    enum ChartType {
-        case line
-        case stackedBar
-        case percentageStackedBar
-    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -31,7 +20,9 @@ class ChartCopmosedView: UIView {
         setup()
     }
     
+    var topDateLabel: UILabel!
     var levelsCount: Int = 5
+    var minValueFixedZero: Bool = true
     var selectionChart: ChartView!
     var displayChart: ChartView!
     var selectionView: ChartSelectionView!
@@ -39,40 +30,99 @@ class ChartCopmosedView: UIView {
         didSet { setNeedsLayout(); layoutIfNeeded() }
     }
     
-    var mode: Mode = .day {
-        didSet { updateMode() }
-    }
-    var chartType: ChartType = .line
-    
-    var data: [ChartData] = [] {
+    var data: ChartGroupData? {
         didSet {
+            if oldValue == data { return }
+            if let chartType = data?.type {
+                selectInfo.selectionDisplay.setChartType(chartType)
+            } else {
+                selectInfo.selectionDisplay.deselect()
+            }
+            
             cancelShowHideAnimation.values.forEach({$0()})
             cancelShowHideAnimation.removeAll()
             selectionChart.data = data
             displayChart.data = data
             
-            dataIsVisible = Array(repeating: true, count: data.count)
-            let maxVal = DataMaxValCalculator.getMaxValue(data, dividableBy: levelsCount)
-            selectionChart.setMaxVal(val: maxVal, animationDuration: 0)
-            displayChart.setMaxVal(val: maxVal, animationDuration: 0)
+            guard let groupData = data else {
+                return
+            }
+            
+            if groupData.scaled {
+                displayChart.chartInset.right = 40
+                let maxValues = groupData.data.map({DataMaxValCalculator.getMinMaxValue([$0], stacked: false, dividableBy: levelsCount).1})
+                let maxValue: Float = maxValues.reduce(Float(0), max)
+                customScale = maxValues.map({maxValue / $0})
+                displayChart.verticalAxe.setupRightLabels(rightScale: customScale[1], leftColor: groupData.data[0].color, rightColor: groupData.data[1].color)
+            } else {
+                displayChart.chartInset.right = 30
+                customScale = []
+                displayChart.verticalAxe.resetRightLabels()
+            }
+            displayChart.metal.customScale = customScale
+            selectionChart.metal.customScale = customScale
+            
+            let maxVal: Float
+            let minVal: Float
+            if groupData.type == .percentage {
+                maxVal = 125
+                minVal = 0
+            } else {
+                (minVal, maxVal) = getMinMaxValue()
+            }
+            selectionChart.setMaxVal(val: maxVal, minVal: minVal, animationDuration: 0)
+            displayChart.setMaxVal(val: maxVal, minVal: minVal, animationDuration: 0)
+            updateTopLabelDates()
             resetState()
         }
     }
     
-    func setShowData(index: Int, show: Bool, animated: Bool) {
-        if index < 0 || index >= dataIsVisible.count { return }
-        if dataIsVisible[index] == show { return }
+    func setDisplayData(index: Int, display: Bool, animated: Bool) {
+        guard let groupData = data else { return }
+        if index < 0 || index >= groupData.data.count { return }
         
-        dataIsVisible[index] = show
-        let animDuration: Double = 0.2
-        
+        if groupData.data[index].visible != display {
+            groupData.data[index].visible = display
+        }
         if visibleData.count > 0 {
-            runMaxValueChangeAnimation(data: visibleData, animDuration: animDuration)
+            runMaxValueChangeAnimation(data: visibleData, animDuration: maxValDuration)
         }
-        runShowHideAnimation(dataIndex: index, show: show, animDuration: animDuration)
-        if let date = displayChart.selectedDate, selectInfoView != nil {
-            updateInfoSlectedDate(date: date)
+        runShowHideAnimation(dataIndex: index, show: display, animDuration: alphaDuration)
+        if selectInfo.isDisplayed {
+            selectInfo.updateInfoSelectedDate(date: selectInfo.lastSelectionDate, data: visibleData, forceUpdateContent: true)
         }
+    }
+    
+    func setDisplayDataOnly(index: Int, animated: Bool) {
+        guard let groupData = data else { return }
+        if index < 0 || index >= groupData.data.count { return }
+        
+        let count = groupData.data.count
+        for i in 0..<count {
+            groupData.data[i].visible = i == index
+        }
+        if visibleData.count > 0 {
+            runMaxValueChangeAnimation(data: visibleData, animDuration: maxValDuration)
+        }
+        runShowHideAnimation(visible: (0..<count).map{$0 == index}, animDuration: alphaDuration)
+        if selectInfo.isDisplayed {
+            selectInfo.updateInfoSelectedDate(date: selectInfo.lastSelectionDate, data: visibleData, forceUpdateContent: true)
+        }
+    }
+    
+    func update(apereance: Apereance) {
+        backgroundColor = apereance.bg
+        topDateLabel.textColor = apereance.textColor
+        let clear = apereance.bg.myColor.metalClear
+        displayChart.metal.clearColor = clear
+        selectionChart.metal.clearColor = clear
+        displayChart.gridColor = apereance.gridColor.myColor
+        selectionView.update(apereance: apereance)
+        selectInfo.update(apereance: apereance)
+        displayChart.labelsPool.color = apereance.chartTextColor
+        displayChart.updateLevels()
+        displayChart.metal.setNeedsDisplay()
+        selectionChart.metal.setNeedsDisplay()
     }
     
     override var backgroundColor: UIColor? {
@@ -96,22 +146,35 @@ class ChartCopmosedView: UIView {
     
     
     // MARK: private
-    private var selectInfoBgColor: UIColor = UIColor(red:0.94, green:0.94, blue:0.96, alpha:1.00) {
-        didSet {
-            selectInfoView?.bgColor = selectInfoBgColor
+    private lazy var selectInfo: SelectionInfoBehavior = SelectionInfoBehavior(chart: self.displayChart)
+    private var customScale: [Float] = []
+    private var maxValDuration: Double = 0.3
+    private var alphaDuration: Double = 0.3
+    
+    private lazy var dateFormatter: (Int64)->(String) = {
+        let df = DateFormatter()
+        df.dateFormat = "d MMM yyyy"
+        return { (time: Int64) -> String in
+            return df.string(from: Date(timeIntervalSince1970: TimeInterval(time) / 1000.0))
         }
-    }
-    private var selectInfoView: SelctionInfoView?
-    private var dataIsVisible: [Bool] = []
+    }()
     private var visibleData: [ChartData] {
-        return zip(data, dataIsVisible).compactMap({$0.1 ? $0.0 : nil})
+        guard let groupData = data else {
+            return []
+        }
+        return groupData.data.filter({$0.visible})
     }
     private var cancelShowHideAnimation: [Int: Cancelable] = [:]
     private var panGesture: UIPanGestureRecognizer!
     
     private func setup() {
+        displayChart = ChartView()
+        displayChart.backgroundColor = backgroundColor
+        displayChart.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height - selectionHeight)
+        addSubview(displayChart)
+        
         selectionChart = ChartView()
-        selectionChart.lineWidth = 1.5
+        selectionChart.isSelectionView = true
         selectionChart.backgroundColor = backgroundColor
         selectionChart.drawGrid = false
         selectionChart.chartInset = UIEdgeInsets.zero
@@ -123,11 +186,14 @@ class ChartCopmosedView: UIView {
         selectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         selectionView.delegate = self
         selectionChart.addSubview(selectionView)
+        selectionView.setupGestures(view: self)
         
-        displayChart = ChartView()
-        displayChart.backgroundColor = backgroundColor
-        displayChart.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height - selectionHeight)
-        addSubview(displayChart)
+        topDateLabel = UILabel(frame: CGRect(x: 0, y: 0, width: bounds.width, height: 30))
+        topDateLabel.autoresizingMask = [.flexibleWidth, .flexibleBottomMargin]
+        topDateLabel.font = UIFont.boldSystemFont(ofSize: 13)
+        topDateLabel.textColor = Apereance.day.textColor
+        topDateLabel.textAlignment = .center
+        addSubview(topDateLabel)
         
         let pan = UIPanGestureRecognizer(target: self, action: #selector(userSelectDate(gesture:)))
         pan.delegate = self
@@ -141,35 +207,32 @@ class ChartCopmosedView: UIView {
     private func resetState() {
         selectionView.range = ChartSelectionView.Range(from: 0, to: 1)
         displayChart.selectedDate = nil
-        selectInfoView?.removeFromSuperview()
-        selectInfoView = nil
+        selectInfo.dismissSelectedDate(animated: false)
     }
-        
-    private func updateMode() {
-        selectionView.mode = mode
-        switch mode {
-        case .day:
-            backgroundColor = .white
-            displayChart.gridColor = UIColor(white: 0.9, alpha: 1.0)
-            selectInfoBgColor = UIColor(red:0.94, green:0.94, blue:0.96, alpha:1.00)
-        case .night:
-            backgroundColor = UIColor(red:0.14, green:0.18, blue:0.24, alpha:1.00)
-            displayChart.gridColor = UIColor(red:0.11, green:0.15, blue:0.20, alpha:1.00)
-            selectInfoBgColor = UIColor(red:0.11, green:0.16, blue:0.21, alpha:1.00)
+    
+    private func updateTopLabelDates() {
+        let from = displayChart.displayRange.from
+        let to = displayChart.displayRange.to
+        if to <= 0 {
+            topDateLabel.text = ""
+            return
         }
+        topDateLabel.text = dateFormatter(from) + " - " + dateFormatter(to)
     }
     
     // MARK: show\hide animation
     private func runMaxValueChangeAnimation(data: [ChartData], animDuration: Double) {
-        let stacked = chartType == .stackedBar
-        let totalMaxVal = DataMaxValCalculator.getMaxValue(data, stacked: stacked, dividableBy: levelsCount)
-        selectionChart.setMaxVal(val: totalMaxVal, animationDuration: animDuration)
+        if displayChart.metal.display.groupMode == .percentage {
+            return
+        }
+        let (totalMinVal, totalMaxVal) = getMinMaxValue()
+        selectionChart.setMaxVal(val: totalMaxVal, minVal: totalMinVal, animationDuration: animDuration)
         
         
         let fromTime = displayChart.displayRange.from
         let toTime = displayChart.displayRange.to
-        let displayMaxVal = DataMaxValCalculator.getMaxValue(data, fromTime: fromTime, toTime: toTime, stacked: stacked, dividableBy: levelsCount)
-        displayChart.setMaxVal(val: displayMaxVal, animationDuration: animDuration)
+        let displayMinMax = getMinMaxValue(fromTime: fromTime, toTime: toTime)
+        displayChart.setMaxVal(val: displayMinMax.1, minVal: displayMinMax.0, animationDuration: animDuration)
     }
     
     private func runShowHideAnimation(dataIndex index: Int, show: Bool, animDuration: Double) {
@@ -177,68 +240,65 @@ class ChartCopmosedView: UIView {
         let startAlpha = displayChart.dataAlpha[index]
         let endAlpha: CGFloat = show ? 1 : 0
         let cancel = DisplayLinkAnimator.animate(duration: animDuration) { (progress) in
+            let progress = -progress * (progress - 2) // ease out
             let alpha = (endAlpha - startAlpha) * progress + startAlpha
             self.displayChart.dataAlpha[index] = alpha
             self.selectionChart.dataAlpha[index] = alpha
             if !self.displayChart.isMaxValAnimating {
-                self.displayChart.setNeedsDisplay()
+                self.displayChart.metal.setNeedsDisplay()
             }
             if !self.selectionChart.isMaxValAnimating {
-                self.selectionChart.setNeedsDisplay()
+                self.selectionChart.metal.setNeedsDisplay()
             }
             if progress == 1 {
                 self.cancelShowHideAnimation[index] = nil
-                self.setShowData(index: index, show: !show, animated: true)
+                //                self.setShowData(index: index, show: !show, animated: true)
             }
         }
         cancelShowHideAnimation[index] = cancel
     }
     
+    private func runShowHideAnimation(visible: [Bool], animDuration: Double) {
+        let animIdx = displayChart.dataAlpha.count
+        cancelShowHideAnimation[animIdx]?()
+        let startAlpha = displayChart.dataAlpha
+        let endAlpha = visible.map{$0 ? CGFloat(1) : CGFloat(0)}
+        let cancel = DisplayLinkAnimator.animate(duration: animDuration) { (progress) in
+            let progress = -progress * (progress - 2) // ease out
+            for i in 0..<startAlpha.count {
+                let alpha = (endAlpha[i] - startAlpha[i]) * progress + startAlpha[i]
+                self.displayChart.dataAlpha[i] = alpha
+                self.selectionChart.dataAlpha[i] = alpha
+            }
+            if !self.displayChart.isMaxValAnimating {
+                self.displayChart.metal.setNeedsDisplay()
+            }
+            if !self.selectionChart.isMaxValAnimating {
+                self.selectionChart.metal.setNeedsDisplay()
+            }
+            if progress == 1 {
+                self.cancelShowHideAnimation[animIdx] = nil
+            }
+        }
+        cancelShowHideAnimation[animIdx] = cancel
+    }
+    
     @objc func userSelectDate(gesture: UIGestureRecognizer) {
         if gesture.state == .cancelled { return }
-        if data.count == 0 { return }
+        guard let groupData = data, groupData.data.count > 0 else { return }
+        
         let pos = gesture.location(in: displayChart)
         guard let date = displayChart.getDate(forPos: pos) else {
             displayChart.selectedDate = nil
             return
         }
         
-        // can be boosted
-        var closestDate: Int64?
-        for item in data[0].items {
-            guard let cDate = closestDate else {
-                closestDate = item.time
-                continue
-            }
-            
-            if abs(cDate - date) > abs(date - item.time) {
-                closestDate = item.time
-            }
-        }
-        displayChart.selectedDate = closestDate
-        
+        let closestDate: Int64? = groupData.getClosestDate(date: date)?.1
         if let date = closestDate {
-            updateInfoSlectedDate(date: date)
+            selectInfo.updateInfoSelectedDate(date: date, data: visibleData, forceUpdateContent: false)
         }
     }
     
-    private func updateInfoSlectedDate(date: Int64) {
-        if selectInfoView == nil {
-            selectInfoView = SelctionInfoView(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
-            selectInfoView?.bgColor = selectInfoBgColor
-            addSubview(selectInfoView!)
-        }
-        if let view = selectInfoView {
-            view.update(data: visibleData, time: date)
-            let centerX = displayChart.getXPos(date: date)
-            let frame = CGRect(x: round(centerX - view.bounds.width / 2.0),
-                               y: 5,
-                               width: view.bounds.width,
-                               height: view.bounds.height)
-            view.frame = convert(frame, from: displayChart)
-            //            selectInfoView?.center =
-        }
-    }
 }
 
 extension ChartCopmosedView: ChartSelectionViewDelegate {
@@ -250,11 +310,40 @@ extension ChartCopmosedView: ChartSelectionViewDelegate {
         displayChart.setRange(minTime: fromTime, maxTime: toTime, animated: false)
         if visibleData.count == 0 { return }
         
-        let stacked = chartType == .stackedBar
-        let maxVal = DataMaxValCalculator.getMaxValue(visibleData, fromTime: fromTime, toTime: toTime, stacked: stacked, dividableBy: levelsCount)
-        if maxVal != 0 {
-            displayChart.setMaxVal(val: maxVal, animationDuration: 0.2)
+        if displayChart.metal.display.groupMode != .percentage {
+            let (minVal, maxVal) = getMinMaxValue(fromTime: fromTime, toTime: toTime)
+            if maxVal != 0 {
+                displayChart.setMaxVal(val: maxVal, minVal: minVal, animationDuration: maxValDuration)
+            }
         }
+        
+        updateTopLabelDates()
+        selectInfo.updateInfoFrame(dataUpdated: nil)
+    }
+    
+    func getMinMaxValue(fromTime: Int64? = nil, toTime: Int64? = nil) -> (Float, Float) {
+        guard let groupData = data else { return (0,0) }
+        
+        if customScale.count == 0 {
+            let stacked = data?.type == .stacked
+            return DataMaxValCalculator.getMinMaxValue(visibleData, fromTime: fromTime, toTime: toTime, stacked: stacked, withMinValue: !minValueFixedZero, dividableBy: levelsCount)
+        }
+        
+        var maxVal: Float = 0
+        var minVal: Float!
+        for (scale, d) in zip(customScale, groupData.data) {
+            if !d.visible { continue }
+            var (val0, val1) = DataMaxValCalculator.getMinMaxValue([d], fromTime: fromTime, toTime: toTime, stacked: false, withMinValue: !minValueFixedZero, dividableBy: levelsCount)
+            val1 *= scale
+            val0 *= scale
+            if val1 > maxVal {
+                maxVal = val1
+            }
+            if minVal == nil || val0 < minVal {
+                minVal = val0
+            }
+        }
+        return (minVal, maxVal)
     }
 }
 

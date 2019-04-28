@@ -21,12 +21,10 @@ class ChartSelectionView: UIView {
             return lhs.from == rhs.from && lhs.to == rhs.to
         }
     }
-    typealias Mode = ChartCopmosedView.Mode
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
-        setupGestures()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -40,15 +38,37 @@ class ChartSelectionView: UIView {
         }
     }
     var minRangeDist: CGFloat = 0.1
-    var mode: Mode = .day {
-        didSet { updateMode() }
-    }
     weak var delegate: ChartSelectionViewDelegate?
+    
+    
+    func update(apereance: Apereance) {
+        let imgName: String
+        switch apereance.mode {
+        case .day:
+            imgName = "white_selector"
+        case .night:
+            imgName = "dark_selector"
+        }
+        selectionImgView.image = UIImage(named: imgName)?.resizableImage(withCapInsets: UIEdgeInsets(top: 3, left: 13, bottom: 3, right: 13))
+        cornerBorders.tintColor = apereance.bg
+        
+        rightOverlay.backgroundColor = apereance.selectionChartOverlay
+        leftOverlay.backgroundColor = apereance.selectionChartOverlay
+    }
+    
+    func setupGestures(view: UIView) {
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(onPan(pan:)))
+        panGesture.delegate = self
+        view.addGestureRecognizer(panGesture)
+        self.panGesture = panGesture
+    }
+    
     
     // MARK: private
     private var leftOverlay: UIView!
     private var rightOverlay: UIView!
     private var selectionImgView: UIImageView!
+    private var cornerBorders: UIImageView!
     private var panStartRange: Range = Range(from: 0, to: 1)
     private var panGesture: UIPanGestureRecognizer?
     
@@ -59,6 +79,7 @@ class ChartSelectionView: UIView {
     
     private func setupViews() {
         let autoresize: UIView.AutoresizingMask = [.flexibleWidth, .flexibleHeight, .flexibleLeftMargin, .flexibleRightMargin]
+        clipsToBounds = false
         
         leftOverlay = UIView(frame: bounds)
         addSubview(leftOverlay)
@@ -66,47 +87,28 @@ class ChartSelectionView: UIView {
         rightOverlay = UIView(frame: bounds)
         addSubview(rightOverlay)
         
-        selectionImgView = UIImageView(image: UIImage(named: "selection_area")?.resizableImage(withCapInsets: UIEdgeInsets(top: 3, left: 6, bottom: 3, right: 6)))
+        cornerBorders = UIImageView(image: UIImage(named: "selection_border_mask")?.resizableImage(withCapInsets: UIEdgeInsets(top: 7, left: 7, bottom: 7, right: 7)).withRenderingMode(.alwaysTemplate))
+        cornerBorders.frame = bounds
+        cornerBorders.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
+        selectionImgView = UIImageView()
         selectionImgView.autoresizingMask = autoresize
-//        selectionImgView.backgroundColor = UIColor.red
+        addSubview(cornerBorders)
         addSubview(selectionImgView)
-        updateMode()
+        
+        update(apereance: .day)
     }
-    
-    private func updateMode() {
-        let overlayColor: UIColor
-        switch mode {
-        case .day:
-            overlayColor = UIColor(red:0.95, green:0.96, blue:0.98, alpha:0.80)
-        case .night:
-            overlayColor = UIColor(red:0.10, green:0.13, blue:0.17, alpha:0.80)
-        }
-        rightOverlay.backgroundColor = overlayColor
-        leftOverlay.backgroundColor = overlayColor
-    }
-    
-    private func setupGestures() {
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(onPan(pan:)))
-        panGesture.delegate = self
-        addGestureRecognizer(panGesture)
-        self.panGesture = panGesture
-//        var s = superview
-//        while s != nil && !(s is UITableView) {
-//            s = s?.superview
-//        }
-//        print(s?.gestureRecognizers)
-    }
-    
     
     override func layoutSubviews() {
         super.layoutSubviews()
         
         let leftX = range.from * bounds.width
         let righX = range.to * bounds.width
+        let offset = CGFloat(3)
         
-        leftOverlay.frame = CGRect(x: 0, y: 0, width: leftX, height: bounds.height)
-        rightOverlay.frame = CGRect(x: righX, y: 0, width: bounds.width-righX, height: bounds.height)
-        selectionImgView.frame = CGRect(x: leftX, y: 0, width: righX-leftX, height: bounds.height)
+        leftOverlay.frame = CGRect(x: 0, y: 0, width: leftX+offset, height: bounds.height)
+        rightOverlay.frame = CGRect(x: righX-offset, y: 0, width: bounds.width-righX+offset, height: bounds.height)
+        selectionImgView.frame = CGRect(x: leftX, y: 0, width: righX-leftX, height: bounds.height).insetBy(dx: -1, dy: -2)
     }
 
     
@@ -185,7 +187,7 @@ class ChartSelectionView: UIView {
 
 extension ChartSelectionView: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        if gestureRecognizer == panGesture {
+        if gestureRecognizer == panGesture && checkRect(g: gestureRecognizer) {
             let t = panGesture!.translation(in: self)
             if abs(t.y) < abs(t.x) {
                 otherGestureRecognizer.isEnabled = false
@@ -200,6 +202,10 @@ extension ChartSelectionView: UIGestureRecognizerDelegate {
             return super.gestureRecognizerShouldBegin(g)
         }
         
+        if !checkRect(g: g) {
+            return false
+        }
+        
         if let pan = g as? UIPanGestureRecognizer {
             let t = pan.translation(in: self)
             if abs(t.y) > abs(t.x) {
@@ -207,5 +213,10 @@ extension ChartSelectionView: UIGestureRecognizerDelegate {
             }
         }
         return true
+    }
+    
+    private func checkRect(g: UIGestureRecognizer) -> Bool {
+        let expandFrame = frame.insetBy(dx: -15, dy: -4)
+        return expandFrame.contains(panGesture!.location(in: self))
     }
 }
