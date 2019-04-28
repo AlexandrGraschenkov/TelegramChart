@@ -10,7 +10,7 @@ import UIKit
 
 class ViewController: UITableViewController {
 
-    @IBOutlet weak var dayNightModeButt: UIButton!
+    @IBOutlet weak var dayNightModeButt: UIBarButtonItem!
     var dataArr: [ChartGroupData] = []
     var selectedData: Int = 0
     var cellBg: UIColor = .white
@@ -47,18 +47,17 @@ class ViewController: UITableViewController {
         
     }
     
-    @IBAction func switchNightDayMode(sender: UIButton) {
+    @IBAction func switchNightDayMode() {
         let aper: Apereance
         if mode == .day {
             mode = .night
             aper = .night
-            dayNightModeButt.setTitle("Switch to Day Mode", for: .normal)
+            dayNightModeButt.title = "Day Mode"
         } else {
             mode = .day
             aper = .day
-            dayNightModeButt.setTitle("Switch to Night Mode", for: .normal)
+            dayNightModeButt.title = "Night Mode"
         }
-        dayNightModeButt.backgroundColor = aper.bg
         
         for cell in cells.values {
             cell.backgroundColor = aper.bg
