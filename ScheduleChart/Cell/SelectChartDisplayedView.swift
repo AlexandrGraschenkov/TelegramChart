@@ -30,6 +30,8 @@ protocol SelectChartDisplayedViewDelegate: class {
 class SelectChartDisplayedView: UIView {
     
     private static let defaultFont: UIFont = UIFont.systemFont(ofSize: 15)
+    private var lastLayoutSize: CGSize = .zero
+    private var data: ChartGroupData?
     
     static func getHeightAndLayout(groupData: ChartGroupData, fixedWidth: CGFloat, layoutButtons: [UIButton] = []) -> CGFloat {
         let infos = ChartDataInfo.mapInfoFrom(groupData: groupData)
@@ -66,6 +68,7 @@ class SelectChartDisplayedView: UIView {
     weak var displayDelegate: SelectChartDisplayedViewDelegate?
     
     func display(groupData: ChartGroupData) {
+        data = groupData
         if groupData.data.count <= 1 {
             while buttons.count > 0 {
                 buttons.popLast()?.removeFromSuperview()
@@ -88,6 +91,14 @@ class SelectChartDisplayedView: UIView {
         }
         
         _ = SelectChartDisplayedView.getHeightAndLayout(groupData: groupData, fixedWidth: bounds.size.width, layoutButtons: buttons)
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        if let data = data, lastLayoutSize != bounds.size {
+            display(groupData: data)
+        }
     }
     
     func update(apereance: Apereance) {
