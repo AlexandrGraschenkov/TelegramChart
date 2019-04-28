@@ -29,14 +29,14 @@ Now there is **no botelnecks** in chart. At least I didn't found it.
 
 **P.S.** there is [brunch](https://github.com/AlexandrGraschenkov/TelegramChart/tree/pie) `pie` with experimental pie transition.
 
-### Metal implementation details
+## Metal implementation details
 
 - use `BaseDisplay` class for prepare render pipeline, work with buffer, switch reduced data
 - all data move to `GPU` buffer in same way (`date`, `value`), no stack data preprocessing is performed
 - on the GPU we perform 3 different display shader
 - switch to redused data: when there more that 1 data value for 1 pix, we switch to reduced data. On this data performance isn't issue, so I disabled it. Look at `reduceSwitchOffset`.
 
-### Issues
+## Issues
 
 - [x] From TG: iPhone 6+ chart exceed outside bounds
 - [x] Orientation change layout buttons
