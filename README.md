@@ -37,11 +37,11 @@ P.S. there is brunch `pie` with experimental pie transition.
 
 ### Issues
 
-[+] From TG: iPhone 6+ chart exceed outside bounds
-[+] Orientation change layout buttons
-[+] Day/night mode button move to header
-[ ] Selection not disappear when fast move date range of chart
-[ ] In line chart selection circles not disappear when this chart is hidden
+- [x] From TG: iPhone 6+ chart exceed outside bounds
+- [x] Orientation change layout buttons
+- [x] Day/night mode button move to header
+- [ ] Selection not disappear when fast move date range of chart
+- [ ] In line chart selection circles not disappear when this chart is hidden
 
 ### Summary for/from me
 It's good when company like Telegram perform contests like this. It's like kick for developers who forgot to grow as developer(issue solver). Business dictates to move fast. Move fast is good but sometimes to the detriment of good product. We fogot about good code or great performance. Buisness requires just do all thing fast. And support result after. Business decay grow as good developers. You need to find power inside to move forward.
