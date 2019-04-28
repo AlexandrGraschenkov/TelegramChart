@@ -192,7 +192,8 @@ class BaseDisplay: NSObject {
         
         var t: CGAffineTransform = .identity
         let scaleX = rect.width / (toTime - fromTime)
-        t = t.scaledBy(x: UIScreen.main.scale, y: UIScreen.main.scale)
+        let scale = view.drawableSize.width / view.bounds.size.width
+        t = t.scaledBy(x: scale, y: scale)
         t = t.translatedBy(x: rect.minX, y: view.bounds.height - rect.maxY)
         t = t.scaledBy(x: scaleX, y: rect.height / (maxValue - minValue))
         t = t.translatedBy(x: -fromTime, y: -minValue)

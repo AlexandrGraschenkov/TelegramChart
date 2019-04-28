@@ -119,7 +119,12 @@ vertex VertexOut percent_fill_vertex(constant float2 *points[[buffer(0)]],
     
     float allSum = 0;
     float valSum = 0;
+    float prevSum = 0;
     for (uint i = 0; i < globalParams.chartCount; i++) {
+        if (i == chartIdx) {
+            prevSum = allSum;
+        }
+        
         allSum += points[dataPointOffset + i * globalParams.linePointsCount].y * colors[i].w;
         if (i == chartIdx) {
             valSum = allSum;
@@ -127,16 +132,17 @@ vertex VertexOut percent_fill_vertex(constant float2 *points[[buffer(0)]],
     }
     
     float2 p1 = points[pointId];
-    p1.y = 100.0 * valSum / allSum;
-    float2 p0 = float2(p1.x, 0);
     
     
-    uint linePointOffset = vertexId % 2; // 0 or 1
-    float2 point = float(linePointOffset) * (p1-p0) + p0;
-    point = (globalParams.transform * float3(point, 1)).xy;
+    if (vertexId % 2 == 0) {
+        p1.y = 100.0 * prevSum / allSum;
+    } else {
+        p1.y = 100.0 * valSum / allSum;
+    }
+    p1 = (globalParams.transform * float3(p1, 1)).xy;
     
     VertexOut vo;
-    vo.pos.xy = (point / globalParams.halfViewport) - float2(1,1);
+    vo.pos.xy = (p1 / globalParams.halfViewport) - float2(1,1);
     vo.pos.zw = float2(0, 1);
     vo.color = colors[chartIdx];
     vo.color.w = 1;
