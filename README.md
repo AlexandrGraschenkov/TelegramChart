@@ -4,9 +4,11 @@
 Thanks Telegram for this competition.
 
 ---
-![example](https://github.com/AlexandrGraschenkov/TelegramChart/raw/master/example.gif)
+![screenshot_1](https://github.com/AlexandrGraschenkov/TelegramChart/raw/master/screenshot_1.png)
+![screenshot_2](https://github.com/AlexandrGraschenkov/TelegramChart/raw/master/screenshot_2.png)
 
 There you can find implementation of hight performance chart, with correct display chart at any time(e.g. in animation). How it works?
+- Use `Metal` in core for draw charts
 - do not use manual draw text, it's costly operation. `UILabel` have desired cache implementation
 - for animation uses `CADisplayLink`
 - reuse `UILabel`s
