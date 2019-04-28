@@ -5,7 +5,8 @@
 <img src="https://github.com/AlexandrGraschenkov/TelegramChart/raw/master/logo.png" alt="Demo" width="782" />
 
 
-Thanks Telegram for this competition.
+Thanks Telegram for this competition. On first stage I didn't win anything cause of performance (`CoreGraphics` not good choice 😊). On second stage took **4 place**. There was issue on iPhone 6+ with scale transform.<br>
+-> [Entry248](https://contest.dev/chart-ios/entry248) <-
 
 ---
 <img src="https://github.com/AlexandrGraschenkov/TelegramChart/raw/master/screenshot_1.png" alt="Demo" width="359" /> &nbsp;
@@ -19,13 +20,6 @@ There you can find implementation of hight performance chart, with correct displ
 - the hardest part combine it together
 
 
-<details><summary>Metal details</summary><p>
-- use `BaseDisplay` class for prepare render pipeline, work with buffer, switch reduced data<br>
-- all data move to `GPU` buffer in same way (`date`, `value`), no stack data preprocessing is performed<br>
-- on the GPU we perform 3 different display shader<br>
-- switch to redused data: when there more that 1 data value for 1 pix, we switch to reduced data. On this data performance isn't issue, so I disabled it. Look at `reduceSwitchOffset`.<br>
-</p>
-</details>
 
 As additional performance improvement: 
 - move from `UILabel` to `CATextLayer`
@@ -33,7 +27,14 @@ As additional performance improvement:
 
 Now there is **no botelnecks** in chart. At least I didn't found it.
 
-P.S. there is brunch `pie` with experimental pie transition.
+**P.S.** there is [brunch](https://github.com/AlexandrGraschenkov/TelegramChart/tree/pie) `pie` with experimental pie transition.
+
+### Metal implementation details
+
+- use `BaseDisplay` class for prepare render pipeline, work with buffer, switch reduced data
+- all data move to `GPU` buffer in same way (`date`, `value`), no stack data preprocessing is performed
+- on the GPU we perform 3 different display shader
+- switch to redused data: when there more that 1 data value for 1 pix, we switch to reduced data. On this data performance isn't issue, so I disabled it. Look at `reduceSwitchOffset`.
 
 ### Issues
 
