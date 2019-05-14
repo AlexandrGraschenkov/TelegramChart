@@ -14,7 +14,6 @@ Thanks Telegram for this competition. On first stage I didn't win anything cause
 
 There you can find implementation of hight performance chart, with correct display chart zoom at any time(e.g. in animation). How it works?
 - use `Metal` in core for draw charts
-- do not use manual draw text, it's costly operation. `UILabel` have desired cache implementation
 - for animation uses `CADisplayLink`
 - reuse `UILabel`s
 - the hardest part combine it together
@@ -36,7 +35,7 @@ Now there is **no botelnecks** in chart. At least I didn't found it.
 - on the GPU we perform 3 different display shader
 - switch to redused data: when there more that 1 data value for 1 pix, we switch to reduced data. On this data performance isn't issue, so I disabled it. Look at `reduceSwitchOffset`.
 
-## Issues
+## Fixed Issues
 
 - [x] From TG: iPhone 6+ chart exceed outside bounds
 - [x] Orientation change layout buttons
