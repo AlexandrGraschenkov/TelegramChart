@@ -14,7 +14,7 @@ Thanks Telegram for this competition. On first stage I didn't win anything cause
 
 There you can find implementation of hight performance chart, with correct display chart zoom at any time(e.g. in animation). How it works?
 - use `Metal` in core for draw charts
-- for animation uses `CADisplayLink`
+- for animation used wrapper around `CADisplayLink`
 - reuse `UILabel`s
 - the hardest part combine it together
 
@@ -32,21 +32,19 @@ Now there is **no botelnecks** in chart. At least I didn't found it.
 
 - use `BaseDisplay` class for prepare render pipeline, work with buffer, switch reduced data
 - all data move to `GPU` buffer in same way (`date`, `value`), no stack data preprocessing is performed
-- on the GPU we perform 3 different display shader
+- on the GPU we perform 3 different display shader for each representation of chart
 - switch to redused data: when there more that 1 data value for 1 pix, we switch to reduced data. On this data performance isn't issue, so I disabled it. Look at `reduceSwitchOffset`.
 
 ## Fixed Issues
 
-- [x] From TG: iPhone 6+ chart exceed outside bounds
+- [x] From TG: iPhone 6+ chart exceed outside bounds (they said it crutual bug and give 4 place 😒)
 - [x] Orientation change layout buttons
 - [x] Day/night mode button move to header
 - [ ] Selection not disappear when fast move date range of chart
 - [ ] In line chart selection circles not disappear when this chart is hidden
 
-### Summary for/from me
-It's good when company like Telegram perform contests like this. It's like kick for developers who forgot to grow as developer(issue solver). Business dictates to move fast. Move fast is good but sometimes to the detriment of good product. We fogot about good code or great performance. Buisness requires just do all thing fast. And support result after. Business decay grow as good developers. You need to find power inside to move forward.
-
+### Summary
 I get great expirience with `Metal`. Indeed `Metal` or `OpenGL` is good framework for problem like this. No need to trick around `CAShapeLayer`. It requere more time at first, but then much easier to build good architecture and great performance in future.
 
 ### Licence
-The code under MIT licence. Use it as you want.
+The code under MIT licence. Do whatever you want.
