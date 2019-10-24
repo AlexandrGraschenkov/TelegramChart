@@ -1,5 +1,6 @@
 # TelegramChart
 ![Swift version](https://img.shields.io/badge/Swift-4.2-orange.svg) 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://paypal.me/gralexdev)
 
 
 <img src="https://github.com/AlexandrGraschenkov/TelegramChart/raw/master/logo.png" alt="Demo" width="782" />
